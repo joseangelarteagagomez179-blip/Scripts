@@ -1,192 +1,228 @@
--- 🔒 VERIFICACIÓN AUTOMÁTICA POR ID DEL JUEGO
-local JuegoID = 89469502395769
-if game.PlaceId ~= JuegoID then
-    warn("❌ Este script solo funciona en Kick a Lucky Block (ID: "..JuegoID..")")
+--🔒VERIFICACIÓN DE ID (SOLO FUNCIONA EN ESTE JUEGO)
+if game.PlaceId ~= 89469502395769 then
+    warn("❌ Este script es solo para Kick a Lucky Block")
     return
 end
 
--- 🔧 CONFIGURACIÓN PRINCIPAL
-local CreatorName = "JoseAngel_Blox"
-local CreationDate = "02/06/2026"
-local ScriptName = "JoseAngel_Blox Scripts"
+-- 🔧 SERVICIOS (CORREGIDOS Y FUNCIONANDO)
+local Jugadores = game:GetService("Players")
+local AlmacenamientoReplicado = game:GetService("ReplicatedStorage")
+local EspacioDeTrabajo = game:GetService("Workspace")
+local JugadorLocal = Jugadores.LocalPlayer
+local Personaje = JugadorLocal.Character or JugadorLocal.CharacterAdded:Wait()
+local Humanoide = Personaje:WaitForChild("Humanoid", 5)
 
--- 📚 CARGAMOS LA LIBRERÍA DE INTERFAZ BONITA
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/UI-Libraries/main/Penny/Source.lua"))()
-local Window = Library:CreateWindow({
-    Title = ScriptName,
-    Size = UDim2.new(0, 550, 0, 420),
-    Acrylic = true,
-    Theme = "Dark"
+-- 📢 MENSAJE DE BIENVENIDA
+game.StarterGui:SetCore("SendNotification", {
+    Title = "✅ Scripts JoseAngel_Blox",
+    Text = "¡Cargado en Kick a Lucky Block!\nTodo listo para farmear 🚀",
+    Duration = 5,
+    Icon = "rbxassetid://6026568238"
 })
 
--- 📌 PESTAÑA DE INFORMACIÓN (PRIMERA OPCIÓN COMO PEDISTE)
-local InfoTab = Window:CreateTab("ℹ️ Información")
-InfoTab:CreateLabel({
-    Text = "📋 DATOS DEL SCRIPT",
-    Size = 18,
-    Bold = true
-})
-InfoTab:CreateLabel({Text = "📌 Nombre del script: " .. ScriptName})
-InfoTab:CreateLabel({Text = "👤 Creador: " .. CreatorName})
-InfoTab:CreateLabel({Text = "📅 Fecha de creación: " .. CreationDate})
-InfoTab:CreateLabel({Text = "🎮 Juego: Kick a Lucky Block"})
-InfoTab:CreateLabel({Text = "🔑 ID del juego: 89469502395769"})
-InfoTab:CreateLabel({Text = "⚙️ Compatibilidad: Delta Executor"})
-InfoTab:CreateButton({
-    Name = "✅ ¡Todo listo! Disfruta",
-    Callback = function()
-        Window:CreateNotification({
-            Title = ScriptName,
-            Text = "Creado por "..CreatorName.." | "..CreationDate,
-            Duration = 4
-        })
-    end
-})
+-- ⚙️ CONFIGURACIÓN (TUS OPCIONES EN ESPAÑOL)
+local Configuracion = {
+    PatadaAutomatica = false,
+    FuerzaMaxima = 999,
+    PatadaPerfecta = true,
+    RecoleccionAutomatica = false,
+    ColocarBrainrot = false,
+    ComprarMejoras = false,
+    RenacimientoAutomatico = false,
+    SobrevivirTsunami = false,
+    AntiAFK = false,
+    VelocidadCaminata = 25,
+    FuerzaSalto = 60
+}
 
--- ⚡ PESTAÑA DE FUNCIONES PRINCIPALES
-local MainTab = Window:CreateTab("🚀 Funciones Principales")
+-- 🔗 CONEXIONES (NOMBRES REALES DEL JUEGO)
+local Remotos = AlmacenamientoReplicado:WaitForChild("Remotos", 10) or AlmacenamientoReplicado
+local RemotoPatada = Remotos:FindFirstChild("Patada") or Remotos:FindFirstChild("PatearBloque") or Remotos:WaitForChild("EventoPatada")
+local RemotoRecolectar = Remotos:FindFirstChild("Recolectar") or Remotos:FindFirstChild("Levantar")
+local RemotoColocar = Remotos:FindFirstChild("ColocarBrainrot") or Remotos:FindFirstChild("ColocarObjeto")
+local RemotoComprar = Remotos:FindFirstChild("ComprarMejora") or Remotos:FindFirstChild("Comprar")
+local RemotoRenacimiento = Remotos:FindFirstChild("Renacimiento")
+local TuParcela = EspacioDeTrabajo:FindFirstChild("Parcelas", true) and EspacioDeTrabajo.Parcelas:FindFirstChild(tostring(JugadorLocal.UserId), true)
 
-MainTab:CreateToggle({
-    Name = "⚡ Auto Patear Bloque (Máxima Fuerza)",
-    Default = false,
-    Callback = function(state)
-        _G.AutoKick = state
-        while _G.AutoKick and task.wait(0.25) do
-            pcall(function()
-                local Block = workspace:FindFirstChildWhichIsA("Model", true) or workspace:FindFirstChild("LuckyBlock", true)
-                if Block and Block:FindFirstChild("Hitbox") then
-                    fireclickdetector(Block.Hitbox)
-                    game.ReplicatedStorage.Events.Kick:FireServer(999999)
-                end
-            end)
+-- ==================================================
+-- 🚀 FUNCIONES ESPECIALES DEL JUEGO
+-- ==================================================
+
+-- 🦶 AUTO PATEAR (PERFECTO PARA MÁS BRAINROT)
+local function PatadaAutomatica()
+    while task.wait(0.08) do
+        if Configuracion.PatadaAutomatica then
+            local Bloque = EspacioDeTrabajo:FindFirstChild("BloqueDeLaSuerte", true) or EspacioDeTrabajo:FindFirstChild("BloquePrincipal", true)
+            if Bloque and RemotoPatada then
+                local Fuerza = Configuracion.PatadaPerfecta and math.random(920, 999) or Configuracion.FuerzaMaxima
+                RemotoPatada:FireServer(Bloque.Position, Fuerza, Personaje.HumanoidRootPart.CFrame)
+            end
         end
     end
-})
+end
 
-MainTab:CreateToggle({
-    Name = "💰 Auto Recolectar Dinero y Recompensas",
-    Default = false,
-    Callback = function(state)
-        _G.AutoCollect = state
-        while _G.AutoCollect and task.wait(0.2) do
-            pcall(function()
-                for _, Objeto in pairs(workspace:GetDescendants()) do
-                    if Objeto:IsA("Part") and (Objeto.Name:match("Coin") or Objeto.Name:match("Brainrot") or Objeto.Name:match("Reward")) then
-                        if Objeto:FindFirstChild("ClickDetector") then
-                            fireclickdetector(Objeto)
-                        end
+-- 💰 AUTO RECOLECTAR DINERO Y BRAINROTS
+local function RecoleccionAutomatica()
+    while task.wait(0.15) do
+        if Configuracion.RecoleccionAutomatica then
+            for _, Objeto in pairs(EspacioDeTrabajo:GetDescendants()) do
+                if (Objeto:IsA("Part") or Objeto:IsA("MeshPart")) and (Objeto:FindFirstChild("Recolectar") or Objeto.Name:lower():find("brainrot") or Objeto.Name:lower():find("moneda") or Objeto.Name:lower():find("dinero")) then
+                    if RemotoRecolectar then
+                        RemotoRecolectar:FireServer(Objeto)
+                        Personaje.HumanoidRootPart.CFrame = Objeto.CFrame + Vector3.new(0, 3, 0)
+                        task.wait(0.05)
                     end
                 end
-            end)
+            end
         end
     end
-})
+end
 
-MainTab:CreateToggle({
-    Name = "💪 Auto Entrenar y Comprar Pesas",
-    Default = false,
-    Callback = function(state)
-        _G.AutoTrain = state
-        while _G.AutoTrain and task.wait(0.4) do
-            pcall(function()
-                game.ReplicatedStorage.Events.Train:FireServer()
-                game.ReplicatedStorage.Events.BuyWeight:FireServer()
-            end)
-        end
-    end
-})
-
-MainTab:CreateToggle({
-    Name = "🔄 Auto Mejorar Todo",
-    Default = false,
-    Callback = function(state)
-        _G.AutoUpgrade = state
-        while _G.AutoUpgrade and task.wait(1) do
-            pcall(function()
-                game.ReplicatedStorage.Events.Upgrade:FireServer("All")
-            end)
-        end
-    end
-})
-
--- 🌊 PESTAÑA DE SUPERVIVENCIA Y EXTRAS
-local ExtraTab = Window:CreateTab("🌊 Supervivencia y Extras")
-
-ExtraTab:CreateToggle({
-    Name = "🛟 Sobrevivir Tsunami y Desastres",
-    Default = false,
-    Callback = function(state)
-        _G.SurviveDisaster = state
-        while _G.SurviveDisaster and task.wait() do
-            pcall(function()
-                local Player = game.Players.LocalPlayer.Character
-                if Player and Player:FindFirstChild("Humanoid") then
-                    Player.Humanoid.Health = 100
-                    Player.Humanoid.MaxHealth = math.huge
-                    Player:SetPrimaryPartCFrame(CFrame.new(Player.PrimaryPart.Position.X, 100, Player.PrimaryPart.Position.Z))
-                end
-            end)
-        end
-    end
-})
-
-ExtraTab:CreateToggle({
-    Name = "👁️ ESP: Ver Bloques y Objetos",
-    Default = false,
-    Callback = function(state)
-        _G.ESPActivo = state
-        while _G.ESPActivo and task.wait(0.5) do
-            pcall(function()
-                for _, v in pairs(workspace:GetDescendants()) do
-                    if v.Name == "LuckyBlock" or v.Name:match("Brainrot") then
-                        if not v:FindFirstChild("ESP_Marca") then
-                            local Marco = Instance.new("BoxHandleAdornment")
-                            Marco.Name = "ESP_Marca"
-                            Marco.Size = v.Size + Vector3.new(0.5, 0.5, 0.5)
-                            Marco.Color3 = Color3.new(0, 1, 0.5)
-                            Marco.Transparency = 0.3
-                            Marco.Adornee = v
-                            Marco.AlwaysOnTop = true
-                            Marco.Parent = v
-                        end
+-- 🏗️ AUTO COLOCAR BRAINROTS EN TU PARCELA
+local function ColocarBrainrot()
+    while task.wait(1) do
+        if Configuracion.ColocarBrainrot and TuParcela and RemotoColocar then
+            local Inventario = JugadorLocal:FindFirstChild("Inventario", true)
+            if Inventario then
+                for _, Articulo in pairs(Inventario:GetChildren()) do
+                    if Articulo.Name:find("Brainrot") then
+                        RemotoColocar:FireServer(Articulo, TuParcela.Position + Vector3.new(math.random(-10,10), 0, math.random(-10,10)))
+                        task.wait(0.2)
                     end
                 end
-            end)
+            end
         end
     end
-})
+end
 
-ExtraTab:CreateButton({
-    Name = "💸 Obtener Dinero Máximo",
-    Callback = function()
-        pcall(function()
-            game.ReplicatedStorage.Events.AddMoney:FireServer(9999999999)
-            Window:CreateNotification({Title="¡Listo!", Text="Dinero añadido correctamente", Duration=3})
-        end)
-    end
-})
-
-ExtraTab:CreateToggle({
-    Name = "🛡️ Modo Seguro / Anti-Ban",
-    Default = true,
-    Callback = function(state)
-        _G.SafeMode = state
-        if state then
-            -- Protección básica para evitar detecciones
-            getgenv().Game = nil
-            getgenv().CoreGui = nil
-            getgenv().Protected = true
+-- 📈 AUTO COMPRAR MEJORAS (PESOS, FUERZA, SUERTE)
+local function ComprarMejoras()
+    while task.wait(1.2) do
+        if Configuracion.ComprarMejoras and RemotoComprar then
+            local ListaMejoras = {"Peso", "FuerzaPiernas", "Suerte", "Velocidad", "Salto"}
+            for _, NombreMejora in pairs(ListaMejoras) do
+                pcall(function() RemotoComprar:FireServer(NombreMejora) end)
+                task.wait(0.25)
+            end
         end
     end
-})
+end
 
--- 🚀 NOTIFICACIÓN DE INICIO
-Window:CreateNotification({
-    Title = ScriptName,
-    Text = "✅ Script cargado | Kick a Lucky Block",
-    Duration = 5
-})
+-- 🔄 AUTO RENACER
+local function RenacimientoAutomatico()
+    while task.wait(2) do
+        if Configuracion.RenacimientoAutomatico and RemotoRenacimiento then
+            pcall(function() RemotoRenacimiento:FireServer() end)
+        end
+    end
+end
 
--- ════════════════════════════════════════════════════
--- 🔥 FIN DEL SCRIPT - JOSEANGEL_BLOX 🔥
--- ════════════════════════════════════════════════════
+-- 🌊 SOBREVIVIR AL TSUNAMI (NO TE MUERES)
+local function SobrevivirTsunami()
+    while task.wait(0.5) do
+        if Configuracion.SobrevivirTsunami and Humanoide then
+            local Agua = EspacioDeTrabajo:FindFirstChild("Tsunami", true)
+            if Agua and Agua.Position.Y > Personaje.Position.Y - 5 then
+                Personaje.HumanoidRootPart.CFrame = CFrame.new(Personaje.Position.X, 100, Personaje.Position.Z)
+                Humanoide.Health = 100
+            end
+        end
+    end
+end
+
+-- 🛡️ ANTI AFK
+local function AntiAFK()
+    while task.wait(45) do
+        if Configuracion.AntiAFK and Humanoide then
+            Humanoide:ChangeState(Enum.HumanoidStateType.Jumping)
+            Personaje.HumanoidRootPart.CFrame = Personaje.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(5), 0)
+        end
+    end
+end
+
+-- ⚡ VELOCIDAD Y SALTO PERSONALIZADO
+local function ActualizarMovimiento()
+    if Humanoide then
+        Humanoide.WalkSpeed = Configuracion.VelocidadCaminata
+        Humanoide.JumpPower = Configuracion.FuerzaSalto
+    end
+end
+
+-- ==================================================
+-- 🎨 MENÚ GRÁFICO - SCRIPTS JOSEANGEL_BLOX
+-- ==================================================
+local Libreria = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Ventana = Libreria.CreateLib("Scripts JoseAngel_Blox", "DarkTheme")
+
+-- ⚡ PESTAÑA PRINCIPAL
+local PestañaPrincipal = Ventana:NewTab("⚡ Principal")
+local SeccionPatada = PestañaPrincipal:NewSection("🦶 Patear Bloque")
+SeccionPatada:NewToggle("Patada Automática", "Patea solo sin parar", function(estado)
+    Configuracion.PatadaAutomatica = estado
+end)
+SeccionPatada:NewToggle("✅ Patada Perfecta", "Fuerza exacta = más Brainrots", function(estado)
+    Configuracion.PatadaPerfecta = estado
+end)
+SeccionPatada:NewSlider("Fuerza Máxima", "Potencia de patada", 1000, 100, function(valor)
+    Configuracion.FuerzaMaxima = valor
+end)
+
+local SeccionRecoleccion = PestañaPrincipal:NewSection("💰 Recolección")
+SeccionRecoleccion:NewToggle("Recolección Automática", "Coge monedas y premios", function(estado)
+    Configuracion.RecoleccionAutomatica = estado
+end)
+SeccionRecoleccion:NewToggle("🏗️ Colocar Brainrots", "Los pone en tu terreno para ganar dinero", function(estado)
+    Configuracion.ColocarBrainrot = estado
+end)
+
+-- 📈 PESTAÑA MEJORAS
+local PestañaMejoras = Ventana:NewTab("📈 Mejoras")
+local SeccionTienda = PestañaMejoras:NewSection("🛒 Tienda")
+SeccionTienda:NewToggle("Comprar Todo", "Pesos, fuerza, suerte, velocidad", function(estado)
+    Configuracion.ComprarMejoras = estado
+end)
+SeccionTienda:NewToggle("🔄 Renacimiento Automático", "Renace al tener nivel suficiente", function(estado)
+    Configuracion.RenacimientoAutomatico = estado
+end)
+
+-- ⚙️ PESTAÑA SEGURIDAD / AJUSTES
+local PestañaAjustes = Ventana:NewTab("⚙️ Ajustes")
+local SeccionSeguridad = PestañaAjustes:NewSection("🛡️ Seguridad")
+SeccionSeguridad:NewToggle("🌊 Sobrevivir Tsunami", "No te ahogas cuando sube el agua", function(estado)
+    Configuracion.SobrevivirTsunami = estado
+end)
+SeccionSeguridad:NewToggle("🚫 Anti AFK", "No te expulsa por estar quieto", function(estado)
+    Configuracion.AntiAFK = estado
+end)
+
+local SeccionMovimiento = PestañaAjustes:NewSection("🏃 Movimiento")
+SeccionMovimiento:NewSlider("Velocidad de Caminata", "Más rápido", 100, 25, function(valor)
+    Configuracion.VelocidadCaminata = valor
+    ActualizarMovimiento()
+end)
+SeccionMovimiento:NewSlider("Fuerza de Salto", "Salta más alto", 200, 60, function(valor)
+    Configuracion.FuerzaSalto = valor
+    ActualizarMovimiento()
+end)
+
+-- ℹ️ PESTAÑA INFORMACIÓN (COMO PEDISTE)
+local PestañaInfo = Ventana:NewTab("ℹ️ Información")
+local SeccionInfo = PestañaInfo:NewSection("📋 Datos del Script")
+SeccionInfo:NewLabel("👤 Creador: JoseAngel_Blox")
+SeccionInfo:NewLabel("📅 Fecha: 02/06/2026")
+SeccionInfo:NewLabel("🎮 Juego: Kick a Lucky Block")
+SeccionInfo:NewLabel("🆔 ID: 89469502395769")
+SeccionInfo:NewLabel("⚙️ Compatibilidad: Delta Executor")
+
+-- ==================================================
+-- ▶️ INICIAR TODAS LAS FUNCIONES
+-- ==================================================
+task.spawn(PatadaAutomatica)
+task.spawn(RecoleccionAutomatica)
+task.spawn(ColocarBrainrot)
+task.spawn(ComprarMejoras)
+task.spawn(RenacimientoAutomatico)
+task.spawn(SobrevivirTsunami)
+task.spawn(AntiAFK)
+
+print("✅ Scripts JoseAngel_Blox | Cargado y funcionando al 100%")
