@@ -1,6 +1,6 @@
 -- JoseAngel_Blox Bonds
 
-local Interfaz = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Interfaz = loadstring(game:HttpGet("https://raw.githubusercontent.com/xian8888888/Kavo-UI/main/source.lua"))()
 local Ventana = Interfaz.CreateLib("JoseAngel_Blox Bonds", "DarkTheme")
 
 local Pestaña = Ventana:NewTab("Principal")
@@ -15,17 +15,17 @@ SeccionFarm:NewToggle("Auto Farm Bonds", "Recoge bonos automáticamente", functi
     if estado then
         coroutine.wrap(function()
             while _G.ActivarFarm do
-                task.wait(0.15)
+                task.wait(0.1)
                 local jugador = game.Players.LocalPlayer
                 if not jugador.Character then continue end
                 local HRP = jugador.Character:FindFirstChild("HumanoidRootPart")
                 if not HRP then continue end
 
-                -- Busca y recoge bonos
+                -- Recolección mejorada para Dead Rails
                 for _, objeto in pairs(workspace:GetDescendants()) do
                     if objeto.Name == "Bond" and (objeto:IsA("Part") or objeto:IsA("Model")) then
                         local parte = objeto:IsA("Model") and objeto.PrimaryPart or objeto
-                        if parte then
+                        if parte and (parte.Position - HRP.Position).Magnitude < 300 then
                             HRP.CFrame = parte.CFrame
                             task.wait(0.05)
                             if objeto:FindFirstChildOfClass("ClickDetector") then
@@ -35,12 +35,13 @@ SeccionFarm:NewToggle("Auto Farm Bonds", "Recoge bonos automáticamente", functi
                     end
                 end
 
-                -- Enviar al servidor
-                local remoto = game.ReplicatedStorage:FindFirstChild("Remotes", true)
-                if remoto and remoto:FindFirstChild("Collect") then
+                -- Envío correcto al servidor
+                local RS = game:GetService("ReplicatedStorage")
+                local remoto = RS:FindFirstChild("Collect", true) or RS:FindFirstChild("CollectBond", true)
+                if remoto then
                     for _, objeto in pairs(workspace:GetDescendants()) do
                         if objeto.Name == "Bond" then
-                            remoto.Collect:FireServer(objeto)
+                            remoto:FireServer(objeto)
                         end
                     end
                 end
@@ -49,9 +50,9 @@ SeccionFarm:NewToggle("Auto Farm Bonds", "Recoge bonos automáticamente", functi
     end
 end)
 
--- Mensaje de confirmación en pantalla
+-- Notificación de carga
 Interfaz:MakeNotification({
     Title = "JoseAngel_Blox Bonds",
-    Text = "Script cargado correctamente ✅",
+    Text = "✅ Script cargado correctamente",
     Duration = 3
 })
