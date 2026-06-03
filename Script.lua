@@ -1,225 +1,363 @@
--- SCRIPT: Kick a Lucky Block
--- CREADOR: JoseAngel_Blox
--- FECHA: 02/06/2026
--- JUEGO EXCLUSIVO: 89469502395769
--- ✅ COMPATIBLE CON DELTA / MÓVIL / PC
+-- ==============================================
+-- JUEGO ROBLOX | ID: 89469502395769
+-- CREADOR DEL SCRIPT: JoseAngel_Blox
+-- FECHA DE CREACIÓN: 02/06/2026
+-- COMPATIBLE CON: Delta Executor (Celular)
+-- ==============================================
 
--- 🔒 PROTECCIÓN: SOLO FUNCIONA EN ESTE JUEGO
-if game.GameId ~= 89469502395769 then
-    return
-end
-
--- ⚙️ SERVICIOS DEL JUEGO
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Workspace = game:GetService("Workspace")
-local StarterGui = game:GetService("StarterGui")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-
--- 👤 DATOS DEL JUGADOR
-local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local Humanoid = Character:WaitForChild("Humanoid")
-local RootPart = Character:WaitForChild("HumanoidRootPart")
-
--- 🔗 CONEXIONES ADAPTADAS AL JUEGO (FUNCIONAN SEGURO)
-local Remotes = ReplicatedStorage:WaitForChild("Remotes", 10) or ReplicatedStorage
-local RemoteKick = Remotes:WaitForChild("Kick", 3) or Remotes:WaitForChild("Patear", 3)
-local RemoteCollect = Remotes:WaitForChild("Collect", 3) or Remotes:WaitForChild("Recolectar", 3)
-local RemotePlace = Remotes:WaitForChild("Place", 3) or Remotes:WaitForChild("Colocar", 3)
-local RemoteBuy = Remotes:WaitForChild("Buy", 3) or Remotes:WaitForChild("Comprar", 3)
-
--- ⚡ CONFIGURACIÓN (TUS OPCIONES)
-local Config = {
-    Activo = true,
-    AutoKick = false,
-    PerfectKick = false,
-    AutoCollect = false,
-    AutoPlace = false,
-    AutoBuy = false,
-    AutoSurvive = false,
-    InfiniteStats = false,
-    Fly = false,
-    Velocidad = 35,
-    Salto = 80,
-    AntiAFK = true,
-    MostrarFPS = false
+-- <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+-- MÓDULO DE CONFIGURACIÓN Y UTILIDADES
+-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+local Configuracion = {
+    MostrarFPS = false,
+    OptimizarJuego = false,
+    ColorInterfaz = Color3.fromRGB(0, 183, 255),
+    VersionScript = "1.0.0"
 }
 
--- 📊 VARIABLES GLOBALES
-local FPS = 0
-local UltimoTiempo = tick()
-local Cuadros = 0
-local Volando = false
-local MiParcela = nil
+local Utilidades = {
+    NombreJuego = game:GetService("MarketplaceService"):GetProductInfo(89469502395769).Name or "Juego Desconocido",
+    HoraEjecucion = os.date("%H:%M:%S"),
+    FechaEjecucion = os.date("%d/%m/%Y")
+}
 
--- 🔄 ACTUALIZAR PERSONAJE SI MUERE O RENACE
-LocalPlayer.CharacterAdded:Connect(function(NuevoPersonaje)
-    Character = NuevoPersonaje
-    Humanoid = NuevoPersonaje:WaitForChild("Humanoid")
-    RootPart = NuevoPersonaje:WaitForChild("HumanoidRootPart")
-    Humanoid.WalkSpeed = Config.Velocidad
-    Humanoid.JumpPower = Config.Salto
-    if Config.Fly and Config.Activo then ToggleVolar(true) end
-end)
+-- <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+-- FUNCIÓN DE BIENVENIDA
+-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+local function MostrarBienvenida()
+    local MensajeBienvenida = [[
+==============================================
+          ¡BIENVENIDO AL SCRIPT OFICIAL!
+==============================================
+🔹 JUEGO: ]]..Utilidades.NombreJuego..[[
+🔹 ID DEL JUEGO: 89469502395769
+🔹 CREADOR DEL SCRIPT: JoseAngel_Blox
+🔹 FECHA DE CREACIÓN: 02/06/2026
+🔹 VERSIÓN DEL SCRIPT: ]]..Configuracion.VersionScript..[[
+🔹 HORA DE EJECUCIÓN: ]]..Utilidades.HoraEjecucion.." | "..Utilidades.FechaEjecucion..[[
+==============================================
+          SELECCIONA UNA OPCIÓN A CONTINUACIÓN
+==============================================
+    ]]
+    print(MensajeBienvenida)
+    wait(1)
+end
 
--- 🚀 FUNCIÓN: AUTO PATEAR BLOQUE
-local function AutoKickLoop()
-    while task.wait(0.1) do
-        if not Config.Activo or not Config.AutoKick or Humanoid.Health <= 0 then task.wait() continue end
-        local Bloque = Workspace:FindFirstChild("LuckyBlock", true) or Workspace:FindFirstChild("Block", true)
-        if Bloque then
-            if (Bloque.Position - RootPart.Position).Magnitude > 12 then Humanoid:MoveTo(Bloque.Position) end
-            pcall(function()
-                if RemoteKick then
-                    local Fuerza = Config.PerfectKick and 100 or math.random(50, 95)
-                    RemoteKick:FireServer(Bloque, Fuerza)
-                end
-                if Bloque:FindFirstChildOfClass("ClickDetector") then fireclickdetector(Bloque.ClickDetector) end
-            end)
-        end
+-- <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+-- MÓDULO DE FPS Y OPTIMIZACIÓN
+-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+local FpsLabel = nil
+
+local function ActualizarFPS()
+    while wait(0.5) and Configuracion.MostrarFPS do
+        local FPS = math.floor(1 / game:GetService("RunService").RenderStepped:Wait())
+        FpsLabel.Text = "FPS: "..FPS
     end
 end
 
--- 🚀 FUNCIÓN: AUTO RECOLECTAR DINERO / BRAINROT
-local function AutoCollectLoop()
-    while task.wait(0.05) do
-        if not Config.Activo or not Config.AutoCollect or Humanoid.Health <= 0 then task.wait() continue end
-        for _, Objeto in pairs(Workspace:GetDescendants()) do
-            if Objeto:IsA("Part") and (Objeto.Name:lower():find("coin") or Objeto.Name:lower():find("money") or Objeto.Name:lower():find("brainrot")) then
-                if (Objeto.Position - RootPart.Position).Magnitude < 50 then
-                    RootPart.CFrame = CFrame.new(Objeto.Position.X, RootPart.Position.Y + 1, Objeto.Position.Z)
-                    pcall(function() if RemoteCollect then RemoteCollect:FireServer(Objeto) end end)
+local function ActivarFPS()
+    if not FpsLabel then
+        FpsLabel = Instance.new("TextLabel")
+        FpsLabel.Name = "FPS_Display"
+        FpsLabel.Size = UDim2.new(0, 120, 0, 30)
+        FpsLabel.Position = UDim2.new(0.02, 0, 0.02, 0)
+        FpsLabel.BackgroundTransparency = 0.3
+        FpsLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        FpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        FpsLabel.TextScaled = true
+        FpsLabel.Font = Enum.Font.SourceSansBold
+        FpsLabel.Parent = game:GetService("Players").LocalPlayer.PlayerGui
+    end
+    Configuracion.MostrarFPS = true
+    spawn(ActualizarFPS)
+    print("[CONFIGURACIÓN] → Mostrar FPS activado correctamente")
+end
+
+local function DesactivarFPS()
+    Configuracion.MostrarFPS = false
+    if FpsLabel then FpsLabel:Destroy() FpsLabel = nil end
+    print("[CONFIGURACIÓN] → Mostrar FPS desactivado correctamente")
+end
+
+local function OptimizarJuegoFuncion()
+    if Configuracion.OptimizarJuego then
+        print("[CONFIGURACIÓN] → El juego ya se encuentra optimizado")
+        return
+    end
+
+    Configuracion.OptimizarJuego = true
+    
+    -- Reducir calidad gráfica
+    game:GetService("Settings").Rendering.QualityLevel = Enum.QualityLevel.Level1
+    game:GetService("Workspace").StreamingEnabled = true
+    game:GetService("Workspace").StreamingMinRadius = 50
+    game:GetService("Workspace").StreamingMaxRadius = 150
+    
+    -- Desactivar efectos innecesarios
+    for _, efecto in pairs(game:GetService("Workspace"):GetDescendants()) do
+        if efecto:IsA("ParticleEmitter") or efecto:IsA("Light") or efecto:IsA("Smoke") then
+            efecto.Enabled = false
+        end
+    end
+    
+    -- Optimizar rendimiento de personajes
+    for _, jugador in pairs(game:GetService("Players"):GetPlayers()) do
+        if jugador ~= game:GetService("Players").LocalPlayer then
+            if jugador.Character then
+                for _, parte in pairs(jugador.Character:GetDescendants()) do
+                    if parte:IsA("MeshPart") or parte:IsA("Part") then
+                        parte.Reflectance = 0
+                        parte.Transparency = 0.1
+                    end
                 end
             end
         end
     end
+    
+    print("[CONFIGURACIÓN] → Juego optimizado exitosamente - Rendimiento mejorado")
 end
 
--- 🚀 FUNCIÓN: AUTO COLOCAR EN TU TERRENO
-local function AutoPlaceLoop()
-    while task.wait(0.5) do
-        if not Config.Activo or not Config.AutoPlace or Humanoid.Health <= 0 then task.wait() continue end
-        if not MiParcela then
-            for _, Lugar in pairs(Workspace:GetDescendants()) do
-                if Lugar:IsA("Model") and Lugar.Name:find("Plot") and Lugar:FindFirstChild("Owner") and Lugar.Owner.Value == LocalPlayer.Name then
-                    MiParcela = Lugar break
+local function RestaurarOptimizacion()
+    if not Configuracion.OptimizarJuego then
+        print("[CONFIGURACIÓN] → El juego no se encuentra optimizado")
+        return
+    end
+
+    Configuracion.OptimizarJuego = false
+    
+    -- Restaurar calidad gráfica
+    game:GetService("Settings").Rendering.QualityLevel = Enum.QualityLevel.Automatic
+    game:GetService("Workspace").StreamingEnabled = false
+    
+    -- Activar efectos
+    for _, efecto in pairs(game:GetService("Workspace"):GetDescendants()) do
+        if efecto:IsA("ParticleEmitter") or efecto:IsA("Light") or efecto:IsA("Smoke") then
+            efecto.Enabled = true
+        end
+    end
+    
+    -- Restaurar personajes
+    for _, jugador in pairs(game:GetService("Players"):GetPlayers()) do
+        if jugador ~= game:GetService("Players").LocalPlayer then
+            if jugador.Character then
+                for _, parte in pairs(jugador.Character:GetDescendants()) do
+                    if parte:IsA("MeshPart") or parte:IsA("Part") then
+                        parte.Reflectance = 0.2
+                        parte.Transparency = 0
+                    end
                 end
             end
         end
-        if MiParcela and ReplicatedStorage:FindFirstChild("Inventory") then
-            for _, Item in pairs(ReplicatedStorage.Inventory:GetChildren()) do
-                if Item:IsA("Model") and Item.Name:find("Brainrot") then
-                    pcall(function()
-                        local Posicion = MiParcela.Position + Vector3.new(math.random(-8,8), 1, math.random(-8,8))
-                        if RemotePlace then RemotePlace:FireServer(Item, Posicion) end
-                    end)
+    end
+    
+    print("[CONFIGURACIÓN] → Configuración gráfica restaurada a valores por defecto")
+end
+
+-- <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+-- MÓDULO DE FUNCIONES DEL JUEGO
+-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+local FuncionesJuego = {
+    -- Opción 1: Funciones de Movimiento
+    Movimiento = function()
+        print("\n==============================================")
+        print("               OPCIÓN: MOVIMIENTO              ")
+        print("==============================================")
+        print("🔹 Funciones disponibles:")
+        print("   1. Velocidad aumentada (x2)")
+        print("   2. Salto aumentado (x3)")
+        print("   3. Desactivar funciones de movimiento")
+        print("==============================================")
+        
+        local Personaje = game:GetService("Players").LocalPlayer.Character or game:GetService("Players").LocalPlayer.CharacterAdded:Wait()
+        local Humanoide = Personaje:WaitForChild("Humanoid")
+        
+        local function ActivarVelocidad()
+            Humanoide.WalkSpeed = 32
+            print("[MOVIMIENTO] → Velocidad aumentada a x2")
+        end
+        
+        local function ActivarSalto()
+            Humanoide.JumpPower = 75
+            print("[MOVIMIENTO] → Salto aumentado a x3")
+        end
+        
+        local function RestaurarMovimiento()
+            Humanoide.WalkSpeed = 16
+            Humanoide.JumpPower = 25
+            print("[MOVIMIENTO] → Funciones de movimiento restauradas")
+        end
+        
+        ActivarVelocidad()
+        ActivarSalto()
+        wait(5) -- Mantener activado por defecto 5 segundos (opcional)
+        RestaurarMovimiento()
+    end,
+
+    -- Opción 2: Funciones de Interacción
+    Interaccion = function()
+        print("\n==============================================")
+        print("              OPCIÓN: INTERACCIÓN              ")
+        print("==============================================")
+        print("🔹 Funciones disponibles:")
+        print("   1. Recoger objetos cercanos automáticamente")
+        print("   2. Activar todos los botones/interruptores")
+        print("   3. Desactivar funciones de interacción")
+        print("==============================================")
+        
+        local JugadorLocal = game:GetService("Players").LocalPlayer
+        local Personaje = JugadorLocal.Character or JugadorLocal.CharacterAdded:Wait()
+        local HumanoideRootPart = Personaje:WaitForChild("HumanoidRootPart")
+        
+        local InteraccionActiva = true
+
+        local function RecogerObjetos()
+            while InteraccionActiva do
+                wait(1)
+                for _, objeto in pairs(game:GetService("Workspace"):GetDescendants()) do
+                    if objeto:IsA("Part") and objeto.Name:lower():find("objeto") or objeto.Name:lower():find("item") then
+                        local Distancia = (HumanoideRootPart.Position - objeto.Position).Magnitude
+                        if Distancia <= 20 then
+                            objeto.Position = HumanoideRootPart.Position + Vector3.new(0, 2, 0)
+                            print("[INTERACCIÓN] → Objeto recogido: "..objeto.Name)
+                        end
+                    end
                 end
             end
         end
-    end
-end
 
--- 🚀 FUNCIÓN: AUTO COMPRAR MEJORAS
-local function AutoBuyLoop()
-    while task.wait(0.4) do
-        if not Config.Activo or not Config.AutoBuy then task.wait() continue end
-        for _, Tienda in pairs(Workspace:GetDescendants()) do
-            if Tienda:IsA("Part") and (Tienda.Name:lower():find("weight") or Tienda.Name:lower():find("upgrade")) then
-                if (Tienda.Position - RootPart.Position).Magnitude < 30 then
-                    pcall(function()
-                        if RemoteBuy then RemoteBuy:FireServer("Strength") RemoteBuy:FireServer("Legs") end
-                        if Tienda:FindFirstChildOfClass("ClickDetector") then fireclickdetector(Tienda.ClickDetector) end
-                    end)
+        local function ActivarBotones()
+            for _, boton in pairs(game:GetService("Workspace"):GetDescendants()) do
+                if boton:IsA("ClickDetector") or boton:IsA("ProximityPrompt") then
+                    if boton:IsA("ClickDetector") then
+                        fireclickdetector(boton)
+                    else
+                        fireproximityprompt(boton)
+                    end
+                    print("[INTERACCIÓN] → Botón/Interruptor activado: "..boton.Parent.Name)
                 end
             end
         end
-        -- STATS INFINITAS
-        if Config.InfiniteStats and LocalPlayer:FindFirstChild("leaderstats") then
-            pcall(function()
-                if LocalPlayer.leaderstats:FindFirstChild("Strength") then LocalPlayer.leaderstats.Strength.Value = 9999999 end
-                if LocalPlayer.leaderstats:FindFirstChild("Legs") then LocalPlayer.leaderstats.Legs.Value = 9999999 end
-                if LocalPlayer.leaderstats:FindFirstChild("Money") then LocalPlayer.leaderstats.Money.Value = 999999999 end
-            end)
+
+        spawn(RecogerObjetos)
+        ActivarBotones()
+        wait(10) -- Mantener activado por defecto 10 segundos
+        InteraccionActiva = false
+        print("[INTERACCIÓN] → Funciones de interacción desactivadas")
+    end,
+
+    -- Opción 3: Configuración del Script
+    ConfiguracionScript = function()
+        print("\n==============================================")
+        print("            OPCIÓN: CONFIGURACIÓN             ")
+        print("==============================================")
+        print("🔹 Opciones disponibles:")
+        print("   1. Mostrar/Ocultar FPS")
+        print("   2. Optimizar/Restaurar juego")
+        print("   3. Ver información del script")
+        print("==============================================")
+        
+        -- Alternar FPS
+        if not Configuracion.MostrarFPS then
+            ActivarFPS()
+        else
+            DesactivarFPS()
         end
-    end
-end
-
--- 🚀 FUNCIÓN: SOBREVIVIR TSUNAMI
-local function SobrevivirTsunamiLoop()
-    while task.wait(0.2) do
-        if not Config.Activo or not Config.AutoSurvive or Humanoid.Health <= 0 then task.wait() continue end
-        local Agua = Workspace:FindFirstChild("Tsunami", true) or Workspace:FindFirstChild("Water", true)
-        if Agua and Agua.Position.Y > RootPart.Position.Y - 3 then
-            RootPart.CFrame = CFrame.new(RootPart.Position.X, 150, RootPart.Position.Z)
-            Humanoid.Health = 100
+        
+        wait(2)
+        
+        -- Alternar optimización
+        if not Configuracion.OptimizarJuego then
+            OptimizarJuegoFuncion()
+        else
+            RestaurarOptimizacion()
         end
+        
+        wait(2)
+        
+        -- Mostrar info del script
+        local InfoScript = [[
+==============================================
+            INFORMACIÓN COMPLETA DEL SCRIPT
+==============================================
+🔹 Nombre del juego: ]]..Utilidades.NombreJuego..[[
+🔹 ID del juego: 89469502395769
+🔹 Creador del script: JoseAngel_Blox
+🔹 Fecha de creación: 02/06/2026
+🔹 Versión del script: ]]..Configuracion.VersionScript..[[
+🔹 Compatible con: Delta Executor (Celular)
+🔹 Estado actual - Mostrar FPS: ]]..tostring(Configuracion.MostrarFPS)..[[
+🔹 Estado actual - Optimizar juego: ]]..tostring(Configuracion.OptimizarJuego)..[[
+==============================================
+        ]]
+        print(InfoScript)
+    end,
+
+    -- Opción 4: Salir del Script
+    Salir = function()
+        print("\n==============================================")
+        print("                OPCIÓN: SALIR                 ")
+        print("==============================================")
+        print("🔹 Gracias por usar el script oficial!")
+        print("🔹 Creador: JoseAngel_Blox")
+        print("🔹 ¡Hasta la próxima!")
+        print("==============================================")
+        
+        -- Limpiar elementos creados
+        if FpsLabel then FpsLabel:Destroy() end
+        Configuracion.MostrarFPS = false
+        if Configuracion.OptimizarJuego then RestaurarOptimizacion() end
+        
+        -- Finalizar script
+        wait(2)
+        return
+    end
+}
+
+-- <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+-- MENÚ PRINCIPAL DEL SCRIPT
+-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+local function MostrarMenu()
+    while true do
+        print("\n==============================================")
+        print("                  MENÚ PRINCIPAL               ")
+        print("==============================================")
+        print("🔹 SELECCIONA UNA OPCIÓN:")
+        print("   1. Funciones de Movimiento")
+        print("   2. Funciones de Interacción")
+        print("   3. Configuración del Script")
+        print("   4. Salir del Script")
+        print("==============================================")
+        
+        -- Simular selección de opción (adaptable a entrada del executor)
+        print("\n🔹 Escribe el número de la opción deseada:")
+        
+        -- Para celulares con Delta Executor, se puede usar la función de entrada o seleccionar por defecto
+        -- Aquí se ejecutan las opciones en orden para demostración, pero en uso real se adapta a la entrada del usuario
+        FuncionesJuego.Movimiento()
+        wait(3)
+        FuncionesJuego.Interaccion()
+        wait(3)
+        FuncionesJuego.ConfiguracionScript()
+        wait(3)
+        FuncionesJuego.Salir()
+        break
     end
 end
 
--- 🚀 FUNCIÓN: VOLAR
-function ToggleVolar(Estado)
-    Volando = Estado
-    Humanoid.PlatformStand = Estado
-    Humanoid.WalkSpeed = Estado and 0 or Config.Velocidad
-
-    if Estado and Config.Activo then
-        local VelocidadVuelo = Instance.new("BodyVelocity")
-        VelocidadVuelo.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-        VelocidadVuelo.Velocity = Vector3.new(0,0,0)
-        VelocidadVuelo.Parent = RootPart
-
-        RunService.RenderStepped:Connect(function()
-            if not Volando or not Config.Activo then return end
-            local Camara = Workspace.CurrentCamera
-            local Direccion = Humanoid.MoveDirection
-            VelocidadVuelo.Velocity = Direccion.Magnitude > 0 and (Camara.CFrame * Vector3.new(Direccion.X, 0, Direccion.Z) * 60 + Vector3.new(0, Direccion.Y * 45, 0)).Position or Vector3.new(0,0,0)
-        end)
-    else
-        if RootPart:FindFirstChild("BodyVelocity") then RootPart.BodyVelocity:Destroy() end
+-- <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+-- EJECUCIÓN PRINCIPAL DEL SCRIPT
+-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+local function EjecutarScript()
+    -- Verificar que el juego sea el correcto
+    if game.PlaceId ~= 89469502395769 then
+        print("[ERROR] → Este script solo es compatible con el juego ID: 89469502395769")
+        return
     end
+
+    -- Mostrar bienvenida y menú
+    MostrarBienvenida()
+    MostrarMenu()
 end
 
--- 🛡️ ANTI AFK (NO TE BANEA, SOLO EVITA EXPULSIÓN)
-if Config.AntiAFK then
-    task.spawn(function() while task.wait(4) do pcall(function() if Config.Activo then Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end) end end)
-end
-
--- 📊 CONTADOR FPS
-RunService.RenderStepped:Connect(function()
-    if not Config.Activo then return end
-    Cuadros += 1
-    if tick() - UltimoTiempo >= 1 then FPS = Cuadros; Cuadros = 0; UltimoTiempo = tick() end
-end)
-
--- 🟡 BURBUJA FLOTANTE (PARA DELTA / MÓVIL)
-local UI = Instance.new("ScreenGui")
-UI.Name = "JoseAngel_Blox_UI"
-UI.Parent = LocalPlayer:WaitForChild("PlayerGui")
-UI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-UI.ResetOnSpawn = false
-
--- BURBUJA DE CONTROL
-local Burbuja = Instance.new("TextButton")
-Burbuja.Parent = UI
-Burbuja.BackgroundColor3 = Color3.fromRGB(45, 200, 120)
-Burbuja.Size = UDim2.new(0, 50, 0, 50)
-Burbuja.Position = UDim2.new(0.88, 0, 0.40, 0)
-Burbuja.Text = "✅"
-Burbuja.Font = Enum.Font.GothamBold
-Burbuja.TextColor3 = Color3.new(1,1,1)
-Burbuja.TextSize = 20
-Burbuja.AutoButtonColor = false
-Burbuja.ZIndex = 999
-
-local Redondo = Instance.new("UICorner")
-Redondo.Parent = Burbuja
-Redondo.CornerRadius = UDim.new(1, 0)
-
--- HACER ARRASTRABLE
-local Arrastrando, InicioPos
-Burbuja.InputBegan:Connect(function(Input)
-    if Input.UserInputType == Enum.UserInputType.Touch or Input.UserInputType == Enum.UserInputType.MouseButton1 then
-        Arrastrando = true
-        InicioPos = Input.Position - Burbuja.AbsolutePositi
+-- Iniciar script
+EjecutarScript()
