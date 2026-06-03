@@ -1,13 +1,12 @@
 --[[
     Nombre: JoseAngel_Blox Fly
-    Función: Vuelo estable, se queda quieto + Botón F para ocultar/mostrar
-    Compatible: Delta Executor
+    Botón F para mostrar/ocultar menú
+    Compatible: Delta Executor - Celular
 ]]
 
 -- Servicios
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 
 -- Variables principales
 local LocalPlayer = Players.LocalPlayer
@@ -17,28 +16,29 @@ local RootPart = Character:WaitForChild("HumanoidRootPart")
 
 local flying = false
 local velocidadActual = 50
-local controlVuelo
-local menuVisible = true -- Estado del menú
+local posicionGuardada
+local conexionVuelo
 
 -- ─────────────────────────────────────
--- INTERFAZ PRINCIPAL
+-- INTERFAZ
 -- ─────────────────────────────────────
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "JoseAngelBlox_Fly"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.Parent = game:GetService("CoreGui")
+local Gui = Instance.new("ScreenGui")
+Gui.Name = "JoseAngel_Blox"
+Gui.ResetOnSpawn = false
+Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+Gui.Parent = game:GetService("CoreGui")
 
--- Marco principal
-local Marco = Instance.new("Frame")
-Marco.Name = "MenuPrincipal"
-Marco.Size = UDim2.new(0, 300, 0, 260)
-Marco.Position = UDim2.new(0.5, -150, 0.5, -130)
-Marco.BackgroundColor3 = Color3.fromRGB(18, 22, 28)
-Marco.BorderSizePixel = 0
-Instance.new("UICorner", Marco).CornerRadius = UDim.new(0, 12)
-Marco.Parent = ScreenGui
+-- Marco del menú
+local Menu = Instance.new("Frame")
+Menu.Name = "MenuPrincipal"
+Menu.Size = UDim2.new(0, 300, 0, 260)
+Menu.Position = UDim2.new(0.5, -150, 0.5, -130)
+Menu.BackgroundColor3 = Color3.fromRGB(18, 22, 28)
+Menu.BorderSizePixel = 0
+Instance.new("UICorner", Menu).CornerRadius = UDim.new(0, 12)
+Menu.Parent = Gui
 
+-- Título
 local Titulo = Instance.new("TextLabel")
 Titulo.Size = UDim2.new(1, 0, 0, 50)
 Titulo.BackgroundColor3 = Color3.fromRGB(30, 36, 46)
@@ -47,140 +47,129 @@ Titulo.TextColor3 = Color3.fromRGB(255, 215, 0)
 Titulo.Font = Enum.Font.GothamBold
 Titulo.TextSize = 19
 Instance.new("UICorner", Titulo).CornerRadius = UDim.new(0, 12)
-Titulo.Parent = Marco
+Titulo.Parent = Menu
 
-local Cerrar = Instance.new("TextButton")
-Cerrar.Size = UDim2.new(0, 32, 0, 32)
-Cerrar.Position = UDim2.new(1, -38, 0, 9)
-Cerrar.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
-Cerrar.Text = "X"
-Cerrar.TextColor3 = Color3.new(1,1,1)
-Cerrar.Font = Enum.Font.GothamBold
-Cerrar.TextSize = 16
-Instance.new("UICorner", Cerrar).CornerRadius = UDim.new(0, 8)
-Cerrar.Parent = Marco
-
+-- Texto velocidad
 local TextoVel = Instance.new("TextLabel")
 TextoVel.Size = UDim2.new(0.8, 0, 0, 40)
 TextoVel.Position = UDim2.new(0.1, 0, 0.28, 0)
 TextoVel.BackgroundTransparency = 1
 TextoVel.Text = "Velocidad: " .. velocidadActual
-TextoVel.TextColor3 = Color3.new(1,1,1)
+TextoVel.TextColor3 = Color3.new(1, 1, 1)
 TextoVel.Font = Enum.Font.GothamSemibold
 TextoVel.TextSize = 17
-TextoVel.Parent = Marco
+TextoVel.Parent = Menu
 
-local BotonMenos = Instance.new("TextButton")
-BotonMenos.Size = UDim2.new(0.35, 0, 0, 45)
-BotonMenos.Position = UDim2.new(0.1, 0, 0.48, 0)
-BotonMenos.BackgroundColor3 = Color3.fromRGB(45, 52, 62)
-BotonMenos.Text = "➖ Menos"
-BotonMenos.TextColor3 = Color3.new(1,1,1)
-BotonMenos.Font = Enum.Font.GothamBold
-BotonMenos.TextSize = 16
-Instance.new("UICorner", BotonMenos).CornerRadius = UDim.new(0, 10)
-BotonMenos.Parent = Marco
+-- Botón menos velocidad
+local BtnMenos = Instance.new("TextButton")
+BtnMenos.Size = UDim2.new(0.35, 0, 0, 45)
+BtnMenos.Position = UDim2.new(0.1, 0, 0.48, 0)
+BtnMenos.BackgroundColor3 = Color3.fromRGB(45, 52, 62)
+BtnMenos.Text = "➖ Menos"
+BtnMenos.TextColor3 = Color3.new(1, 1, 1)
+BtnMenos.Font = Enum.Font.GothamBold
+BtnMenos.TextSize = 16
+Instance.new("UICorner", BtnMenos).CornerRadius = UDim.new(0, 10)
+BtnMenos.Parent = Menu
 
-local BotonMas = Instance.new("TextButton")
-BotonMas.Size = UDim2.new(0.35, 0, 0, 45)
-BotonMas.Position = UDim2.new(0.55, 0, 0.48, 0)
-BotonMas.BackgroundColor3 = Color3.fromRGB(45, 52, 62)
-BotonMas.Text = "➕ Más"
-BotonMas.TextColor3 = Color3.new(1,1,1)
-BotonMas.Font = Enum.Font.GothamBold
-BotonMas.TextSize = 16
-Instance.new("UICorner", BotonMas).CornerRadius = UDim.new(0, 10)
-BotonMas.Parent = Marco
+-- Botón más velocidad
+local BtnMas = Instance.new("TextButton")
+BtnMas.Size = UDim2.new(0.35, 0, 0, 45)
+BtnMas.Position = UDim2.new(0.55, 0, 0.48, 0)
+BtnMas.BackgroundColor3 = Color3.fromRGB(45, 52, 62)
+BtnMas.Text = "➕ Más"
+BtnMas.TextColor3 = Color3.new(1, 1, 1)
+BtnMas.Font = Enum.Font.GothamBold
+BtnMas.TextSize = 16
+Instance.new("UICorner", BtnMas).CornerRadius = UDim.new(0, 10)
+BtnMas.Parent = Menu
 
-local BotonVolar = Instance.new("TextButton")
-BotonVolar.Size = UDim2.new(0.8, 0, 0, 50)
-BotonVolar.Position = UDim2.new(0.1, 0, 0.72, 0)
-BotonVolar.BackgroundColor3 = Color3.fromRGB(34, 139, 34)
-BotonVolar.Text = "✅ Comenzar a Volar"
-BotonVolar.TextColor3 = Color3.new(1,1,1)
-BotonVolar.Font = Enum.Font.GothamBold
-BotonVolar.TextSize = 17
-Instance.new("UICorner", BotonVolar).CornerRadius = UDim.new(0, 10)
-BotonVolar.Parent = Marco
+-- Botón volar / detener
+local BtnVolar = Instance.new("TextButton")
+BtnVolar.Size = UDim2.new(0.8, 0, 0, 50)
+BtnVolar.Position = UDim2.new(0.1, 0, 0.72, 0)
+BtnVolar.BackgroundColor3 = Color3.fromRGB(34, 139, 34)
+BtnVolar.Text = "✅ Comenzar a Volar"
+BtnVolar.TextColor3 = Color3.new(1, 1, 1)
+BtnVolar.Font = Enum.Font.GothamBold
+BtnVolar.TextSize = 17
+Instance.new("UICorner", BtnVolar).CornerRadius = UDim.new(0, 10)
+BtnVolar.Parent = Menu
 
 -- ─────────────────────────────────────
--- BOTÓN FLOTANTE "F" PARA MOSTRAR/OCULTAR
+-- BURBUJA CON LETRA F
 -- ─────────────────────────────────────
-local BotonFlotante = Instance.new("TextButton")
-BotonFlotante.Size = UDim2.new(0, 55, 0, 55)
-BotonFlotante.Position = UDim2.new(0.05, 0, 0.85, 0) -- Lado inferior izquierdo
-BotonFlotante.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
-BotonFlotante.BackgroundTransparency = 0.1
-BotonFlotante.Text = "F"
-BotonFlotante.TextColor3 = Color3.fromRGB(20, 20, 20)
-BotonFlotante.Font = Enum.Font.GothamBlack
-BotonFlotante.TextSize = 28
-BotonFlotante.ZIndex = 10
-Instance.new("UICorner", BotonFlotante).CornerRadius = UDim.new(1, 0) -- Completamente redondo
-Instance.new("UIStroke", BotonFlotante).Color = Color3.fromRGB(255, 255, 255)
-BotonFlotante.Parent = ScreenGui
+local BtnFlotante = Instance.new("TextButton")
+BtnFlotante.Size = UDim2.new(0, 55, 0, 55)
+BtnFlotante.Position = UDim2.new(0.05, 0, 0.85, 0) -- Abajo a la izquierda
+BtnFlotante.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+BtnFlotante.Text = "F"
+BtnFlotante.TextColor3 = Color3.fromRGB(20, 20, 20)
+BtnFlotante.Font = Enum.Font.GothamBlack
+BtnFlotante.TextSize = 28
+BtnFlotante.ZIndex = 10
+Instance.new("UICorner", BtnFlotante).CornerRadius = UDim.new(1, 0) -- Completamente redondo
+Instance.new("UIStroke", BtnFlotante).Color = Color3.new(1, 1, 1)
+Instance.new("UIStroke", BtnFlotante).Thickness = 2
+BtnFlotante.Parent = Gui
 
 -- ─────────────────────────────────────
 -- FUNCIONES
 -- ─────────────────────────────────────
+
+-- Mostrar / Ocultar menú con la burbuja F
+BtnFlotante.MouseButton1Click:Connect(function()
+    Menu.Visible = not Menu.Visible
+end)
+
+-- Actualizar texto de velocidad
 local function ActualizarTexto()
     TextoVel.Text = "Velocidad: " .. velocidadActual
 end
 
--- Alternar visibilidad del menú
-local function AlternarMenu()
-    menuVisible = not menuVisible
-    Marco.Visible = menuVisible
-end
-
-BotonFlotante.MouseButton1Click:Connect(AlternarMenu)
-
-BotonMenos.MouseButton1Click:Connect(function()
+BtnMenos.MouseButton1Click:Connect(function()
     velocidadActual = math.max(10, velocidadActual - 10)
     ActualizarTexto()
 end)
 
-BotonMas.MouseButton1Click:Connect(function()
+BtnMas.MouseButton1Click:Connect(function()
     velocidadActual = math.min(400, velocidadActual + 10)
     ActualizarTexto()
 end)
 
--- Activar / Desactivar vuelo (AHORA SE QUEDA QUIETO)
+-- Activar / Desactivar vuelo
 local function AlternarVuelo()
     flying = not flying
 
     if flying then
-        BotonVolar.Text = "❌ Desactivar Vuelo"
-        BotonVolar.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+        BtnVolar.Text = "❌ Detener Vuelo"
+        BtnVolar.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
         Humanoid.PlatformStand = true
-        local posicionFija = RootPart.Position -- Guardamos la posición actual
+        posicionGuardada = RootPart.Position
 
-        controlVuelo = RunService.Heartbeat:Connect(function()
-            if not flying or not RootPart or not RootPart:IsDescendantOf(workspace) then return end
+        conexionVuelo = RunService.RenderStepped:Connect(function()
+            if not flying or not RootPart:IsDescendantOf(workspace) then return end
 
             local cam = workspace.CurrentCamera
             local mov = Humanoid.MoveDirection
             local dir = Vector3.new()
 
-            -- Solo se mueve si estás tocando el joystick
             if mov.Magnitude > 0 then
                 dir = (cam.CFrame * CFrame.new(mov.X, 0, mov.Z)).LookVector
-                posicionFija = RootPart.Position -- Actualizamos la posición cuando te mueves
+                posicionGuardada = RootPart.Position
             end
 
-            -- Subir / Bajar
             if Humanoid.Jump then
                 dir += Vector3.new(0, 1, 0)
-                posicionFija = RootPart.Position
+                posicionGuardada = RootPart.Position
             end
             if Humanoid.Sit then
                 dir -= Vector3.new(0, 1, 0)
-                posicionFija = RootPart.Position
+                posicionGuardada = RootPart.Position
             end
 
-            -- Si no hay movimiento, se queda justo en la posición guardada
             if dir.Magnitude == 0 then
-                RootPart.CFrame = CFrame.new(posicionFija, cam.CFrame.Position + cam.CFrame.LookVector * 10)
+                RootPart.CFrame = CFrame.new(posicionGuardada, cam.CFrame.Position + cam.CFrame.LookVector * 10)
                 RootPart.Velocity = Vector3.new(0, 0, 0)
             else
                 RootPart.Velocity = dir * velocidadActual
@@ -188,23 +177,17 @@ local function AlternarVuelo()
         end)
 
     else
-        BotonVolar.Text = "✅ Comenzar a Volar"
-        BotonVolar.BackgroundColor3 = Color3.fromRGB(34, 139, 34)
+        BtnVolar.Text = "✅ Comenzar a Volar"
+        BtnVolar.BackgroundColor3 = Color3.fromRGB(34, 139, 34)
         Humanoid.PlatformStand = false
-        if controlVuelo then controlVuelo:Disconnect() end
+        if conexionVuelo then conexionVuelo:Disconnect() end
         RootPart.Velocity = Vector3.new(0, 0, 0)
     end
 end
 
-BotonVolar.MouseButton1Click:Connect(AlternarVuelo)
+BtnVolar.MouseButton1Click:Connect(AlternarVuelo)
 
--- Cerrar todo
-Cerrar.MouseButton1Click:Connect(function()
-    if flying then AlternarVuelo() end
-    ScreenGui:Destroy()
-end)
-
--- Actualizar si reapareces
+-- Actualizar si el personaje reaparece
 LocalPlayer.CharacterAdded:Connect(function(nuevoChar)
     Character = nuevoChar
     Humanoid = Character:WaitForChild("Humanoid")
