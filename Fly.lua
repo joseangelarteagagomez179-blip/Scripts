@@ -1,13 +1,13 @@
 --[[
     Nombre: JoseAngel_Blox Fly
-    Función: Volar estable con controles para celular
+    Función: Vuelo estable, se queda quieto + Botón F para ocultar/mostrar
     Compatible: Delta Executor
 ]]
 
 -- Servicios
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local ContextActionService = game:GetService("ContextActionService")
+local TweenService = game:GetService("TweenService")
 
 -- Variables principales
 local LocalPlayer = Players.LocalPlayer
@@ -18,9 +18,10 @@ local RootPart = Character:WaitForChild("HumanoidRootPart")
 local flying = false
 local velocidadActual = 50
 local controlVuelo
+local menuVisible = true -- Estado del menú
 
 -- ─────────────────────────────────────
--- INTERFAZ
+-- INTERFAZ PRINCIPAL
 -- ─────────────────────────────────────
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "JoseAngelBlox_Fly"
@@ -28,7 +29,9 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = game:GetService("CoreGui")
 
+-- Marco principal
 local Marco = Instance.new("Frame")
+Marco.Name = "MenuPrincipal"
 Marco.Size = UDim2.new(0, 300, 0, 260)
 Marco.Position = UDim2.new(0.5, -150, 0.5, -130)
 Marco.BackgroundColor3 = Color3.fromRGB(18, 22, 28)
@@ -101,11 +104,36 @@ Instance.new("UICorner", BotonVolar).CornerRadius = UDim.new(0, 10)
 BotonVolar.Parent = Marco
 
 -- ─────────────────────────────────────
--- FUNCIONES DE CONTROL
+-- BOTÓN FLOTANTE "F" PARA MOSTRAR/OCULTAR
+-- ─────────────────────────────────────
+local BotonFlotante = Instance.new("TextButton")
+BotonFlotante.Size = UDim2.new(0, 55, 0, 55)
+BotonFlotante.Position = UDim2.new(0.05, 0, 0.85, 0) -- Lado inferior izquierdo
+BotonFlotante.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+BotonFlotante.BackgroundTransparency = 0.1
+BotonFlotante.Text = "F"
+BotonFlotante.TextColor3 = Color3.fromRGB(20, 20, 20)
+BotonFlotante.Font = Enum.Font.GothamBlack
+BotonFlotante.TextSize = 28
+BotonFlotante.ZIndex = 10
+Instance.new("UICorner", BotonFlotante).CornerRadius = UDim.new(1, 0) -- Completamente redondo
+Instance.new("UIStroke", BotonFlotante).Color = Color3.fromRGB(255, 255, 255)
+BotonFlotante.Parent = ScreenGui
+
+-- ─────────────────────────────────────
+-- FUNCIONES
 -- ─────────────────────────────────────
 local function ActualizarTexto()
     TextoVel.Text = "Velocidad: " .. velocidadActual
 end
+
+-- Alternar visibilidad del menú
+local function AlternarMenu()
+    menuVisible = not menuVisible
+    Marco.Visible = menuVisible
+end
+
+BotonFlotante.MouseButton1Click:Connect(AlternarMenu)
 
 BotonMenos.MouseButton1Click:Connect(function()
     velocidadActual = math.max(10, velocidadActual - 10)
@@ -113,43 +141,50 @@ BotonMenos.MouseButton1Click:Connect(function()
 end)
 
 BotonMas.MouseButton1Click:Connect(function()
-    velocidadActual = math.min(350, velocidadActual + 10)
+    velocidadActual = math.min(400, velocidadActual + 10)
     ActualizarTexto()
 end)
 
--- Activar / Desactivar vuelo
+-- Activar / Desactivar vuelo (AHORA SE QUEDA QUIETO)
 local function AlternarVuelo()
     flying = not flying
 
     if flying then
         BotonVolar.Text = "❌ Desactivar Vuelo"
         BotonVolar.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-        Humanoid.PlatformStand = true -- Para no caerse
+        Humanoid.PlatformStand = true
+        local posicionFija = RootPart.Position -- Guardamos la posición actual
 
-        -- Control de movimiento estable
         controlVuelo = RunService.Heartbeat:Connect(function()
             if not flying or not RootPart or not RootPart:IsDescendantOf(workspace) then return end
 
             local cam = workspace.CurrentCamera
+            local mov = Humanoid.MoveDirection
             local dir = Vector3.new()
 
-            -- Leer entrada del jugador (funciona con joystick en celular)
-            local mov = Humanoid.MoveDirection
+            -- Solo se mueve si estás tocando el joystick
             if mov.Magnitude > 0 then
                 dir = (cam.CFrame * CFrame.new(mov.X, 0, mov.Z)).LookVector
+                posicionFija = RootPart.Position -- Actualizamos la posición cuando te mueves
             end
 
-            -- Subir / Bajar: toca 2 veces rápido el botón de saltar para subir, agacharse para bajar
+            -- Subir / Bajar
             if Humanoid.Jump then
-                dir += Vector3.new(0, 0.8, 0)
+                dir += Vector3.new(0, 1, 0)
+                posicionFija = RootPart.Position
             end
             if Humanoid.Sit then
-                dir -= Vector3.new(0, 0.8, 0)
+                dir -= Vector3.new(0, 1, 0)
+                posicionFija = RootPart.Position
             end
 
-            -- Aplicar movimiento
-            RootPart.Velocity = dir * velocidadActual
-            RootPart.CFrame = CFrame.new(RootPart.Position, cam.CFrame.Position + cam.CFrame.LookVector * 10)
+            -- Si no hay movimiento, se queda justo en la posición guardada
+            if dir.Magnitude == 0 then
+                RootPart.CFrame = CFrame.new(posicionFija, cam.CFrame.Position + cam.CFrame.LookVector * 10)
+                RootPart.Velocity = Vector3.new(0, 0, 0)
+            else
+                RootPart.Velocity = dir * velocidadActual
+            end
         end)
 
     else
@@ -169,7 +204,7 @@ Cerrar.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- Si reapareces
+-- Actualizar si reapareces
 LocalPlayer.CharacterAdded:Connect(function(nuevoChar)
     Character = nuevoChar
     Humanoid = Character:WaitForChild("Humanoid")
