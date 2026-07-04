@@ -128,7 +128,7 @@ local TitleCorner = Instance.new("UICorner")
 TitleCorner.CornerRadius = UDim.new(0, 14)
 TitleCorner.Parent = Title
 
---// BOTON MINIMIZAR
+--// BOTON MINIMIZAR (CORREGIDO)
 local MinimizeBtn = Instance.new("TextButton")
 MinimizeBtn.Size = UDim2.new(0, 25, 0, 25)
 MinimizeBtn.Position = UDim2.new(1, -30, 0, 2.5)
@@ -145,7 +145,7 @@ MinCorner.CornerRadius = UDim.new(0, 50)
 MinCorner.Parent = MinimizeBtn
 
 --// SECCION INFO
-local InfoSection = Instance.new("Frame")
+local InfoSection = Instance.new("TextButton") -- Cambiado a TextButton para que sea clickeable
 InfoSection.Size = UDim2.new(1, -20, 0, 40)
 InfoSection.Position = UDim2.new(0, 10, 0, 40)
 InfoSection.BackgroundColor3 = Color3.fromRGB(40,40,40)
@@ -192,7 +192,7 @@ InfoData.TextXAlignment = Enum.TextXAlignment.Left
 InfoData.Parent = InfoContent
 
 --// SECCION FLY
-local FlySection = Instance.new("Frame")
+local FlySection = Instance.new("TextButton") -- Cambiado a TextButton para que sea clickeable
 FlySection.Size = UDim2.new(1, -20, 0, 40)
 FlySection.Position = UDim2.new(0, 10, 0, 150)
 FlySection.BackgroundColor3 = Color3.fromRGB(40,40,40)
@@ -275,7 +275,7 @@ PlusBtn.TextColor3 = Color3.new(1,1,1)
 PlusBtn.Parent = FlyContent
 
 -- ==============================================
--- FUNCIONES
+-- FUNCIONES (CORREGIDAS)
 -- ==============================================
 
 -- MOSTRAR / OCULTAR INFO
@@ -304,7 +304,7 @@ FlySection.MouseButton1Click:Connect(function()
     end
 end)
 
--- MINIMIZAR
+-- MINIMIZAR (CORREGIDO)
 local Minimized = false
 MinimizeBtn.MouseButton1Click:Connect(function()
     Minimized = not Minimized
@@ -383,15 +383,15 @@ RunService.RenderStepped:Connect(function()
         HRP.Velocity = moveV.Unit * Speed
         
         -- Soporte Joystick Celular
-        local Thumbstick = Player.PlayerGui:FindFirstChild("ControlModule")
-        if Thumbstick then
-            local MoveController = require(Players.LocalPlayer.PlayerScripts:FindFirstChild("PlayerModule")).GetControls()
-            local MoveVec = MoveController:GetMoveVector()
+        local success, err = pcall(function()
+            local PlayerModule = require(game:GetService("Players").LocalPlayer.PlayerScripts:FindFirstChild("PlayerModule"))
+            local Controls = PlayerModule:GetControls()
+            local MoveVec = Controls:GetMoveVector()
             if MoveVec.Magnitude > 0 then
                  local camLook = CFrame.new(Vector3.new(), CamCF.LookVector)
                  HRP.Velocity = camLook:VectorToWorldSpace(MoveVec) * Speed + Vector3.new(0, HRP.Velocity.Y, 0)
             end
-        end
+        end)
         
     else
         -- Restaurar Collision cuando no vuela
