@@ -1,228 +1,313 @@
--- Configuración básica de velocidad
-local FlySpeed = 50
-local Flying = false
+-- =============================================
+-- JoseAngel_Blox Fly - Versión 1.2
+-- Fecha de lanzamiento: 03/06/2026
+-- Creador: JoseAngel_Blox
+-- =============================================
 
--- Servicios de Roblox
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local CoreGui = game:GetService("CoreGui")
-local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 
--- Crear interfaz de usuario (Protegida)
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "FlyScriptGui"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = CoreGui
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
 
--- 1. CREAR BURBUJA FLOTANTE REDONDA (BOTÓN F)
-local BubbleButton = Instance.new("TextButton")
-BubbleButton.Size = UDim2.new(0, 60, 0, 60)
-BubbleButton.Position = UDim2.new(0.1, 0, 0.4, 0)
-BubbleButton.BackgroundColor3 = Color3.fromRGB(0, 122, 255)
-BubbleButton.Text = "F"
-BubbleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-BubbleButton.TextSize = 28
-BubbleButton.Font = Enum.Font.SourceSansBold
-BubbleButton.Parent = ScreenGui
+local flySpeed = 100
+local flying = false
+local noclip = false
+local connection = nil
 
--- Hacer la burbuja redonda
-local UICornerBubble = Instance.new("UICorner")
-UICornerBubble.CornerRadius = UDim.new(1, 0)
-UICornerBubble.Parent = BubbleButton
+-- ==================== CARGA INICIAL ====================
+local loadingScreen = Instance.new("ScreenGui")
+loadingScreen.Name = "JoseAngelLoading"
+loadingScreen.ResetOnSpawn = false
+loadingScreen.Parent = game:GetService("CoreGui")
 
--- Lógica para arrastrar la burbuja (Móvil y PC)
-local dragging, dragInput, dragStart, startPos
-BubbleButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = BubbleButton.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-BubbleButton.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
-    end
-end)
-RunService.Heartbeat:Connect(function()
-    if dragging and dragInput then
-        local delta = dragInput.Position - dragStart
-        BubbleButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0.4, 0, 0.2, 0)
+frame.Position = UDim2.new(0.3, 0, 0.4, 0)
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+frame.BorderSizePixel = 0
+frame.Parent = loadingScreen
 
--- 2. CREAR MENÚ PRINCIPAL (Inicia oculto)
-local MainMenu = Instance.new("Frame")
-MainMenu.Size = UDim2.new(0, 220, 0, 220)
-MainMenu.Position = UDim2.new(0.5, -110, 0.5, -110)
-MainMenu.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-MainMenu.Visible = false
-MainMenu.Parent = ScreenGui
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 20)
+corner.Parent = frame
 
-local UICornerMenu = Instance.new("UICorner")
-UICornerMenu.CornerRadius = UDim.new(0, 12)
-UICornerMenu.Parent = MainMenu
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0.3, 0)
+title.BackgroundTransparency = 1
+title.Text = "Bienvenidos a Scripts JoseAngel_Blox"
+title.TextColor3 = Color3.fromRGB(0, 255, 100)
+title.TextScaled = true
+title.Font = Enum.Font.GothamBold
+title.Parent = frame
 
--- TÍTULO DEL SCRIPT: JoseAngel_Blox Fly
-local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Size = UDim2.new(1, 0, 0, 40)
-TitleLabel.Position = UDim2.new(0, 0, 0, 5)
-TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "JoseAngel_Blox Fly"
-TitleLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
-TitleLabel.TextSize = 20
-TitleLabel.Font = Enum.Font.SourceSansBold
-TitleLabel.Parent = MainMenu
+local progressBar = Instance.new("Frame")
+progressBar.Size = UDim2.new(0.9, 0, 0.15, 0)
+progressBar.Position = UDim2.new(0.05, 0, 0.65, 0)
+progressBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+progressBar.Parent = frame
 
--- Contenedor para alinear los botones debajo del título
-local ButtonContainer = Instance.new("Frame")
-ButtonContainer.Size = UDim2.new(1, 0, 1, -45)
-ButtonContainer.Position = UDim2.new(0, 0, 0, 45)
-ButtonContainer.BackgroundTransparency = 1
-ButtonContainer.Parent = MainMenu
+local progressCorner = Instance.new("UICorner")
+progressCorner.CornerRadius = UDim.new(0, 10)
+progressCorner.Parent = progressBar
 
-local UIListLayout = Instance.new("UIListLayout")
-UIListLayout.Parent = ButtonContainer
-UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-UIListLayout.Padding = UDim.new(0, 8)
+local progressFill = Instance.new("Frame")
+progressFill.Size = UDim2.new(0, 0, 1, 0)
+progressFill.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+progressFill.Parent = progressBar
 
--- Función para dar estilo a los botones del menú
-local function CreateMenuButton(text, color)
+local progressCorner2 = Instance.new("UICorner")
+progressCorner2.CornerRadius = UDim.new(0, 10)
+progressCorner2.Parent = progressFill
+
+local progressText = Instance.new("TextLabel")
+progressText.Size = UDim2.new(0.2, 0, 1, 0)
+progressText.Position = UDim2.new(0.91, 0, 0, 0)
+progressText.BackgroundTransparency = 1
+progressText.Text = "0%"
+progressText.TextColor3 = Color3.fromRGB(255, 255, 255)
+progressText.TextScaled = true
+progressText.Font = Enum.Font.GothamBold
+progressText.Parent = progressBar
+
+-- Animación de carga
+local startPercent = 0
+for i = 1, 100 do
+    wait(0.03) -- velocidad de carga (ajusta si quieres más lenta)
+    startPercent = i
+    progressFill.Size = UDim2.new(0, progressBar.AbsoluteSize.X * (i/100), 1, 0)
+    progressText.Text = i .. "%"
+end
+
+-- Desvanecer animación
+TweenService:Create(frame, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
+TweenService:Create(title, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 1}):Play()
+TweenService:Create(progressBar, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
+TweenService:Create(progressFill, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
+TweenService:Create(progressText, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 1}):Play()
+
+wait(1.2)
+loadingScreen:Destroy()
+
+-- ==================== MENÚ PRINCIPAL ====================
+local mainGui = Instance.new("ScreenGui")
+mainGui.Name = "JoseAngel_Blox Fly"
+mainGui.ResetOnSpawn = false
+mainGui.Parent = game:GetService("CoreGui")
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0.35, 0, 0.5, 0)
+mainFrame.Position = UDim2.new(0.325, 0, 0.25, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = mainGui
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 25)
+mainCorner.Parent = mainFrame
+
+local mainTitle = Instance.new("TextLabel")
+mainTitle.Size = UDim2.new(1, 0, 0.15, 0)
+mainTitle.BackgroundTransparency = 1
+mainTitle.Text = "JoseAngel_Blox Fly"
+mainTitle.TextColor3 = Color3.fromRGB(0, 255, 150)
+mainTitle.TextScaled = true
+mainTitle.Font = Enum.Font.GothamBold
+mainTitle.Parent = mainFrame
+
+-- ==================== OPCIONES ====================
+local function createOptionButton(text, yPos, callback)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 180, 0, 40)
-    btn.BackgroundColor3 = color
+    btn.Size = UDim2.new(0.85, 0, 0.12, 0)
+    btn.Position = UDim2.new(0.075, 0, yPos, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     btn.Text = text
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 16
-    btn.Font = Enum.Font.SourceSansBold
-    btn.Parent = ButtonContainer
-    
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = btn
+    btn.TextScaled = true
+    btn.Font = Enum.Font.Gotham
+    btn.Parent = mainFrame
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 12)
+    btnCorner.Parent = btn
+    btn.MouseButton1Click:Connect(callback)
     return btn
 end
 
--- Botones del menú
-local FlyBtn = CreateMenuButton("Fly: Volar", Color3.fromRGB(46, 204, 113))
-local SpeedUpBtn = CreateMenuButton("+ Velocidad", Color3.fromRGB(52, 152, 219))
-local SpeedDownBtn = CreateMenuButton("- Velocidad", Color3.fromRGB(231, 76, 60))
+local infoBtn = createOptionButton("Info", 0.25, function()
+    local infoFrame = Instance.new("Frame")
+    infoFrame.Size = UDim2.new(0.8, 0, 0.6, 0)
+    infoFrame.Position = UDim2.new(0.1, 0, 0.2, 0)
+    infoFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    infoFrame.Parent = mainGui
+    local infoCorner = Instance.new("UICorner")
+    infoCorner.CornerRadius = UDim.new(0, 20)
+    infoCorner.Parent = infoFrame
 
--- Interruptor ON/OFF sucesivo para el menú al presionar la burbuja
-BubbleButton.MouseButton1Click:Connect(function()
-    MainMenu.Visible = not MainMenu.Visible
+    local infoTitle = Instance.new("TextLabel")
+    infoTitle.Size = UDim2.new(1, 0, 0.2, 0)
+    infoTitle.Text = "INFO"
+    infoTitle.TextColor3 = Color3.fromRGB(0, 255, 100)
+    infoTitle.TextScaled = true
+    infoTitle.Font = Enum.Font.GothamBold
+    infoTitle.Parent = infoFrame
+
+    local infoText = Instance.new("TextLabel")
+    infoText.Size = UDim2.new(0.9, 0, 0.7, 0)
+    infoText.Position = UDim2.new(0.05, 0, 0.25, 0)
+    infoText.Text = [[
+Nombre del Creador: JoseAngel_Blox
+Fecha de lanzamiento: 03/06/2026
+Versión: 1.2
+
+Cómo usar:
+1. Presiona F para volar (sin noclip)
+2. Mantén WASD para moverte
+3. Mantén SHIFT para bajar
+4. Mantén ESPACIO para subir
+5. Presiona N para activar Noclip (volar sin atravesar paredes)
+
+¡Disfruta volando, JoseAngel_Blox!
+    ]]
+    infoText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    infoText.TextScaled = false
+    infoText.Font = Enum.Font.Gotham
+    infoText.TextWrapped = true
+    infoText.TextXAlignment = Enum.TextXAlignment.Left
+    infoText.Parent = infoFrame
+
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0.2, 0, 0.15, 0)
+    closeBtn.Position = UDim2.new(0.4, 0, 0.85, 0)
+    closeBtn.Text = "Cerrar"
+    closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    closeBtn.Parent = infoFrame
+    local closeCorner = Instance.new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 10)
+    closeCorner.Parent = closeBtn
+    closeBtn.MouseButton1Click:Connect(function() infoFrame:Destroy() end)
 end)
 
--- Modificar velocidad
-SpeedUpBtn.MouseButton1Click:Connect(function()
-    FlySpeed = FlySpeed + 10
-    SpeedUpBtn.Text = "+ Vel (" .. FlySpeed .. ")"
-    task.wait(0.5)
-    SpeedUpBtn.Text = "+ Velocidad"
-end)
-
--- Disminuir velocidad
-SpeedDownBtn.MouseButton1Click:Connect(function()
-    if FlySpeed > 10 then
-        FlySpeed = FlySpeed - 10
-        SpeedDownBtn.Text = "- Vel (" .. FlySpeed .. ")"
-        task.wait(0.5)
-        SpeedDownBtn.Text = "- Velocidad"
-    end
-end)
-
--- 3. LÓGICA DE VUELO DIRECCIONAL 3D (CÁMARA, JOYSTICK Y TECLADO)
-local BodyVelocity, BodyGyro
-
-FlyBtn.MouseButton1Click:Connect(function()
-    Flying = not Flying
-    
-    local Character = LocalPlayer.Character
-    if not Character or not Character:FindFirstChild("HumanoidRootPart") then return end
-    local Root = Character.HumanoidRootPart
-    local Humanoid = Character:FindFirstChildOfClass("Humanoid")
-
-    if Flying then
-        FlyBtn.Text = "Volando: Activo"
-        FlyBtn.BackgroundColor3 = Color3.fromRGB(155, 89, 182)
-        
-        BodyVelocity = Instance.new("BodyVelocity")
-        BodyVelocity.Velocity = Vector3.new(0, 0, 0)
-        BodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        BodyVelocity.Parent = Root
-
-        BodyGyro = Instance.new("BodyGyro")
-        BodyGyro.CFrame = Root.CFrame
-        BodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-        BodyGyro.P = 3000
-        BodyGyro.Parent = Root
-
-        if Humanoid then 
-            Humanoid.PlatformStand = true
-        end
+local flyBtn = createOptionButton("Fly", 0.45, function()
+    if flying then
+        flying = false
+        flyBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        flyBtn.Text = "Fly"
+        connection:Disconnect()
+        connection = nil
+        print("Fly desactivado")
     else
-        FlyBtn.Text = "Fly: Volar"
-        FlyBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
+        flying = true
+        flyBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        flyBtn.Text = "Desactivar Fly"
+        print("Fly activado")
         
-        if BodyVelocity then BodyVelocity:Destroy() end
-        if BodyGyro then BodyGyro:Destroy() end
-        if Humanoid then Humanoid.PlatformStand = false end
+        connection = RunService.Heartbeat:Connect(function()
+            if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+            
+            local cam = workspace.CurrentCamera
+            local moveDir = Vector3.new()
+            
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + cam.CFrame.RightVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then moveDir = moveDir - Vector3.new(0, 1, 0) end
+            
+            moveDir = moveDir.Magnitude > 0 and moveDir.Unit or Vector3.new()
+            
+            local targetCFrame = rootPart.CFrame + moveDir * flySpeed
+            rootPart.CFrame = targetCFrame
+        end)
     end
 end)
 
--- Bucle de movimiento continuo en 3D según la cámara
-RunService.RenderStepped:Connect(function()
-    if Flying and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local Root = LocalPlayer.Character.HumanoidRootPart
-        local Camera = workspace.CurrentCamera
-        local Humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        
-        if Humanoid and BodyVelocity and BodyGyro then
-            local MoveDirection = Humanoid.MoveDirection
-            
-            if MoveDirection.Magnitude > 0 then
-                -- Obtener los vectores de dirección de la cámara (adelante/atrás y lados)
-                local LookVector = Camera.CFrame.LookVector
-                local RightVector = Camera.CFrame.RightVector
-                
-                -- Detectar si nos movemos hacia adelante/atrás o lateralmente basándonos en la MoveDirection del Humanoid
-                -- Esto permite que funcione perfectamente con el joystick 3D en celular
-                local ForwardMove = Root.CFrame.LookVector:Dot(MoveDirection)
-                local RightMove = Root.CFrame.RightVector:Dot(MoveDirection)
-                
-                -- Combinar las direcciones reales de la cámara en 3D (incluye el eje Y para subir y bajar)
-                local TargetVelocity = (LookVector * ForwardMove) + (RightVector * RightMove)
-                
-                -- Si por alguna razón la magnitud es cero, usamos la dirección por defecto ajustada
-                if TargetVelocity.Magnitude == 0 then
-                    TargetVelocity = MoveDirection
-                else
-                    TargetVelocity = TargetVelocity.Unit
-                end
-                
-                -- Aplicar la velocidad final
-                BodyVelocity.Velocity = TargetVelocity * FlySpeed
-            else
-                -- Si no mueves el joystick, te quedas suspendido en el aire inmóvil
-                BodyVelocity.Velocity = Vector3.new(0, 0, 0)
+-- Noclip siempre activo (sin bugs)
+noclip = true
+RunService.Stepped:Connect(function()
+    if noclip and character then
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") and part.CanCollide then
+                part.CanCollide = false
             end
-            
-            -- Mantener el cuerpo del personaje totalmente recto (vertical) sin rotar de forma extraña
-            local CameraLook = Camera.CFrame.LookVector
-            BodyGyro.CFrame = CFrame.new(Root.Position, Root.Position + Vector3.new(CameraLook.X, 0, CameraLook.Z))
         end
     end
 end)
 
--- Resetear estado al reaparecer
-LocalPlayer.CharacterAdded:Connect(function()
-    Flying = false
-    FlyBtn.Text = "Fly: Volar"
-    FlyBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
+-- ==================== MANUAL DE USUARIO ====================
+local manualBtn = createOptionButton("Manual", 0.65, function()
+    local manualFrame = Instance.new("Frame")
+    manualFrame.Size = UDim2.new(0.85, 0, 0.75, 0)
+    manualFrame.Position = UDim2.new(0.075, 0, 0.125, 0)
+    manualFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    manualFrame.Parent = mainGui
+    local manualCorner = Instance.new("UICorner")
+    manualCorner.CornerRadius = UDim.new(0, 20)
+    manualCorner.Parent = manualFrame
+
+    local manualTitle = Instance.new("TextLabel")
+    manualTitle.Size = UDim2.new(1, 0, 0.15, 0)
+    manualTitle.Text = "📖 MANUAL DE USO"
+    manualTitle.TextColor3 = Color3.fromRGB(0, 255, 100)
+    manualTitle.TextScaled = true
+    manualTitle.Font = Enum.Font.GothamBold
+    manualTitle.Parent = manualFrame
+
+    local manualText = Instance.new("TextLabel")
+    manualText.Size = UDim2.new(0.95, 0, 0.65, 0)
+    manualText.Position = UDim2.new(0.025, 0, 0.18, 0)
+    manualText.Text = [[
+¡BIENVENIDO A JOSEANGEL_BLOX FLY!
+
+✅ Noclip = siempre activado (puedes volar sin atravesar paredes).
+✅ Fly = activa el vuelo usando WASD + ESPACIO (sube) + SHIFT (baja).
+
+Cómo volar:
+• WASD = moverte en la dirección de la cámara
+• ESPACIO = subir
+• SHIFT = bajar
+• F = activar/desactivar Fly
+
+¡Disfruta volando sin bugs! JoseAngel_Blox ❤️
+
+    ]]
+    manualText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    manualText.TextScaled = false
+    manualText.Font = Enum.Font.Gotham
+    manualText.TextWrapped = true
+    manualText.TextXAlignment = Enum.TextXAlignment.Left
+    manualText.Parent = manualFrame
+
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0.2, 0, 0.12, 0)
+    closeBtn.Position = UDim2.new(0.4, 0, 0.85, 0)
+    closeBtn.Text = "Cerrar"
+    closeBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeBtn.Parent = manualFrame
+    local cb = Instance.new("UICorner")
+    cb.CornerRadius = UDim.new(0, 10)
+    cb.Parent = closeBtn
+    closeBtn.MouseButton1Click:Connect(function() manualFrame:Destroy() end)
 end)
+
+-- Cerrar gui con ESC
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.Escape then
+        mainGui.Enabled = not mainGui.Enabled
+    end
+end)
+
+-- Limpiar si reaparece personaje
+player.CharacterAdded:Connect(function(newChar)
+    character = newChar
+    humanoid = newChar:WaitForChild("Humanoid")
+    rootPart = newChar:WaitForChild("HumanoidRootPart")
+end)
+
+print("✅ JoseAngel_Blox Fly cargado correctamente")
