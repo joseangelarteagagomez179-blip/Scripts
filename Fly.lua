@@ -28,13 +28,14 @@ local function round(parent, radius)
     return corner
 end
 
--- GUI (carga, OpenBtn y MainFrame exactamente como tenías)
+-- GUI Principal
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "JoseAngel_Blox_Fly_V4"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.Parent = game:GetService("CoreGui")
 
+-- Pantalla de carga
 local LoadingFrame = Instance.new("Frame")
 LoadingFrame.Size = UDim2.new(1, 0, 1, 0)
 LoadingFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
@@ -42,7 +43,7 @@ LoadingFrame.ZIndex = 500
 LoadingFrame.Parent = ScreenGui
 
 local LoadingText = Instance.new("TextLabel")
-LoadingText.Size = UDim2.new(0.8, 0, 0, 50)
+LoadingText.Size = UDim2.new(0, 80, 0, 50)
 LoadingText.Position = UDim2.new(0.5, 0, 0.45, 0)
 LoadingText.AnchorPoint = Vector2.new(0.5, 0.5)
 LoadingText.BackgroundTransparency = 1
@@ -52,8 +53,6 @@ LoadingText.TextSize = 24
 LoadingText.Font = Enum.Font.GothamBold
 LoadingText.ZIndex = 501
 LoadingText.Parent = LoadingFrame
-
--- ... (BarBack, BarFill, PercentText exactamente como antes)
 
 local BarBack = Instance.new("Frame")
 BarBack.Size = UDim2.new(0, 250, 0, 10)
@@ -83,7 +82,7 @@ PercentText.Font = Enum.Font.Gotham
 PercentText.ZIndex = 501
 PercentText.Parent = LoadingFrame
 
--- OpenBtn y MainFrame (igual que antes)
+-- Botón para abrir menú
 local OpenBtn = Instance.new("TextButton")
 OpenBtn.Size = UDim2.new(0, 50, 0, 50)
 OpenBtn.Position = UDim2.new(0, 10, 0.5, -25)
@@ -99,6 +98,7 @@ OpenStroke.Thickness = 2
 OpenStroke.Color = Color3.fromRGB(0, 150, 255)
 OpenStroke.Parent = OpenBtn
 
+-- Marco principal
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 400, 0, 250)
 MainFrame.Position = UDim2.new(0.5, -200, 0.5, -125)
@@ -136,7 +136,7 @@ MinBtn.TextSize = 20
 MinBtn.Parent = MainFrame
 round(MinBtn, 8)
 
--- Sidebar, tabs, buttons (igual que antes)
+-- Sidebar y contenido
 local Sidebar = Instance.new("Frame")
 Sidebar.Size = UDim2.new(0, 120, 1, -60)
 Sidebar.Position = UDim2.new(0, 10, 0, 50)
@@ -150,6 +150,7 @@ Content.Position = UDim2.new(0, 140, 0, 50)
 Content.BackgroundTransparency = 1
 Content.Parent = MainFrame
 
+-- Pestañas
 local TabInfo = Instance.new("Frame")
 TabInfo.Size = UDim2.new(1, 0, 1, 0)
 TabInfo.BackgroundTransparency = 1
@@ -162,11 +163,124 @@ TabMain.BackgroundTransparency = 1
 TabMain.Visible = false
 TabMain.Parent = Content
 
--- ... (todos los botones de sidebar, infoLbl, flyToggle, speedText, sUp, sDown exactamente iguales)
+-- Botones sidebar
+local BtnInfo = Instance.new("TextButton")
+BtnInfo.Size = UDim2.new(1, -10, 0, 40)
+BtnInfo.Position = UDim2.new(0, 5, 0, 10)
+BtnInfo.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+BtnInfo.Text = "Información"
+BtnInfo.TextColor3 = Color3.fromRGB(255, 255, 255)
+BtnInfo.Font = Enum.Font.GothamBold
+BtnInfo.Parent = Sidebar
+round(BtnInfo, 8)
 
--- SISTEMA DRAG (igual que antes)
+local BtnMain = Instance.new("TextButton")
+BtnMain.Size = UDim2.new(1, -10, 0, 40)
+BtnMain.Position = UDim2.new(0, 5, 0, 60)
+BtnMain.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+BtnMain.Text = "Principal"
+BtnMain.TextColor3 = Color3.fromRGB(255, 255, 255)
+BtnMain.Font = Enum.Font.GothamBold
+BtnMain.Parent = Sidebar
+round(BtnMain, 8)
 
--- LOGICA DE VUELO v1.6 (¡el joystick corregido!)
+-- Contenido pestaña información
+local infoLbl = Instance.new("TextLabel")
+infoLbl.Size = UDim2.new(1, 0, 1, 0)
+infoLbl.BackgroundTransparency = 1
+infoLbl.Text = "Creador: JoseAngel_Blox\nVersión: 1.6\n• Joystick corregido\n• Cámara estabilizada\n• Funciona con teclado y mando"
+infoLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+infoLbl.Font = Enum.Font.Gotham
+infoLbl.TextSize = 14
+infoLbl.Parent = TabInfo
+
+-- Contenido pestaña principal
+local flyToggle = Instance.new("TextButton")
+flyToggle.Size = UDim2.new(1, 0, 0, 40)
+flyToggle.Position = UDim2.new(0, 0, 0, 20)
+flyToggle.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+flyToggle.Text = "FLY: OFF"
+flyToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyToggle.Font = Enum.Font.GothamBold
+flyToggle.Parent = TabMain
+round(flyToggle, 8)
+
+local speedText = Instance.new("TextLabel")
+speedText.Size = UDim2.new(1, 0, 0, 30)
+speedText.Position = UDim2.new(0, 0, 0, 70)
+speedText.BackgroundTransparency = 1
+speedText.Text = "Velocidad: " .. speed
+speedText.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedText.Font = Enum.Font.GothamBold
+speedText.Parent = TabMain
+
+local sUp = Instance.new("TextButton")
+sUp.Size = UDim2.new(0, 80, 0, 35)
+sUp.Position = UDim2.new(0, 20, 0, 110)
+sUp.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+sUp.Text = "+"
+sUp.TextColor3 = Color3.fromRGB(255, 255, 255)
+sUp.Font = Enum.Font.GothamBold
+sUp.Parent = TabMain
+round(sUp, 8)
+
+local sDown = Instance.new("TextButton")
+sDown.Size = UDim2.new(0, 80, 0, 35)
+sDown.Position = UDim2.new(0, 120, 0, 110)
+sDown.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+sDown.Text = "-"
+sDown.TextColor3 = Color3.fromRGB(255, 255, 255)
+sDown.Font = Enum.Font.GothamBold
+sDown.Parent = TabMain
+round(sDown, 8)
+
+-- Sistema de arrastre (drag)
+local dragging, dragStart, startPos = false, nil, nil
+
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+-- Cambio de pestañas
+BtnInfo.MouseButton1Click:Connect(function()
+    TabInfo.Visible = true
+    TabMain.Visible = false
+end)
+
+BtnMain.MouseButton1Click:Connect(function()
+    TabInfo.Visible = false
+    TabMain.Visible = true
+end)
+
+-- Minimizar
+MinBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+    OpenBtn.Visible = true
+end)
+
+OpenBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = true
+    OpenBtn.Visible = false
+end)
+
+-- LÓGICA DE VUELO v1.6 (Joystick corregido)
 local function startFly()
     local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
     local root = char:WaitForChild("HumanoidRootPart")
@@ -189,22 +303,22 @@ local function startFly()
         root.CanCollide = false
         hum.PlatformStand = true
 
-        local moveDir = hum.MoveDirection  -- esto ahora SÍ funciona perfecto
+        local moveDir = hum.MoveDirection
 
-        -- CORRECCIÓN: multiplicamos por la rotación de la cámara (¡esto es lo que faltaba!)
+        -- Corrección: dirección relativa a la cámara
         local camCF = camera.CFrame
         local finalVelocity = camCF.Rotation * Vector3.new(moveDir.X, 0, moveDir.Z).Unit * speed
 
-        -- Altura manual (mismo que antes)
+        -- Control de altura
         if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-            finalVelocity = finalVelocity + Vector3.new(0, speed, 0)
+            finalVelocity += Vector3.new(0, speed, 0)
         elseif UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
-            finalVelocity = finalVelocity + Vector3.new(0, -speed, 0)
+            finalVelocity += Vector3.new(0, -speed, 0)
         end
 
         bv.Velocity = finalVelocity
 
-        -- Cámara se queda donde estás mirando (estabilizada)
+        -- Mantener rotación estable
         bg.CFrame = CFrame.new(root.Position, root.Position + Vector3.new(camCF.LookVector.X, 0, camCF.LookVector.Z))
     end)
 end
@@ -220,7 +334,7 @@ local function stopFly()
     end
 end
 
--- Botones (igual que antes, solo cambié el texto de velocidad)
+-- Botones de control
 flyToggle.MouseButton1Click:Connect(function()
     flying = not flying
     if flying then
@@ -244,16 +358,22 @@ sDown.MouseButton1Click:Connect(function()
     speedText.Text = "Velocidad: " .. speed
 end)
 
--- Resto de eventos (tabs, MinBtn, OpenBtn, drag) exactamente iguales que antes
+-- CARGA ARREGLADA CON TWEENSERVICE
+local loadTween = TweenService:Create(BarFill, TweenInfo.new(2, Enum.EasingStyle.Linear), {Size = UDim2.new(1, 0, 1, 0)})
+loadTween:Play()
 
--- EJECUTAR CARGA (igual que antes)
-task.spawn(function()
-    for i = 1, 100 do
-        task.wait(0.02)
-        BarFill.Size = UDim2.new(i/100, 0, 1, 0)
-        PercentText.Text = i .. "%"
+-- Actualizar porcentaje mientras se carga
+local updatePercent
+updatePercent = RunService.Heartbeat:Connect(function()
+    local elapsed = loadTween.TweenInfo.Time - loadTween.RemainingTime
+    local percent = math.clamp(math.floor((elapsed / loadTween.TweenInfo.Time) * 100), 0, 100)
+    PercentText.Text = percent .. "%"
+    if percent >= 100 then
+        updatePercent:Disconnect()
     end
+end)
 
+loadTween.Completed:Connect(function()
     local t = TweenService:Create(LoadingFrame, TweenInfo.new(0.6), {BackgroundTransparency = 1})
     TweenService:Create(LoadingText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
     TweenService:Create(BarBack, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
