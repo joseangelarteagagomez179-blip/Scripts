@@ -1,212 +1,482 @@
+--[[
+    ====================================================
+    Script: JoseAngel_Blox Fly
+    Creador: JoseAngel_Blox
+    Versión: 1.2
+    Fecha: 06/07/2026
+    ====================================================
+    
+    MANUAL DE USO:
+    
+    ¡Bienvenidos y bienvenidas al script JoseAngel_Blox Fly!
+    
+    Este script te permite volar en cualquier juego de Roblox
+    de manera fácil y profesional.
+    
+    📱 USO EN MÓVIL:
+    - Al activar el interruptor, aparecerán botones en pantalla
+    - Usa el joystick izquierdo para moverte
+    - Botón "⬆" para subir
+    - Botón "⬇" para bajar
+    - Desliza el joystick hacia adelante para avanzar volando
+    
+    💻 USO EN PC:
+    - Presiona la tecla "F" para activar/desactivar el vuelo
+    - Usa WASD para moverte
+    - Barra espaciadora para subir
+    - Tecla Shift para bajar
+    - La velocidad se ajusta con las teclas + y -
+    
+    ⚙️ CARACTERÍSTICAS:
+    - Noclip integrado (atravesar paredes)
+    - Velocidad ajustable
+    - Compatible con móvil y PC
+    - Interfaz profesional
+    - Funciona en cualquier juego
+--]]
+
 -- ==================================================
--- 📄 INFORMACIÓN
+-- CONFIGURACIÓN INICIAL
 -- ==================================================
--- Nombre del Script: JoseAngel_Blox Fly
--- Nombre del Creador: JoseAngel_Blox
--- Fecha de lanzamiento: 06/07/2026
--- Versión: 1.2
--- Compatibilidad: PC / Móvil / Tablet
-
--- 📖 MANUAL DE USO
--- ¡Bienvenidos y bienvenidas al script JoseAngel_Blox Fly!
--- Aquí te explicamos cómo utilizar todas sus funciones de forma sencilla:
-
--- 🖥️ EN PC:
--- • Activar / Desactivar vuelo: Tecla F
--- • Moverse: Teclas W (adelante), S (atrás), A (izquierda), D (derecha)
--- • Subir altura: Tecla Espacio
--- • Bajar altura: Tecla Control Izquierdo
--- • Aumentar velocidad: Tecla +
--- • Disminuir velocidad: Tecla -
--- • Activar / Desactivar Noclip: Tecla N
-
--- 📱 EN MÓVIL:
--- • Activar / Desactivar vuelo: Botón "Vuelo" en pantalla
--- • Moverse: Usa el joystick táctil
--- • Subir altura: Desliza el dedo hacia arriba
--- • Bajar altura: Desliza el dedo hacia abajo
--- • Aumentar velocidad: Botón "+ Velocidad"
--- • Disminuir velocidad: Botón "- Velocidad"
--- • Activar / Desactivar Noclip: Botón "Noclip" en pantalla
-
--- ==================================================
--- ⚙️ MAIN - FUNCIONES PRINCIPALES
--- ==================================================
-
--- Servicios necesarios
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local StarterGui = game:GetService("StarterGui")
+local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
 
--- Datos del jugador
-local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local Humanoid = Character:WaitForChild("Humanoid")
-local RootPart = Character:WaitForChild("HumanoidRootPart")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
 
--- Configuración del script
-local Config = {
-    FlyActivo = false,
-    Velocidad = 50,
-    VelocidadMin = 10,
-    VelocidadMax = 150,
-    NoclipActivo = false
-}
+local flying = false
+local flySpeed = 50
+local minSpeed = 10
+local maxSpeed = 200
+local noclipEnabled = true
 
--- Variables de control
-local CuerpoVelocidad = Instance.new("BodyVelocity")
-CuerpoVelocidad.MaxForce = Vector3.new(999999, 999999, 999999)
-CuerpoVelocidad.Velocity = Vector3.new(0, 0, 0)
+-- ==================================================
+-- CREACIÓN DE GUI
+-- ==================================================
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "JoseAngel_BloxFlyGUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Interfaz gráfica para móvil
-local function CrearInterfaz()
-    if UserInputService.TouchEnabled then
-        local Pantalla = Instance.new("ScreenGui")
-        Pantalla.Name = "JoseAngel_Blox_UI"
-        Pantalla.ResetOnSpawn = false
-        Pantalla.Parent = LocalPlayer:WaitForChild("PlayerGui")
-
-        -- Botón Vuelo
-        local BotonVuelo = Instance.new("TextButton")
-        BotonVuelo.Size = UDim2.new(0, 120, 0, 50)
-        BotonVuelo.Position = UDim2.new(0.02, 0, 0.2, 0)
-        BotonVuelo.BackgroundColor3 = Color3.new(0.2, 0.6, 1)
-        BotonVuelo.Text = "Vuelo: OFF"
-        BotonVuelo.TextColor3 = Color3.new(1,1,1)
-        BotonVuelo.Font = Enum.Font.GothamBold
-        BotonVuelo.TextSize = 16
-        BotonVuelo.Parent = Pantalla
-
-        -- Botón Noclip
-        local BotonNoclip = BotonVuelo:Clone()
-        BotonNoclip.Position = UDim2.new(0.02, 0, 0.3, 0)
-        BotonNoclip.Text = "Noclip: OFF"
-        BotonNoclip.Parent = Pantalla
-
-        -- Botón + Velocidad
-        local BotonMas = BotonVuelo:Clone()
-        BotonMas.Position = UDim2.new(0.02, 0, 0.4, 0)
-        BotonMas.Size = UDim2.new(0, 55, 0, 50)
-        BotonMas.Text = "+"
-        BotonMas.Parent = Pantalla
-
-        -- Botón - Velocidad
-        local BotonMenos = BotonMas:Clone()
-        BotonMenos.Position = UDim2.new(0.08, 0, 0.4, 0)
-        BotonMenos.Text = "-"
-        BotonMenos.Parent = Pantalla
-
-        -- Etiqueta velocidad
-        local EtiquetaVel = Instance.new("TextLabel")
-        EtiquetaVel.Size = UDim2.new(0, 120, 0, 30)
-        EtiquetaVel.Position = UDim2.new(0.02, 0, 0.48, 0)
-        EtiquetaVel.BackgroundTransparency = 1
-        EtiquetaVel.Text = "Vel: "..Config.Velocidad
-        EtiquetaVel.TextColor3 = Color3.new(1,1,1)
-        EtiquetaVel.Font = Enum.Font.GothamBold
-        EtiquetaVel.TextSize = 14
-        EtiquetaVel.Parent = Pantalla
-
-        -- Actualizar interfaz
-        local function ActualizarUI()
-            BotonVuelo.Text = Config.FlyActivo and "Vuelo: ON" or "Vuelo: OFF"
-            BotonVuelo.BackgroundColor3 = Config.FlyActivo and Color3.new(0.2, 0.8, 0.3) or Color3.new(0.2, 0.6, 1)
-            BotonNoclip.Text = Config.NoclipActivo and "Noclip: ON" or "Noclip: OFF"
-            BotonNoclip.BackgroundColor3 = Config.NoclipActivo and Color3.new(0.8, 0.2, 0.3) or Color3.new(0.2, 0.6, 1)
-            EtiquetaVel.Text = "Vel: "..Config.Velocidad
-        end
-
-        -- Conexiones de botones
-        BotonVuelo.MouseButton1Click:Connect(function() AlternarVuelo() ActualizarUI() end)
-        BotonNoclip.MouseButton1Click:Connect(function() AlternarNoclip() ActualizarUI() end)
-        BotonMas.MouseButton1Click:Connect(function() CambiarVelocidad(10) ActualizarUI() end)
-        BotonMenos.MouseButton1Click:Connect(function() CambiarVelocidad(-10) ActualizarUI() end)
-    end
+-- ==================================================
+-- FUNCIÓN PARA CREAR BOTONES PROFESIONALES
+-- ==================================================
+local function createButton(parent, text, position, size, color)
+    local button = Instance.new("TextButton")
+    button.Text = text
+    button.Size = size or UDim2.new(0, 60, 0, 60)
+    button.Position = position
+    button.BackgroundColor3 = color or Color3.fromRGB(30, 144, 255)
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Font = Enum.Font.GothamBold
+    button.TextSize = 18
+    button.BackgroundTransparency = 0.1
+    button.BorderSizePixel = 2
+    button.BorderColor3 = Color3.fromRGB(255, 255, 255)
+    
+    -- Efecto de gradiente
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 100, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 200, 255))
+    })
+    gradient.Parent = button
+    
+    -- Efecto de esquinas redondeadas
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 15)
+    corner.Parent = button
+    
+    button.Parent = parent
+    
+    -- Animación al pasar el mouse
+    button.MouseEnter:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2), {
+            BackgroundTransparency = 0.0,
+            Size = size + UDim2.new(0, 5, 0, 5)
+        }):Play()
+    end)
+    
+    button.MouseLeave:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2), {
+            BackgroundTransparency = 0.1,
+            Size = size
+        }):Play()
+    end)
+    
+    return button
 end
 
--- Función: Activar / Desactivar vuelo
-function AlternarVuelo()
-    Config.FlyActivo = not Config.FlyActivo
-    if Config.FlyActivo then
-        CuerpoVelocidad.Parent = RootPart
-        Humanoid.PlatformStand = true
-        Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
-        Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
+-- ==================================================
+-- INTERFAZ PRINCIPAL
+-- ==================================================
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 220, 0, 350)
+mainFrame.Position = UDim2.new(0.5, -110, 0.5, -175)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+mainFrame.BackgroundTransparency = 0.15
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = screenGui
+
+-- Fondo con blur
+local blur = Instance.new("BlurEffect")
+blur.Size = 10
+blur.Parent = mainFrame
+
+-- Esquinas redondeadas
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 20)
+mainCorner.Parent = mainFrame
+
+-- Borde brillante
+local border = Instance.new("Frame")
+border.Size = UDim2.new(1, 0, 1, 0)
+border.Position = UDim2.new(0, 0, 0, 0)
+border.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+border.BackgroundTransparency = 0.8
+border.BorderSizePixel = 0
+border.Parent = mainFrame
+
+local borderCorner = Instance.new("UICorner")
+borderCorner.CornerRadius = UDim.new(0, 20)
+borderCorner.Parent = border
+
+-- Título
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, 0, 0, 40)
+titleLabel.Position = UDim2.new(0, 0, 0, 10)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "✈️ JoseAngel_Blox Fly"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextSize = 18
+titleLabel.TextScaled = true
+titleLabel.Parent = mainFrame
+
+-- Línea decorativa
+local line = Instance.new("Frame")
+line.Size = UDim2.new(0.8, 0, 0, 2)
+line.Position = UDim2.new(0.1, 0, 0, 55)
+line.BackgroundColor3 = Color3.fromRGB(30, 144, 255)
+line.BackgroundTransparency = 0.3
+line.Parent = mainFrame
+
+-- Versión
+local versionLabel = Instance.new("TextLabel")
+versionLabel.Size = UDim2.new(1, 0, 0, 20)
+versionLabel.Position = UDim2.new(0, 0, 0, 62)
+versionLabel.BackgroundTransparency = 1
+versionLabel.Text = "v1.2 | 06/07/2026"
+versionLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+versionLabel.Font = Enum.Font.Gotham
+versionLabel.TextSize = 12
+versionLabel.TextScaled = true
+versionLabel.Parent = mainFrame
+
+-- ==================================================
+-- INTERRUPTOR DE VUELO (PROFESIONAL)
+-- ==================================================
+local switchFrame = Instance.new("Frame")
+switchFrame.Size = UDim2.new(0, 120, 0, 50)
+switchFrame.Position = UDim2.new(0.5, -60, 0, 110)
+switchFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+switchFrame.BackgroundTransparency = 0.5
+switchFrame.BorderSizePixel = 0
+switchFrame.Parent = mainFrame
+
+local switchCorner = Instance.new("UICorner")
+switchCorner.CornerRadius = UDim.new(0, 25)
+switchCorner.Parent = switchFrame
+
+local switchButton = Instance.new("TextButton")
+switchButton.Size = UDim2.new(0, 50, 0, 40)
+switchButton.Position = UDim2.new(0.05, 0, 0.05, 0)
+switchButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+switchButton.BackgroundTransparency = 0.1
+switchButton.BorderSizePixel = 0
+switchButton.Text = "OFF"
+switchButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+switchButton.Font = Enum.Font.GothamBold
+switchButton.TextSize = 16
+switchButton.Parent = switchFrame
+
+local switchCorner2 = Instance.new("UICorner")
+switchCorner2.CornerRadius = UDim.new(0, 20)
+switchCorner2.Parent = switchButton
+
+local switchLabel = Instance.new("TextLabel")
+switchLabel.Size = UDim2.new(0, 50, 1, 0)
+switchLabel.Position = UDim2.new(0.6, 0, 0, 0)
+switchLabel.BackgroundTransparency = 1
+switchLabel.Text = "FLY"
+switchLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+switchLabel.Font = Enum.Font.GothamBold
+switchLabel.TextSize = 16
+switchLabel.TextXAlignment = Enum.TextXAlignment.Center
+switchLabel.Parent = switchFrame
+
+-- ==================================================
+-- CONTROLES DE VELOCIDAD
+-- ==================================================
+local speedFrame = Instance.new("Frame")
+speedFrame.Size = UDim2.new(0, 160, 0, 40)
+speedFrame.Position = UDim2.new(0.5, -80, 0, 180)
+speedFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+speedFrame.BackgroundTransparency = 0.5
+speedFrame.BorderSizePixel = 0
+speedFrame.Parent = mainFrame
+
+local speedCorner = Instance.new("UICorner")
+speedCorner.CornerRadius = UDim.new(0, 10)
+speedCorner.Parent = speedFrame
+
+local speedLabel = Instance.new("TextLabel")
+speedLabel.Size = UDim2.new(1, 0, 1, 0)
+speedLabel.Position = UDim2.new(0, 0, 0, 0)
+speedLabel.BackgroundTransparency = 1
+speedLabel.Text = "⚡ Velocidad: 50"
+speedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedLabel.Font = Enum.Font.GothamBold
+speedLabel.TextSize = 14
+speedLabel.Parent = speedFrame
+
+-- Botones de velocidad
+local speedMinus = createButton(mainFrame, "-", UDim2.new(0.1, 0, 0, 240), UDim2.new(0, 40, 0, 40), Color3.fromRGB(200, 50, 50))
+local speedPlus = createButton(mainFrame, "+", UDim2.new(0.7, 0, 0, 240), UDim2.new(0, 40, 0, 40), Color3.fromRGB(50, 200, 50))
+
+-- ==================================================
+-- BOTONES MÓVIL (SOLO VISIBLES EN MÓVIL)
+-- ==================================================
+local mobileFrame = Instance.new("Frame")
+mobileFrame.Size = UDim2.new(0, 200, 0, 100)
+mobileFrame.Position = UDim2.new(1, -220, 0.5, -50)
+mobileFrame.BackgroundTransparency = 1
+mobileFrame.Parent = screenGui
+mobileFrame.Visible = UserInputService.TouchEnabled
+
+-- Botón subir
+local upButton = createButton(mobileFrame, "⬆", UDim2.new(0.5, -30, 0, 0), UDim2.new(0, 60, 0, 60), Color3.fromRGB(50, 200, 50))
+
+-- Botón bajar
+local downButton = createButton(mobileFrame, "⬇", UDim2.new(0.5, -30, 0, 50), UDim2.new(0, 60, 0, 60), Color3.fromRGB(200, 50, 50))
+
+-- ==================================================
+-- FUNCIONALIDAD DE VUELO
+-- ==================================================
+local bodyVelocity = nil
+local bodyGyro = nil
+local noclip = nil
+
+local function startFly()
+    if not character or not rootPart or not humanoid then return end
+    
+    -- Crear BodyVelocity
+    bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.MaxForce = Vector3.new(1/0, 1/0, 1/0)
+    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+    bodyVelocity.Parent = rootPart
+    
+    -- Crear BodyGyro para controlar la orientación
+    bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.MaxTorque = Vector3.new(1/0, 1/0, 1/0)
+    bodyGyro.Parent = rootPart
+    
+    -- Noclip
+    if noclipEnabled then
+        noclip = Instance.new("NoClip", character)
+        noclip.Name = "JoseAngel_Noclip"
+    end
+    
+    -- Desactivar gravedad
+    humanoid.PlatformStand = true
+    
+    flying = true
+    switchButton.Text = "ON"
+    switchButton.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+    TweenService:Create(switchButton, TweenInfo.new(0.3), {
+        Position = UDim2.new(0.6, 0, 0.05, 0)
+    }):Play()
+end
+
+local function stopFly()
+    if bodyVelocity then bodyVelocity:Destroy() end
+    if bodyGyro then bodyGyro:Destroy() end
+    if noclip then noclip:Destroy() end
+    
+    bodyVelocity = nil
+    bodyGyro = nil
+    noclip = nil
+    
+    humanoid.PlatformStand = false
+    
+    flying = false
+    switchButton.Text = "OFF"
+    switchButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+    TweenService:Create(switchButton, TweenInfo.new(0.3), {
+        Position = UDim2.new(0.05, 0, 0.05, 0)
+    }):Play()
+end
+
+-- ==================================================
+-- MOVIMIENTO DE VUELO
+-- ==================================================
+local function updateFly()
+    if not flying or not character or not rootPart or not bodyVelocity then return end
+    
+    local moveDirection = Vector3.new(0, 0, 0)
+    local camera = workspace.CurrentCamera
+    
+    -- Movimiento en PC
+    if not UserInputService.TouchEnabled then
+        local forward = camera.CFrame.LookVector * Vector3.new(1, 0, 1)
+        local right = camera.CFrame.RightVector * Vector3.new(1, 0, 1)
+        
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+            moveDirection = moveDirection + forward
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+            moveDirection = moveDirection - forward
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+            moveDirection = moveDirection - right
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+            moveDirection = moveDirection + right
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+            moveDirection = moveDirection + Vector3.new(0, 1, 0)
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+            moveDirection = moveDirection - Vector3.new(0, 1, 0)
+        end
     else
-        CuerpoVelocidad.Parent = nil
-        Humanoid.PlatformStand = false
-        Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
-        Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
-        CuerpoVelocidad.Velocity = Vector3.new(0,0,0)
-    end
-end
-
--- Función: Activar / Desactivar Noclip
-function AlternarNoclip()
-    Config.NoclipActivo = not Config.NoclipActivo
-end
-
--- Función: Cambiar velocidad
-function CambiarVelocidad(cantidad)
-    Config.Velocidad = math.clamp(Config.Velocidad + cantidad, Config.VelocidadMin, Config.VelocidadMax)
-end
-
--- Función: Aplicar Noclip
-local function AplicarNoclip()
-    if Config.NoclipActivo and Humanoid then
-        Humanoid.CanCollide = false
-        for _, parte in ipairs(Character:GetChildren()) do
-            if parte:IsA("BasePart") then
-                parte.CanCollide = false
-            end
+        -- Movimiento en móvil (usando joystick virtual)
+        -- El joystick de Roblox ya maneja el movimiento
+        local moveVector = humanoid.MoveDirection
+        if moveVector.Magnitude > 0 then
+            -- Obtener dirección relativa a la cámara
+            local camCFrame = camera.CFrame
+            local forwardVec = camCFrame.LookVector * Vector3.new(1, 0, 1)
+            local rightVec = camCFrame.RightVector * Vector3.new(1, 0, 1)
+            
+            moveDirection = (forwardVec * moveVector.Z) + (rightVec * moveVector.X)
         end
-    elseif not Config.NoclipActivo and Humanoid then
-        Humanoid.CanCollide = true
+    end
+    
+    -- Normalizar y aplicar velocidad
+    if moveDirection.Magnitude > 0 then
+        moveDirection = moveDirection.Unit * flySpeed
+    end
+    
+    -- Aplicar velocidad
+    bodyVelocity.Velocity = moveDirection
+    
+    -- Orientación
+    if moveDirection.Magnitude > 0.1 then
+        bodyGyro.CFrame = CFrame.lookAt(Vector3.new(0, 0, 0), moveDirection.Unit)
     end
 end
 
--- Función: Actualizar movimiento
-local function ActualizarMovimiento()
-    if not Config.FlyActivo then return end
-
-    local Camara = workspace.CurrentCamera
-    local Direccion = Vector3.new()
-
-    -- Entrada teclado
-    if UserInputService:IsKeyDown(Enum.KeyCode.W) then Direccion += Camara.CFrame.LookVector end
-    if UserInputService:IsKeyDown(Enum.KeyCode.S) then Direccion -= Camara.CFrame.LookVector end
-    if UserInputService:IsKeyDown(Enum.KeyCode.A) then Direccion -= Camara.CFrame.RightVector end
-    if UserInputService:IsKeyDown(Enum.KeyCode.D) then Direccion += Camara.CFrame.RightVector end
-    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then Direccion += Vector3.new(0,1,0) end
-    if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then Direccion -= Vector3.new(0,1,0) end
-
-    -- Normalizar y aplicar
-    if Direccion.Magnitude > 0 then
-        Direccion = Direccion.Unit * Config.Velocidad
+-- ==================================================
+-- EVENTOS DE CONTROL
+-- ==================================================
+-- Switch de vuelo
+switchButton.MouseButton1Click:Connect(function()
+    if flying then
+        stopFly()
+    else
+        startFly()
     end
-    CuerpoVelocidad.Velocity = Direccion
-end
-
--- Conexión de teclas para PC
-UserInputService.InputBegan:Connect(function(entrada, procesado)
-    if procesado then return end
-    if entrada.KeyCode == Enum.KeyCode.F then AlternarVuelo() end
-    if entrada.KeyCode == Enum.KeyCode.N then AlternarNoclip() end
-    if entrada.KeyCode == Enum.KeyCode.Equals then CambiarVelocidad(10) end
-    if entrada.KeyCode == Enum.KeyCode.Minus then CambiarVelocidad(-10) end
 end)
 
--- Ejecución continua
-RunService.RenderStepped:Connect(function()
-    ActualizarMovimiento()
-    AplicarNoclip()
+-- Controles de velocidad
+speedMinus.MouseButton1Click:Connect(function()
+    flySpeed = math.max(minSpeed, flySpeed - 5)
+    speedLabel.Text = "⚡ Velocidad: " .. math.round(flySpeed)
 end)
 
--- Crear interfaz al iniciar
-CrearInterfaz()
+speedPlus.MouseButton1Click:Connect(function()
+    flySpeed = math.min(maxSpeed, flySpeed + 5)
+    speedLabel.Text = "⚡ Velocidad: " .. math.round(flySpeed)
+end)
 
--- Mensaje de inicio
-print("✅ JoseAngel_Blox Fly v1.2 cargado correctamente")
-print("ℹ️ Recuerda: Uso permitido solo en juegos propios o autorizados")
+-- Controles móviles
+upButton.MouseButton1Click:Connect(function()
+    if flying and bodyVelocity then
+        bodyVelocity.Velocity = bodyVelocity.Velocity + Vector3.new(0, flySpeed, 0)
+    end
+end)
+
+downButton.MouseButton1Click:Connect(function()
+    if flying and bodyVelocity then
+        bodyVelocity.Velocity = bodyVelocity.Velocity - Vector3.new(0, flySpeed, 0)
+    end
+end)
+
+-- Teclas de PC
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    
+    if input.KeyCode == Enum.KeyCode.F then
+        if flying then
+            stopFly()
+        else
+            startFly()
+        end
+    end
+end)
+
+-- ==================================================
+-- LOOP PRINCIPAL
+-- ==================================================
+RunService.Heartbeat:Connect(function()
+    updateFly()
+end)
+
+-- ==================================================
+-- MANEJO DE REINICIO DEL PERSONAJE
+-- ==================================================
+player.CharacterAdded:Connect(function(newChar)
+    character = newChar
+    rootPart = character:WaitForChild("HumanoidRootPart")
+    humanoid = character:WaitForChild("Humanoid")
+    
+    if flying then
+        stopFly()
+        startFly()
+    end
+end)
+
+-- ==================================================
+-- MENSAJE DE BIENVENIDA
+-- ==================================================
+wait(1)
+print("============================================")
+print("✨ JoseAngel_Blox Fly v1.2 ✨")
+print("============================================")
+print("¡Bienvenidos y bienvenidas al script JoseAngel_Blox Fly!")
+print("")
+print("📱 MÓVIL:")
+print("- Activa el interruptor y usa los botones")
+print("- Usa el joystick para moverte")
+print("")
+print("💻 PC:")
+print("- Presiona F para volar")
+print("- WASD para moverte")
+print("- Espacio para subir")
+print("- Shift para bajar")
+print("- + y - para velocidad")
+print("")
+print("⚙️ Velocidad ajustable: " .. flySpeed)
+print("🎯 Noclip: Activado")
+print("============================================")
+
+-- Efecto de entrada
+TweenService:Create(mainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back), {
+    Size = UDim2.new(0, 240, 0, 370)
+}):Play()
