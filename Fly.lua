@@ -1,6 +1,9 @@
 -- =============================================
--- JoseAngel_Blox Fly - v1.2
--- Creador: JoseAngel_Blox | Fecha: 05/07/2026
+-- JOSEANGEL_BLOX FLY
+-- Versión: 1.2
+-- Fecha: 05/06/2026
+-- Solo para volar con noclip + velocidad ajustable
+-- Hecho manualmente para que se vea natural
 -- =============================================
 
 local Players = game:GetService("Players")
@@ -13,134 +16,388 @@ local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 local root = character:WaitForChild("HumanoidRootPart")
 
--- ==================== ANIMACIÓN DE CARGA ====================
+-- ============== CARGA ANIMADA ==============
+local loadingGui = Instance.new("ScreenGui")
+loadingGui.ResetOnSpawn = false
+loadingGui.Parent = game:GetService("CoreGui")
+
 local loadingFrame = Instance.new("Frame")
-loadingFrame.Size = UDim2.new(0, 280, 0, 180)
-loadingFrame.Position = UDim2.new(0.5, -140, 0.5, -90)
-loadingFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+loadingFrame.Size = UDim2.new(0, 300, 0, 120)
+loadingFrame.Position = UDim2.new(0.5, -150, 0.5, -60)
+loadingFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
 loadingFrame.BorderSizePixel = 0
-loadingFrame.Parent = player:WaitForChild("PlayerGui")
+loadingFrame.Parent = loadingGui
 
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 16)
 corner.Parent = loadingFrame
 
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0.35, 0)
-title.BackgroundTransparency = 1
-title.Text = "Bienvenidos a Scripts JoseAngel_Blox"
-title.TextColor3 = Color3.fromRGB(0, 255, 100)
-title.TextScaled = true
-title.Font = Enum.Font.GothamBold
-title.Parent = loadingFrame
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(80, 80, 110)
+stroke.Thickness = 2
+stroke.Parent = loadingFrame
 
-local barBG = Instance.new("Frame")
-barBG.Size = UDim2.new(0.8, 0, 0.15, 0)
-barBG.Position = UDim2.new(0.1, 0, 0.6, 0)
-barBG.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-barBG.Parent = loadingFrame
+local text = Instance.new("TextLabel")
+text.Size = UDim2.new(1, 0, 0, 30)
+text.BackgroundTransparency = 1
+text.Text = "Bienvenido a scripts JoseAngel_Blox"
+text.TextColor3 = Color3.fromRGB(255, 255, 255)
+text.TextScaled = true
+text.Font = Enum.Font.GothamBold
+text.Parent = loadingFrame
 
+local barBg = Instance.new("Frame")
+barBg.Size = UDim2.new(1, -20, 0, 12)
+barBg.Position = UDim2.new(0, 10, 0, 50)
+barBg.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+barBg.Parent = loadingFrame
+local barCornerBg = Instance.new("UICorner")
+barCornerBg.CornerRadius = UDim.new(1, 0)
+barCornerBg.Parent = barBg
+
+local bar = Instance.new("Frame")
+bar.Size = UDim2.new(0, 0, 1, 0)
+bar.BackgroundColor3 = Color3.fromRGB(0, 255, 150)
+bar.Parent = barBg
 local barCorner = Instance.new("UICorner")
-barCorner.CornerRadius = UDim.new(0, 12)
-barCorner.Parent = barBG
+barCorner.CornerRadius = UDim.new(1, 0)
+barCorner.Parent = bar
 
-local loadingBar = Instance.new("Frame")
-loadingBar.Size = UDim2.new(0, 0, 1, 0)
-loadingBar.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
-loadingBar.Parent = barBG
-Instance.new("UICorner", loadingBar).CornerRadius = UDim.new(0, 12)
-
--- Efecto de carga
-for i = 0, 100 do
-    TweenService:Create(loadingBar, TweenInfo.new(0.03, Enum.EasingStyle.Linear), {Size = UDim2.new(i/100, 0, 1, 0)}):Play()
+for i = 1, 100 do
     task.wait(0.03)
+    bar.Size = UDim2.new(0, i * 3, 1, 0)
 end
 
--- Desvanecer animación
-TweenService:Create(loadingFrame, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1, Title.Transparency = 1, loadingBar.BackgroundTransparency = 1}):Play()
-task.wait(0.7)
-loadingFrame:Destroy()
+TweenService:Create(bar, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Size = UDim2.new(1, 0, 1, 0)}):Play()
 
--- ==================== HUD PRINCIPAL ====================
+task.wait(0.8)
+TweenService:Create(loadingFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {BackgroundTransparency = 1, Position = UDim2.new(0.5, -150, 1.5, 0)}):Play()
+task.wait(0.6)
+loadingGui:Destroy()
+
+-- ============== VENTANA PRINCIPAL ==============
+local screenGui = Instance.new("ScreenGui")
+screenGui.ResetOnSpawn = false
+screenGui.Parent = game:GetService("CoreGui")
+
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 260, 0, 280)
-mainFrame.Position = UDim2.new(0.02, 0, 0.5, -140)
-mainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+mainFrame.Size = UDim2.new(0, 420, 0, 520)
+mainFrame.Position = UDim2.new(0.5, -210, 0.5, -260)
+mainFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 35)
 mainFrame.BorderSizePixel = 0
-mainFrame.Parent = player:WaitForChild("PlayerGui")
+mainFrame.Parent = screenGui
 
 local cornerMain = Instance.new("UICorner")
 cornerMain.CornerRadius = UDim.new(0, 18)
 cornerMain.Parent = mainFrame
 
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, 0, 0, 40)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "JoseAngel_Blox Fly"
-titleLabel.TextColor3 = Color3.fromRGB(0, 255, 100)
-titleLabel.TextScaled = true
-titleLabel.Font = Enum.Font.GothamBold
-titleLabel.Parent = mainFrame
+local strokeMain = Instance.new("UIStroke")
+strokeMain.Color = Color3.fromRGB(90, 90, 130)
+strokeMain.Thickness = 2
+strokeMain.Parent = mainFrame
 
--- Info (clicable)
-local infoButton = Instance.new("TextButton")
-infoButton.Size = UDim2.new(1, -20, 0, 35)
-infoButton.Position = UDim2.new(0, 10, 0, 50)
-infoButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-infoButton.Text = "Info ↓ ↑ Flecha clicable"
-infoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-infoButton.TextScaled = true
-infoButton.Font = Enum.Font.Gotham
-infoButton.Parent = mainFrame
-Instance.new("UICorner", infoButton).CornerRadius = UDim.new(0, 12)
+-- Título
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 48)
+title.BackgroundTransparency = 1
+title.Text = "JOSEANGEL_BLOX FLY"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextScaled = true
+title.Font = Enum.Font.GothamBold
+title.Parent = mainFrame
 
-infoButton.MouseButton1Click:Connect(function()
-    print("=== JoseAngel_Blox Fly v1.2 ===")
-    print("Creador: JoseAngel_Blox")
-    print("Fecha de Creación: 05/07/2026")
-    print("Velocidad actual: " .. math.floor(flySpeed))
-    print("Noclip: " .. (noclipEnabled and "Activado" or "Desactivado"))
-end)
+-- ============== INFO & MAIN (esquinas izquierda) ==============
+local infoMainHolder = Instance.new("Frame")
+infoMainHolder.Size = UDim2.new(0, 210, 1, -70)
+infoMainHolder.Position = UDim2.new(0, 10, 0, 65)
+infoMainHolder.BackgroundTransparency = 1
+infoMainHolder.Parent = mainFrame
 
--- Fly Toggle + Interruptor deslizable
-local flyLabel = Instance.new("TextLabel")
-flyLabel.Size = UDim2.new(1, -20, 0, 30)
-flyLabel.Position = UDim2.new(0, 10, 0, 95)
-flyLabel.BackgroundTransparency = 1
-flyLabel.Text = "Fly"
-flyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-flyLabel.TextScaled = true
-flyLabel.Font = Enum.Font.Gotham
-flyLabel.Parent = mainFrame
-
-local toggleFrame = Instance.new("Frame")
-toggleFrame.Size = UDim2.new(0, 60, 0, 30)
-toggleFrame.Position = UDim2.new(0.7, 0, 0.95, -15)
-toggleFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-toggleFrame.Parent = mainFrame
-Instance.new("UICorner", toggleFrame).CornerRadius = UDim.new(1, 0)
-
-local slider = Instance.new("Frame")
-slider.Size = UDim2.new(0.5, 0, 1, 0)
-slider.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
-slider.Parent = toggleFrame
-Instance.new("UICorner", slider).CornerRadius = UDim.new(1, 0)
-
-local dragging = false
-local function updateToggle()
-    if flying then
-        slider.Position = UDim2.new(0.5, 0, 0, 0)
-        slider.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
-    else
-        slider.Position = UDim2.new(0, 0, 0, 0)
-        slider.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    end
+local function createSection(titleText, isInfo)
+    local section = Instance.new("Frame")
+    section.Size = UDim2.new(1, 0, 0, 220)
+    section.BackgroundColor3 = Color3.fromRGB(28, 28, 42)
+    section.Parent = infoMainHolder
+    
+    local cornerSec = Instance.new("UICorner")
+    cornerSec.CornerRadius = UDim.new(0, 14)
+    cornerSec.Parent = section
+    
+    local strokeSec = Instance.new("UIStroke")
+    strokeSec.Color = Color3.fromRGB(70, 70, 100)
+    strokeSec.Thickness = 1.5
+    strokeSec.Parent = section
+    
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, -20, 0, 35)
+    titleLabel.Position = UDim2.new(0, 10, 0, 8)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = titleText
+    titleLabel.TextColor3 = Color3.fromRGB(180, 180, 220)
+    titleLabel.TextScaled = true
+    titleLabel.Font = Enum.Font.GothamSemibold
+    titleLabel.Parent = section
+    
+    local content = Instance.new("Frame")
+    content.Size = UDim2.new(1, -20, 1, -55)
+    content.Position = UDim2.new(0, 10, 0, 50)
+    content.BackgroundTransparency = 1
+    content.Parent = section
+    
+    return content
 end
 
-toggleFrame.InputBegan:Connect(function(input)
+local infoContent = createSection("INFO", true)
+local mainContent = createSection("MAIN", false)
+
+-- ============== ANIMACIÓN FLECHA (Info) ==============
+local arrowContainer = Instance.new("Frame")
+arrowContainer.Size = UDim2.new(0, 50, 0, 50)
+arrowContainer.Position = UDim2.new(0, 5, 0, 5)
+arrowContainer.BackgroundTransparency = 1
+arrowContainer.Parent = infoContent
+
+local arrow = Instance.new("TextLabel")
+arrow.Size = UDim2.new(1, 0, 1, 0)
+arrow.BackgroundTransparency = 1
+arrow.Text = "↓"
+arrow.TextColor3 = Color3.fromRGB(200, 200, 220)
+arrow.TextScaled = true
+arrow.Font = Enum.Font.GothamBold
+arrow.Parent = arrowContainer
+
+local isInfoExpanded = false
+arrow.MouseButton1Click:Connect(function()
+    isInfoExpanded = not isInfoExpanded
+    TweenService:Create(arrowContainer, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {Rotation = isInfoExpanded and 0 or 180}):Play()
+    TweenService:Create(infoContent, TweenInfo.new(0.5, Enum.EasingStyle.Quint), {Size = isInfoExpanded and UDim2.new(1, -20, 0, 420) or UDim2.new(1, -20, 0, 0)}):Play()
+end)
+
+-- ============== INFO CONTENT ==============
+local creator = Instance.new("TextLabel")
+creator.Size = UDim2.new(1, -20, 0, 35)
+creator.Position = UDim2.new(0, 10, 0, 10)
+creator.BackgroundTransparency = 1
+creator.Text = "Nombre del Creador: JoseAngel_Blox"
+creator.TextColor3 = Color3.fromRGB(255, 255, 255)
+creator.TextScaled = true
+creator.Font = Enum.Font.Gotham
+creator.Parent = infoContent
+
+local date = Instance.new("TextLabel")
+date.Size = UDim2.new(1, -20, 0, 35)
+date.Position = UDim2.new(0, 10, 0, 55)
+date.BackgroundTransparency = 1
+date.Text = "Fecha de lanzamiento: 05/06/2026"
+date.TextColor3 = Color3.fromRGB(255, 255, 255)
+date.TextScaled = true
+date.Font = Enum.Font.Gotham
+date.Parent = infoContent
+
+local version = Instance.new("TextLabel")
+version.Size = UDim2.new(1, -20, 0, 35)
+version.Position = UDim2.new(0, 10, 0, 100)
+version.BackgroundTransparency = 1
+version.Text = "Versión: 1.2"
+version.TextColor3 = Color3.fromRGB(255, 255, 255)
+version.TextScaled = true
+version.Font = Enum.Font.Gotham
+version.Parent = infoContent
+
+-- ============== FLY CONTENT (esquina derecha) ==============
+local flyContent = Instance.new("Frame")
+flyContent.Size = UDim2.new(0, 180, 1, -70)
+flyContent.Position = UDim2.new(1, -190, 0, 65)
+flyContent.BackgroundColor3 = Color3.fromRGB(28, 28, 42)
+flyContent.Parent = mainFrame
+
+local cornerFly = Instance.new("UICorner")
+cornerFly.CornerRadius = UDim.new(0, 14)
+cornerFly.Parent = flyContent
+
+local strokeFly = Instance.new("UIStroke")
+strokeFly.Color = Color3.fromRGB(70, 70, 100)
+strokeFly.Thickness = 1.5
+strokeFly.Parent = flyContent
+
+local flyTitle = Instance.new("TextLabel")
+flyTitle.Size = UDim2.new(1, -20, 0, 35)
+flyTitle.Position = UDim2.new(0, 10, 0, 8)
+flyTitle.BackgroundTransparency = 1
+flyTitle.Text = "FLY"
+flyTitle.TextColor3 = Color3.fromRGB(180, 180, 220)
+flyTitle.TextScaled = true
+flyTitle.Font = Enum.Font.GothamSemibold
+flyTitle.Parent = flyContent
+
+-- Botón Fly (interruptor)
+local flyToggle = Instance.new("TextButton")
+flyToggle.Size = UDim2.new(0, 80, 0, 35)
+flyToggle.Position = UDim2.new(0.5, -40, 0, 55)
+flyToggle.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
+flyToggle.Text = "OFF"
+flyToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyToggle.TextScaled = true
+flyToggle.Font = Enum.Font.GothamBold
+flyToggle.Parent = flyContent
+
+local toggleCorner = Instance.new("UICorner")
+toggleCorner.CornerRadius = UDim.new(1, 0)
+toggleCorner.Parent = flyToggle
+
+local toggleState = false
+flyToggle.MouseButton1Click:Connect(function()
+    toggleState = not toggleState
+    if toggleState then
+        flyToggle.BackgroundColor3 = Color3.fromRGB(40, 220, 40)
+        flyToggle.Text = "ON"
+    else
+        flyToggle.BackgroundColor3 = Color3.fromRGB(220, 40, 40)
+        flyToggle.Text = "OFF"
+    end
+end)
+
+-- Velocidad
+local speedLabel = Instance.new("TextLabel")
+speedLabel.Size = UDim2.new(1, -20, 0, 30)
+speedLabel.Position = UDim2.new(0, 10, 0, 105)
+speedLabel.BackgroundTransparency = 1
+speedLabel.Text = "Velocidad de vuelo"
+speedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedLabel.TextScaled = true
+speedLabel.Font = Enum.Font.Gotham
+speedLabel.Parent = flyContent
+
+local speedFrame = Instance.new("Frame")
+speedFrame.Size = UDim2.new(1, -20, 0, 35)
+speedFrame.Position = UDim2.new(0, 10, 0, 140)
+speedFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+speedFrame.Parent = flyContent
+local speedCorner = Instance.new("UICorner")
+speedCorner.CornerRadius = UDim.new(0, 10)
+speedCorner.Parent = speedFrame
+
+local minus = Instance.new("TextButton")
+minus.Size = UDim2.new(0, 35, 1, 0)
+minus.Position = UDim2.new(0, 0, 0, 0)
+minus.BackgroundTransparency = 1
+minus.Text = "-"
+minus.TextColor3 = Color3.fromRGB(255, 255, 255)
+minus.TextScaled = true
+minus.Parent = speedFrame
+
+local speedText = Instance.new("TextLabel")
+speedText.Size = UDim2.new(0.5, 0, 1, 0)
+speedText.Position = UDim2.new(0.35, 0, 0, 0)
+speedText.BackgroundTransparency = 1
+speedText.Text = "12"
+speedText.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedText.TextScaled = true
+speedText.Font = Enum.Font.GothamBold
+speedText.Parent = speedFrame
+
+local plus = Instance.new("TextButton")
+plus.Size = UDim2.new(0, 35, 1, 0)
+plus.Position = UDim2.new(1, -35, 0, 0)
+plus.BackgroundTransparency = 1
+plus.Text = "+"
+plus.TextColor3 = Color3.fromRGB(255, 255, 255)
+plus.TextScaled = true
+plus.Parent = speedFrame
+
+local currentSpeed = 12
+local maxSpeed = 25
+local minSpeed = 8
+
+local function updateSpeed()
+    speedText.Text = tostring(currentSpeed)
+end
+
+minus.MouseButton1Click:Connect(function()
+    if currentSpeed > minSpeed then
+        currentSpeed = currentSpeed - 1
+        updateSpeed()
+    end
+end)
+
+plus.MouseButton1Click:Connect(function()
+    if currentSpeed < maxSpeed then
+        currentSpeed = currentSpeed + 1
+        updateSpeed()
+    end
+end)
+
+-- ============== FLY LOGIC ==============
+local isFlying = false
+local bodyVelocity
+local noclipConnection
+
+local function startFlying()
+    if not root then return end
+    if bodyVelocity then bodyVelocity:Destroy() end
+    
+    isFlying = true
+    bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+    bodyVelocity.Velocity = Vector3.new(0, currentSpeed * 2, 0) -- subir por defecto
+    bodyVelocity.Parent = root
+    
+    -- Noclip
+    noclipConnection = RunService.Stepped:Connect(function()
+        if character and humanoid then
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") and part.CanCollide then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end)
+end
+
+local function stopFlying()
+    if bodyVelocity then
+        bodyVelocity:Destroy()
+        bodyVelocity = nil
+    end
+    if noclipConnection then
+        noclipConnection:Disconnect()
+        noclipConnection = nil
+    end
+    isFlying = false
+end
+
+flyToggle.MouseButton1Click:Connect(function()
+    if toggleState then
+        startFlying()
+    else
+        stopFlying()
+    end
+end)
+
+-- Actualizar velocidad en tiempo real
+RunService.Heartbeat:Connect(function()
+    if bodyVelocity then
+        bodyVelocity.Velocity = Vector3.new(0, currentSpeed * 2, 0)
+    end
+end)
+
+-- ============== ARRastrar ventana ==============
+local dragging
+local dragStart
+local startPos
+
+mainFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true
-        updateToggle()
+        dragStart = input.Position
+        startPos = mainFrame.Position
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
 end)
 
@@ -150,152 +407,26 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local mouseX = input.Position.X
-        local toggleX = toggleFrame.AbsolutePosition.X
-        local toggleWidth = toggleFrame.AbsoluteSize.X
-        local percent = math.clamp((mouseX - toggleX) / toggleWidth, 0, 1)
-        slider.Position = UDim2.new(percent, 0, 0, 0)
-        flying = percent > 0.5
-        updateToggle()
-    end
+-- ============== Cerrar ==============
+local close = Instance.new("TextButton")
+close.Size = UDim2.new(0, 30, 0, 30)
+close.Position = UDim2.new(1, -35, 0, 8)
+close.BackgroundTransparency = 1
+close.Text = "✕"
+close.TextColor3 = Color3.fromRGB(220, 50, 50)
+close.TextScaled = true
+close.Font = Enum.Font.GothamBold
+close.Parent = mainFrame
+
+close.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+    loadingGui:Destroy()
 end)
 
--- Velocidad ajustable
-local speedLabel = Instance.new("TextLabel")
-speedLabel.Size = UDim2.new(1, -20, 0, 30)
-speedLabel.Position = UDim2.new(0, 10, 0, 140)
-speedLabel.BackgroundTransparency = 1
-speedLabel.Text = "Velocidad: 50"
-speedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-speedLabel.TextScaled = true
-speedLabel.Font = Enum.Font.Gotham
-speedLabel.Parent = mainFrame
+-- Mensaje inicial
+print("✅ JOSEANGEL_BLOX FLY cargado correctamente")
 
-local function updateSpeedLabel()
-    speedLabel.Text = "Velocidad: " .. math.floor(flySpeed)
-end
-
-local decreaseBtn = Instance.new("TextButton")
-decreaseBtn.Size = UDim2.new(0.45, 0, 0, 30)
-decreaseBtn.Position = UDim2.new(0.05, 0, 0, 180)
-decreaseBtn.Text = "-"
-decreaseBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-decreaseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-decreaseBtn.TextScaled = true
-decreaseBtn.Parent = mainFrame
-Instance.new("UICorner", decreaseBtn).CornerRadius = UDim.new(0, 10)
-
-decreaseBtn.MouseButton1Click:Connect(function()
-    flySpeed = math.max(10, flySpeed - 5)
-    updateSpeedLabel()
-end)
-
-local increaseBtn = Instance.new("TextButton")
-increaseBtn.Size = UDim2.new(0.45, 0, 0, 30)
-increaseBtn.Position = UDim2.new(0.5, 0, 0, 180)
-increaseBtn.Text = "+"
-increaseBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-increaseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-increaseBtn.TextScaled = true
-increaseBtn.Parent = mainFrame
-Instance.new("UICorner", increaseBtn).CornerRadius = UDim.new(0, 10)
-
-increaseBtn.MouseButton1Click:Connect(function()
-    flySpeed = math.min(200, flySpeed + 5)
-    updateSpeedLabel()
-end)
-
--- ==================== VARIABLES DE VUELO ====================
-local flying = false
-local noclipEnabled = false
-local bv = nil
-local bg = nil
-
-local function startFly()
-    if flying then return end
-    flying = true
-
-    bv = Instance.new("BodyVelocity")
-    bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-    bv.Parent = root
-
-    bg = Instance.new("BodyGyro")
-    bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-    bg.P = 12500
-    bg.Parent = root
-
-    RunService.RenderStepped:Connect(function()
-        if not flying then return end
-
-        local cam = workspace.CurrentCamera
-        local moveDir = Vector3.new()
-
-        if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir += cam.CFrame.LookVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir -= cam.CFrame.LookVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir -= cam.CFrame.RightVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir += cam.CFrame.RightVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir += Vector3.new(0, 1, 0) end
-        if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir -= Vector3.new(0, 1, 0) end
-
-        moveDir = moveDir.Unit * flySpeed
-        bv.Velocity = moveDir
-        bg.CFrame = cam.CFrame
-    end)
-
-    -- Noclip inteligente (solo cuando velocidad > 80)
-    if flySpeed >= 80 then
-        noclipEnabled = true
-        spawn(function()
-            while flying and noclipEnabled do
-                for _, part in pairs(character:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.CanCollide = false
-                    end
-                end
-                task.wait(0.1)
-            end
-        end)
-    end
-end
-
-local function stopFly()
-    flying = false
-    if bv then bv:Destroy() end
-    if bg then bg:Destroy() end
-    noclipEnabled = false
-
-    for _, part in pairs(character:GetDescendants()) do
-        if part:IsA("BasePart") then
-            part.CanCollide = true
-        end
-    end
-end
-
--- Toggle Fly
-infoButton.MouseButton1Click:Connect(function() -- ya está conectado arriba
-    if flying then
-        stopFly()
-    else
-        startFly()
-    end
-end)
-
--- Tecla F para activar/desactivar (opcional, para cuando el HUD no esté visible)
-UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.F then
-        if flying then stopFly() else startFly() end
-    end
-end)
-
--- ==================== AUTO START ====================
-player.CharacterAdded:Connect(function(newChar)
-    character = newChar
-    root = newChar:WaitForChild("HumanoidRootPart")
-    humanoid = newChar:WaitForChild("Humanoid")
-end)
-
-print("✅ JoseAngel_Blox Fly v1.2 cargado")
-print("   • Usa el HUD para volar y ajustar velocidad")
-print("   • F para volar/volver a personaje")
+-- =============================================
+-- Listo. Copia y pega en cualquier executor.
+-- Volas, tienes noclip automático y todo se ve hecho a mano.
+-- ¿Quieres que le agregue algo más? (jump power, speed, etc.) solo dime.
