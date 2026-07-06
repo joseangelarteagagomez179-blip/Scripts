@@ -1,390 +1,354 @@
---[[
-    Script: JoseAngel_Blox Fly (Universal Fix v1.6)
-    Version: 1.6
-    Creator: JoseAngel_Blox
-    Description: Joystick CORREGIDO (ahora mueve exactamente donde empujas el stick).
-                 Cámara estabilizada. Dirección perfecta. Joypad + teclado funciona igual.
-]]
+-- JoseAngel_Blox Fly | Versión 1.2
+-- Fecha de lanzamiento: 06/07/2026
+-- Creador: JoseAngel_Blox
 
+-- Servicios necesarios
 local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
+
 local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local RootPart = Character:WaitForChild("HumanoidRootPart")
 
--- Variables
-local flying = false
-local speed = 100
-local minSpeed = 20
-local maxSpeed = 300
-local bv, bg
-local steppedConn
+-- Variables de control
+local FlyActive = false
+local NoclipActive = false
+local FlySpeed = 60
+local FlyBodyVel = nil
+local GuiVisible = true
 
--- Función bordes redondeados
-local function round(parent, radius)
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, radius)
-    corner.Parent = parent
-    return corner
-end
-
--- GUI Principal
+-- Crear interfaz principal
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "JoseAngel_Blox_Fly_V4"
+ScreenGui.Name = "JoseAngel_BloxFly"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.IgnoreGuiInset = true
-ScreenGui.Parent = game:GetService("CoreGui")
-
--- Pantalla de carga
-local LoadingFrame = Instance.new("Frame")
-LoadingFrame.Size = UDim2.new(1, 0, 1, 0)
-LoadingFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-LoadingFrame.ZIndex = 500
-LoadingFrame.Parent = ScreenGui
-
-local LoadingText = Instance.new("TextLabel")
-LoadingText.Size = UDim2.new(0, 80, 0, 50)
-LoadingText.Position = UDim2.new(0.5, 0, 0.45, 0)
-LoadingText.AnchorPoint = Vector2.new(0.5, 0.5)
-LoadingText.BackgroundTransparency = 1
-LoadingText.Text = "Bienvenido a scripts JoseAngel_Blox"
-LoadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
-LoadingText.TextSize = 24
-LoadingText.Font = Enum.Font.GothamBold
-LoadingText.ZIndex = 501
-LoadingText.Parent = LoadingFrame
-
-local BarBack = Instance.new("Frame")
-BarBack.Size = UDim2.new(0, 250, 0, 10)
-BarBack.Position = UDim2.new(0.5, 0, 0.55, 0)
-BarBack.AnchorPoint = Vector2.new(0.5, 0.5)
-BarBack.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-BarBack.ZIndex = 501
-BarBack.Parent = LoadingFrame
-round(BarBack, 5)
-
-local BarFill = Instance.new("Frame")
-BarFill.Size = UDim2.new(0, 0, 1, 0)
-BarFill.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-BarFill.ZIndex = 502
-BarFill.Parent = BarBack
-round(BarFill, 5)
-
-local PercentText = Instance.new("TextLabel")
-PercentText.Size = UDim2.new(0, 100, 0, 20)
-PercentText.Position = UDim2.new(0.5, 0, 0.62, 0)
-PercentText.AnchorPoint = Vector2.new(0.5, 0.5)
-PercentText.BackgroundTransparency = 1
-PercentText.Text = "0%"
-PercentText.TextColor3 = Color3.fromRGB(200, 200, 200)
-PercentText.TextSize = 16
-PercentText.Font = Enum.Font.Gotham
-PercentText.ZIndex = 501
-PercentText.Parent = LoadingFrame
-
--- Botón para abrir menú
-local OpenBtn = Instance.new("TextButton")
-OpenBtn.Size = UDim2.new(0, 50, 0, 50)
-OpenBtn.Position = UDim2.new(0, 10, 0.5, -25)
-OpenBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-OpenBtn.Text = "FLY"
-OpenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-OpenBtn.Font = Enum.Font.GothamBold
-OpenBtn.Visible = false
-OpenBtn.Parent = ScreenGui
-round(OpenBtn, 25)
-local OpenStroke = Instance.new("UIStroke")
-OpenStroke.Thickness = 2
-OpenStroke.Color = Color3.fromRGB(0, 150, 255)
-OpenStroke.Parent = OpenBtn
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 -- Marco principal
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 400, 0, 250)
-MainFrame.Position = UDim2.new(0.5, -200, 0.5, -125)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+MainFrame.Size = UDim2.new(0, 320, 0, 220)
+MainFrame.Position = UDim2.new(0.05, 0, 0.1, 0)
+MainFrame.BackgroundColor3 = Color3.new(0.12, 0.12, 0.15)
 MainFrame.BorderSizePixel = 0
-MainFrame.Visible = false
-MainFrame.ClipsDescendants = true
+MainFrame.Active = true
+MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
-round(MainFrame, 15)
 
-local Stroke = Instance.new("UIStroke")
-Stroke.Thickness = 2
-Stroke.Color = Color3.fromRGB(45, 45, 55)
-Stroke.Parent = MainFrame
+-- Esquinas redondeadas
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = MainFrame
 
+-- Título
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -50, 0, 45)
-Title.Position = UDim2.new(0, 15, 0, 0)
-Title.Text = "JoseAngel_Blox Fly v1.6"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.BackgroundColor3 = Color3.new(0.18, 0.18, 0.22)
+Title.Text = "JoseAngel_Blox Fly"
+Title.TextColor3 = Color3.new(1, 1, 1)
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 18
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.BackgroundTransparency = 1
+Title.TextSize = 16
 Title.Parent = MainFrame
 
-local MinBtn = Instance.new("TextButton")
-MinBtn.Size = UDim2.new(0, 35, 0, 35)
-MinBtn.Position = UDim2.new(1, -40, 0, 5)
-MinBtn.Text = "-"
-MinBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinBtn.Font = Enum.Font.GothamBold
-MinBtn.TextSize = 20
-MinBtn.Parent = MainFrame
-round(MinBtn, 8)
+local UICornerTitle = Instance.new("UICorner")
+UICornerTitle.CornerRadius = UDim.new(0, 10)
+UICornerTitle.Parent = Title
 
--- Sidebar y contenido
-local Sidebar = Instance.new("Frame")
-Sidebar.Size = UDim2.new(0, 120, 1, -60)
-Sidebar.Position = UDim2.new(0, 10, 0, 50)
-Sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-Sidebar.Parent = MainFrame
-round(Sidebar, 10)
+-- Botón minimizar
+local MinimizeBtn = Instance.new("TextButton")
+MinimizeBtn.Size = UDim2.new(0, 30, 0, 30)
+MinimizeBtn.Position = UDim2.new(1, -35, 0, 2)
+MinimizeBtn.BackgroundColor3 = Color3.new(0.25, 0.25, 0.3)
+MinimizeBtn.Text = "-"
+MinimizeBtn.TextColor3 = Color3.new(1, 1, 1)
+MinimizeBtn.Font = Enum.Font.GothamBold
+MinimizeBtn.TextSize = 18
+MinimizeBtn.Parent = Title
 
-local Content = Instance.new("Frame")
-Content.Size = UDim2.new(1, -150, 1, -60)
-Content.Position = UDim2.new(0, 140, 0, 50)
-Content.BackgroundTransparency = 1
-Content.Parent = MainFrame
+local UICornerMin = Instance.new("UICorner")
+UICornerMin.CornerRadius = UDim.new(0, 6)
+UICornerMin.Parent = MinimizeBtn
 
--- Pestañas
-local TabInfo = Instance.new("Frame")
-TabInfo.Size = UDim2.new(1, 0, 1, 0)
-TabInfo.BackgroundTransparency = 1
-TabInfo.Visible = true
-TabInfo.Parent = Content
+-- Botón flotante para volver a abrir
+local RestoreBtn = Instance.new("TextButton")
+RestoreBtn.Size = UDim2.new(0, 45, 0, 45)
+RestoreBtn.Position = UDim2.new(0.05, 0, 0.1, 0)
+RestoreBtn.BackgroundColor3 = Color3.new(0.2, 0.6, 1)
+RestoreBtn.Text = "📌"
+RestoreBtn.TextColor3 = Color3.new(1, 1, 1)
+RestoreBtn.Font = Enum.Font.GothamBold
+RestoreBtn.TextSize = 18
+RestoreBtn.Visible = false
+RestoreBtn.Active = true
+RestoreBtn.Draggable = true
+RestoreBtn.Parent = ScreenGui
 
-local TabMain = Instance.new("Frame")
-TabMain.Size = UDim2.new(1, 0, 1, 0)
-TabMain.BackgroundTransparency = 1
-TabMain.Visible = false
-TabMain.Parent = Content
+local UICornerRestore = Instance.new("UICorner")
+UICornerRestore.CornerRadius = UDim.new(0, 12)
+UICornerRestore.Parent = RestoreBtn
 
--- Botones sidebar
-local BtnInfo = Instance.new("TextButton")
-BtnInfo.Size = UDim2.new(1, -10, 0, 40)
-BtnInfo.Position = UDim2.new(0, 5, 0, 10)
-BtnInfo.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-BtnInfo.Text = "Información"
-BtnInfo.TextColor3 = Color3.fromRGB(255, 255, 255)
-BtnInfo.Font = Enum.Font.GothamBold
-BtnInfo.Parent = Sidebar
-round(BtnInfo, 8)
+-- Panel izquierdo: Opciones
+local LeftPanel = Instance.new("Frame")
+LeftPanel.Size = UDim2.new(0.4, -5, 1, -40)
+LeftPanel.Position = UDim2.new(0, 5, 0, 38)
+LeftPanel.BackgroundTransparency = 1
+LeftPanel.Parent = MainFrame
 
-local BtnMain = Instance.new("TextButton")
-BtnMain.Size = UDim2.new(1, -10, 0, 40)
-BtnMain.Position = UDim2.new(0, 5, 0, 60)
-BtnMain.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-BtnMain.Text = "Principal"
-BtnMain.TextColor3 = Color3.fromRGB(255, 255, 255)
-BtnMain.Font = Enum.Font.GothamBold
-BtnMain.Parent = Sidebar
-round(BtnMain, 8)
+-- Botón Info
+local InfoBtn = Instance.new("TextButton")
+InfoBtn.Size = UDim2.new(1, 0, 0, 40)
+InfoBtn.BackgroundColor3 = Color3.new(0.15, 0.15, 0.18)
+InfoBtn.Text = "Info ↓"
+InfoBtn.TextColor3 = Color3.new(1, 1, 1)
+InfoBtn.Font = Enum.Font.Gotham
+InfoBtn.TextSize = 14
+InfoBtn.Parent = LeftPanel
 
--- Contenido pestaña información
-local infoLbl = Instance.new("TextLabel")
-infoLbl.Size = UDim2.new(1, 0, 1, 0)
-infoLbl.BackgroundTransparency = 1
-infoLbl.Text = "Creador: JoseAngel_Blox\nVersión: 1.6\n• Joystick corregido\n• Cámara estabilizada\n• Funciona con teclado y mando"
-infoLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-infoLbl.Font = Enum.Font.Gotham
-infoLbl.TextSize = 14
-infoLbl.Parent = TabInfo
+local UICornerInfo = Instance.new("UICorner")
+UICornerInfo.CornerRadius = UDim.new(0, 8)
+UICornerInfo.Parent = InfoBtn
 
--- Contenido pestaña principal
-local flyToggle = Instance.new("TextButton")
-flyToggle.Size = UDim2.new(1, 0, 0, 40)
-flyToggle.Position = UDim2.new(0, 0, 0, 20)
-flyToggle.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
-flyToggle.Text = "FLY: OFF"
-flyToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-flyToggle.Font = Enum.Font.GothamBold
-flyToggle.Parent = TabMain
-round(flyToggle, 8)
+-- Panel derecho: Funciones
+local RightPanel = Instance.new("Frame")
+RightPanel.Size = UDim2.new(0.55, -5, 1, -40)
+RightPanel.Position = UDim2.new(0.45, 5, 0, 38)
+RightPanel.BackgroundTransparency = 1
+RightPanel.Parent = MainFrame
 
-local speedText = Instance.new("TextLabel")
-speedText.Size = UDim2.new(1, 0, 0, 30)
-speedText.Position = UDim2.new(0, 0, 0, 70)
-speedText.BackgroundTransparency = 1
-speedText.Text = "Velocidad: " .. speed
-speedText.TextColor3 = Color3.fromRGB(255, 255, 255)
-speedText.Font = Enum.Font.GothamBold
-speedText.Parent = TabMain
+-- Subpanel Info
+local InfoFrame = Instance.new("Frame")
+InfoFrame.Size = UDim2.new(1, 0, 0, 90)
+InfoFrame.Position = UDim2.new(0, 0, 0, 0)
+InfoFrame.BackgroundColor3 = Color3.new(0.14, 0.14, 0.17)
+InfoFrame.Visible = false
+InfoFrame.Parent = RightPanel
 
-local sUp = Instance.new("TextButton")
-sUp.Size = UDim2.new(0, 80, 0, 35)
-sUp.Position = UDim2.new(0, 20, 0, 110)
-sUp.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-sUp.Text = "+"
-sUp.TextColor3 = Color3.fromRGB(255, 255, 255)
-sUp.Font = Enum.Font.GothamBold
-sUp.Parent = TabMain
-round(sUp, 8)
+local UICornerInfoFrame = Instance.new("UICorner")
+UICornerInfoFrame.CornerRadius = UDim.new(0, 8)
+UICornerInfoFrame.Parent = InfoFrame
 
-local sDown = Instance.new("TextButton")
-sDown.Size = UDim2.new(0, 80, 0, 35)
-sDown.Position = UDim2.new(0, 120, 0, 110)
-sDown.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-sDown.Text = "-"
-sDown.TextColor3 = Color3.fromRGB(255, 255, 255)
-sDown.Font = Enum.Font.GothamBold
-sDown.Parent = TabMain
-round(sDown, 8)
+local InfoText = Instance.new("TextLabel")
+InfoText.Size = UDim2.new(1, -10, 1, -10)
+InfoText.Position = UDim2.new(0, 5, 0, 5)
+InfoText.BackgroundTransparency = 1
+InfoText.Text = "👤 Creador: JoseAngel_Blox\n📅 Lanzamiento: 06/07/2026\n📌 Versión: 1.2"
+InfoText.TextColor3 = Color3.new(0.9, 0.9, 0.9)
+InfoText.Font = Enum.Font.Gotham
+InfoText.TextSize = 13
+InfoText.TextXAlignment = Enum.TextXAlignment.Left
+InfoText.TextWrapped = true
+InfoText.Parent = InfoFrame
 
--- Sistema de arrastre (drag)
-local dragging, dragStart, startPos = false, nil, nil
+-- Subpanel Fly
+local FlyFrame = Instance.new("Frame")
+FlyFrame.Size = UDim2.new(1, 0, 0, 115)
+FlyFrame.Position = UDim2.new(0, 0, 0, 95)
+FlyFrame.BackgroundColor3 = Color3.new(0.14, 0.14, 0.17)
+FlyFrame.Parent = RightPanel
 
-MainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = MainFrame.Position
-    end
-end)
+local UICornerFlyFrame = Instance.new("UICorner")
+UICornerFlyFrame.CornerRadius = UDim.new(0, 8)
+UICornerFlyFrame.Parent = FlyFrame
 
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStart
-        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
+local FlyLabel = Instance.new("TextLabel")
+FlyLabel.Size = UDim2.new(1, -10, 0, 25)
+FlyLabel.Position = UDim2.new(0, 5, 0, 5)
+FlyLabel.BackgroundTransparency = 1
+FlyLabel.Text = "Fly ↓"
+FlyLabel.TextColor3 = Color3.new(1, 1, 1)
+FlyLabel.Font = Enum.Font.GothamBold
+FlyLabel.TextSize = 14
+FlyLabel.TextXAlignment = Enum.TextXAlignment.Left
+FlyLabel.Parent = FlyFrame
 
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
+-- Interruptor Fly
+local FlyToggle = Instance.new("TextButton")
+FlyToggle.Size = UDim2.new(0, 60, 0, 25)
+FlyToggle.Position = UDim2.new(1, -65, 0, 5)
+FlyToggle.BackgroundColor3 = Color3.new(0.4, 0.4, 0.4)
+FlyToggle.Text = "OFF"
+FlyToggle.TextColor3 = Color3.new(1, 1, 1)
+FlyToggle.Font = Enum.Font.GothamBold
+FlyToggle.TextSize = 12
+FlyToggle.Parent = FlyFrame
 
--- Cambio de pestañas
-BtnInfo.MouseButton1Click:Connect(function()
-    TabInfo.Visible = true
-    TabMain.Visible = false
-end)
+local UICornerFlyToggle = Instance.new("UICorner")
+UICornerFlyToggle.CornerRadius = UDim.new(0, 6)
+UICornerFlyToggle.Parent = FlyToggle
 
-BtnMain.MouseButton1Click:Connect(function()
-    TabInfo.Visible = false
-    TabMain.Visible = true
-end)
+-- Interruptor Noclip
+local NoclipLabel = Instance.new("TextLabel")
+NoclipLabel.Size = UDim2.new(0, 80, 0, 25)
+NoclipLabel.Position = UDim2.new(0, 5, 0, 35)
+NoclipLabel.BackgroundTransparency = 1
+NoclipLabel.Text = "Noclip"
+NoclipLabel.TextColor3 = Color3.new(1, 1, 1)
+NoclipLabel.Font = Enum.Font.Gotham
+NoclipLabel.TextSize = 13
+NoclipLabel.TextXAlignment = Enum.TextXAlignment.Left
+NoclipLabel.Parent = FlyFrame
 
--- Minimizar
-MinBtn.MouseButton1Click:Connect(function()
-    MainFrame.Visible = false
-    OpenBtn.Visible = true
-end)
+local NoclipToggle = Instance.new("TextButton")
+NoclipToggle.Size = UDim2.new(0, 50, 0, 22)
+NoclipToggle.Position = UDim2.new(1, -55, 0, 36)
+NoclipToggle.BackgroundColor3 = Color3.new(0.4, 0.4, 0.4)
+NoclipToggle.Text = "OFF"
+NoclipToggle.TextColor3 = Color3.new(1, 1, 1)
+NoclipToggle.Font = Enum.Font.Gotham
+NoclipToggle.TextSize = 11
+NoclipToggle.Parent = FlyFrame
 
-OpenBtn.MouseButton1Click:Connect(function()
-    MainFrame.Visible = true
-    OpenBtn.Visible = false
-end)
+local UICornerNoclip = Instance.new("UICorner")
+UICornerNoclip.CornerRadius = UDim.new(0, 5)
+UICornerNoclip.Parent = NoclipToggle
 
--- LÓGICA DE VUELO v1.6 (Joystick corregido)
-local function startFly()
-    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    local root = char:WaitForChild("HumanoidRootPart")
-    local hum = char:WaitForChild("Humanoid")
-    local camera = workspace.CurrentCamera
+-- Control de velocidad
+local SpeedLabel = Instance.new("TextLabel")
+SpeedLabel.Size = UDim2.new(0, 100, 0, 25)
+SpeedLabel.Position = UDim2.new(0, 5, 0, 65)
+SpeedLabel.BackgroundTransparency = 1
+SpeedLabel.Text = "Velocidad: "..FlySpeed
+SpeedLabel.TextColor3 = Color3.new(1, 1, 1)
+SpeedLabel.Font = Enum.Font.Gotham
+SpeedLabel.TextSize = 13
+SpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
+SpeedLabel.Parent = FlyFrame
 
-    bv = Instance.new("BodyVelocity")
-    bv.MaxForce = Vector3.new(1e8, 1e8, 1e8)
-    bv.Velocity = Vector3.new(0, 0, 0)
-    bv.Parent = root
+local SpeedUp = Instance.new("TextButton")
+SpeedUp.Size = UDim2.new(0, 25, 0, 22)
+SpeedUp.Position = UDim2.new(1, -55, 0, 66)
+SpeedUp.BackgroundColor3 = Color3.new(0.2, 0.7, 0.3)
+SpeedUp.Text = "+"
+SpeedUp.TextColor3 = Color3.new(1, 1, 1)
+SpeedUp.Font = Enum.Font.GothamBold
+SpeedUp.TextSize = 14
+SpeedUp.Parent = FlyFrame
 
-    bg = Instance.new("BodyGyro")
-    bg.MaxTorque = Vector3.new(1e8, 1e8, 1e8)
-    bg.P = 20000
-    bg.D = 100
-    bg.CFrame = root.CFrame
-    bg.Parent = root
+local UICornerSpeedUp = Instance.new("UICorner")
+UICornerSpeedUp.CornerRadius = UDim.new(0, 5)
+UICornerSpeedUp.Parent = SpeedUp
 
-    steppedConn = RunService.RenderStepped:Connect(function()
-        root.CanCollide = false
-        hum.PlatformStand = true
+local SpeedDown = Instance.new("TextButton")
+SpeedDown.Size = UDim2.new(0, 25, 0, 22)
+SpeedDown.Position = UDim2.new(1, -85, 0, 66)
+SpeedDown.BackgroundColor3 = Color3.new(0.8, 0.2, 0.2)
+SpeedDown.Text = "-"
+SpeedDown.TextColor3 = Color3.new(1, 1, 1)
+SpeedDown.Font = Enum.Font.GothamBold
+SpeedDown.TextSize = 14
+SpeedDown.Parent = FlyFrame
 
-        local moveDir = hum.MoveDirection
+local UICornerSpeedDown = Instance.new("UICorner")
+UICornerSpeedDown.CornerRadius = UDim.new(0, 5)
+UICornerSpeedDown.Parent = SpeedDown
 
-        -- Corrección: dirección relativa a la cámara
-        local camCF = camera.CFrame
-        local finalVelocity = camCF.Rotation * Vector3.new(moveDir.X, 0, moveDir.Z).Unit * speed
+-- Funciones de vuelo
+local function ActivarFly()
+    if FlyActive then return end
+    FlyActive = true
+    Humanoid.PlatformStand = true
+    FlyBodyVel = Instance.new("BodyVelocity")
+    FlyBodyVel.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+    FlyBodyVel.Parent = RootPart
+end
 
-        -- Control de altura
-        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-            finalVelocity += Vector3.new(0, speed, 0)
-        elseif UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
-            finalVelocity += Vector3.new(0, -speed, 0)
+local function DesactivarFly()
+    if not FlyActive then return end
+    FlyActive = false
+    Humanoid.PlatformStand = false
+    if FlyBodyVel then FlyBodyVel:Destroy() end
+end
+
+local function ActualizarNoclip()
+    if NoclipActive and Character then
+        for _, parte in ipairs(Character:GetDescendants()) do
+            if parte:IsA("BasePart") then
+                parte.CanCollide = false
+            end
         end
-
-        bv.Velocity = finalVelocity
-
-        -- Mantener rotación estable
-        bg.CFrame = CFrame.new(root.Position, root.Position + Vector3.new(camCF.LookVector.X, 0, camCF.LookVector.Z))
-    end)
-end
-
-local function stopFly()
-    if steppedConn then steppedConn:Disconnect() end
-    if bv then bv:Destroy() end
-    if bg then bg:Destroy() end
-    local char = LocalPlayer.Character
-    if char and char:FindFirstChild("Humanoid") then
-        char.Humanoid.PlatformStand = false
-        char.HumanoidRootPart.CanCollide = true
     end
 end
 
--- Botones de control
-flyToggle.MouseButton1Click:Connect(function()
-    flying = not flying
-    if flying then
-        flyToggle.Text = "FLY: ON"
-        flyToggle.BackgroundColor3 = Color3.fromRGB(60, 200, 60)
-        startFly()
+-- Conexiones
+InfoBtn.MouseButton1Click:Connect(function()
+    InfoFrame.Visible = not InfoFrame.Visible
+    InfoBtn.Text = InfoFrame.Visible and "Info ↑" or "Info ↓"
+end)
+
+FlyToggle.MouseButton1Click:Connect(function()
+    FlyActive = not FlyActive
+    if FlyActive then
+        ActivarFly()
+        FlyToggle.BackgroundColor3 = Color3.new(0.2, 0.7, 0.3)
+        FlyToggle.Text = "ON"
     else
-        flyToggle.Text = "FLY: OFF"
-        flyToggle.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
-        stopFly()
+        DesactivarFly()
+        FlyToggle.BackgroundColor3 = Color3.new(0.4, 0.4, 0.4)
+        FlyToggle.Text = "OFF"
     end
 end)
 
-sUp.MouseButton1Click:Connect(function()
-    speed = math.min(maxSpeed, speed + 25)
-    speedText.Text = "Velocidad: " .. speed
-end)
-
-sDown.MouseButton1Click:Connect(function()
-    speed = math.max(minSpeed, speed - 25)
-    speedText.Text = "Velocidad: " .. speed
-end)
-
--- CARGA ARREGLADA CON TWEENSERVICE
-local loadTween = TweenService:Create(BarFill, TweenInfo.new(2, Enum.EasingStyle.Linear), {Size = UDim2.new(1, 0, 1, 0)})
-loadTween:Play()
-
--- Actualizar porcentaje mientras se carga
-local updatePercent
-updatePercent = RunService.Heartbeat:Connect(function()
-    local elapsed = loadTween.TweenInfo.Time - loadTween.RemainingTime
-    local percent = math.clamp(math.floor((elapsed / loadTween.TweenInfo.Time) * 100), 0, 100)
-    PercentText.Text = percent .. "%"
-    if percent >= 100 then
-        updatePercent:Disconnect()
+NoclipToggle.MouseButton1Click:Connect(function()
+    NoclipActive = not NoclipActive
+    if NoclipActive then
+        NoclipToggle.BackgroundColor3 = Color3.new(0.2, 0.7, 0.3)
+        NoclipToggle.Text = "ON"
+    else
+        NoclipToggle.BackgroundColor3 = Color3.new(0.4, 0.4, 0.4)
+        NoclipToggle.Text = "OFF"
+        for _, parte in ipairs(Character:GetDescendants()) do
+            if parte:IsA("BasePart") then parte.CanCollide = true end
+        end
     end
 end)
 
-loadTween.Completed:Connect(function()
-    local t = TweenService:Create(LoadingFrame, TweenInfo.new(0.6), {BackgroundTransparency = 1})
-    TweenService:Create(LoadingText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-    TweenService:Create(BarBack, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-    TweenService:Create(BarFill, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-    TweenService:Create(PercentText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-    t:Play()
-
-    t.Completed:Connect(function()
-        LoadingFrame:Destroy()
-        MainFrame.Visible = true
-        MainFrame.Size = UDim2.new(0, 0, 0, 0)
-        MainFrame:TweenSize(UDim2.new(0, 400, 0, 250), "Out", "Back", 0.5)
-    end)
+SpeedUp.MouseButton1Click:Connect(function()
+    FlySpeed = math.min(FlySpeed + 10, 300)
+    SpeedLabel.Text = "Velocidad: "..FlySpeed
 end)
+
+SpeedDown.MouseButton1Click:Connect(function()
+    FlySpeed = math.max(FlySpeed - 10, 20)
+    SpeedLabel.Text = "Velocidad: "..FlySpeed
+end)
+
+MinimizeBtn.MouseButton1Click:Connect(function()
+    GuiVisible = false
+    MainFrame.Visible = false
+    RestoreBtn.Visible = true
+end)
+
+RestoreBtn.MouseButton1Click:Connect(function()
+    GuiVisible = true
+    MainFrame.Visible = true
+    RestoreBtn.Visible = false
+end)
+
+-- Bucle principal
+RunService.RenderStepped:Connect(function()
+    if FlyActive and FlyBodyVel then
+        local cam = workspace.CurrentCamera
+        local dir = Vector3.new()
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then dir += cam.CFrame.LookVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then dir -= cam.CFrame.LookVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then dir -= cam.CFrame.RightVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then dir += cam.CFrame.RightVector end
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then dir += Vector3.new(0, 1, 0) end
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then dir -= Vector3.new(0, 1, 0) end
+
+        FlyBodyVel.Velocity = dir.Magnitude > 0 and dir.Unit * FlySpeed or Vector3.new(0, 0, 0)
+    end
+
+    if NoclipActive then ActualizarNoclip() end
+end)
+
+-- Recargar al revivir
+LocalPlayer.CharacterAdded:Connect(function(nuevoChar)
+    Character = nuevoChar
+    Humanoid = nuevoChar:WaitForChild("Humanoid")
+    RootPart = nuevoChar:WaitForChild("HumanoidRootPart")
+    DesactivarFly()
+end)
+
+print("✅ JoseAngel_Blox Fly v1.2 cargado correctamente ❤️")
