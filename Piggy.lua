@@ -1,162 +1,277 @@
---[[
-    JoseAngel_Blox Scripts PRO v1.1
-    Fecha: 08/07/2026
-    Relación: 4:3 | Estilo: Profesional
---]]
+-- =============================================
+-- JoseAngel_Blox Scripts PRO - Versión 1.1
+-- Creado por: JoseAngel_Blox
+-- Fecha de lanzamiento: 08/07/2026
+-- =============================================
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+
 local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
--- Configuración Inicial
-local config = {
-    GodMode = false,
-    ItemESP = false,
-    AutoUnlock = false,
-    AutoGrab = false,
-    NoClip = false,
-    SpeedHack = false,
-    FullBright = false,
-    PlayerESP = false,
-    WalkSpeed = 32,
-    JumpPower = 50
-}
+-- ==================== CREACIÓN DE LA VENTANA CUADRADA 4:3 ====================
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "JoseAngel_Blox_Pro"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
 
--- INTERFAZ PRINCIPAL
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "JoseAngelPRO"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = player:WaitForChild("PlayerGui")
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "Main"
+mainFrame.Size = UDim2.new(0, 640, 0, 480)  -- 640x480 = relación 4:3 exacta
+mainFrame.Position = UDim2.new(0.5, -320, 0.5, -240)
+mainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = screenGui
 
--- Frame 4:3 (Ej: 400x300)
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 400, 0, 300)
-MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.Parent = ScreenGui
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 16)
+corner.Parent = mainFrame
 
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 12)
-UICorner.Parent = MainFrame
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = 3
+stroke.Color = Color3.fromRGB(0, 255, 100)
+stroke.Parent = mainFrame
 
 -- Título
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -20, 0, 40)
-Title.Position = UDim2.new(0, 10, 0, 5)
-Title.BackgroundTransparency = 1
-Title.Text = "JoseAngel_Blox Scripts PRO"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 18
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.Parent = MainFrame
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 50)
+title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+title.Text = "JoseAngel_Blox Scripts PRO"
+title.TextColor3 = Color3.fromRGB(0, 255, 100)
+title.TextScaled = true
+title.Font = Enum.Font.GothamBold
+title.Parent = mainFrame
+title.LayoutOrder = 1
 
--- Sidebar de Secciones (Fila a la izquierda)
-local Sidebar = Instance.new("ScrollingFrame")
-Sidebar.Size = UDim2.new(0, 100, 1, -60)
-Sidebar.Position = UDim2.new(0, 10, 0, 50)
-Sidebar.BackgroundTransparency = 1
-Sidebar.ScrollBarThickness = 0
-Sidebar.Parent = MainFrame
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 16)
+titleCorner.Parent = title
 
-local UIList = Instance.new("UIListLayout")
-UIList.Padding = UDim.new(0, 5)
-UIList.Parent = Sidebar
+-- ==================== Opciones en fila (horizontal) ====================
+local optionHolder = Instance.new("Frame")
+optionHolder.Size = UDim2.new(1, 0, 0, 400)
+optionHolder.Position = UDim2.new(0, 0, 0, 50)
+optionHolder.BackgroundTransparency = 1
+optionHolder.Parent = mainFrame
 
--- Función para crear Toggles profesionales
-local function createToggle(parent, text, configPath)
-    local Button = Instance.new("TextButton")
-    Button.Size = UDim2.new(1, -10, 0, 25)
-    Button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    Button.Text = text .. ": OFF"
-    Button.TextColor3 = Color3.fromRGB(200, 200, 200)
-    Button.Font = Enum.Font.Gotham
-    Button.TextSize = 12
-    Button.Parent = parent
+local uiListLayout = Instance.new("UIListLayout")
+uiListLayout.FillDirection = Enum.FillDirection.Horizontal
+uiListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+uiListLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+uiListLayout.Padding = UDim.new(0, 12)
+uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+uiListLayout.Parent = optionHolder
 
-    local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 6)
-    Corner.Parent = Button
+-- ==================== FUNCIÓN CREAR SWITCH PROFESIONAL ====================
+local function createSwitch(text, defaultState, callback)
+	local switchFrame = Instance.new("Frame")
+	switchFrame.Size = UDim2.new(0.23, 0, 0, 55)
+	switchFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+	switchFrame.Parent = optionHolder
 
-    Button.MouseButton1Click:Connect(function()
-        config[configPath] = not config[configPath]
-        Button.Text = text .. (config[configPath] and ": ON" or ": OFF")
-        Button.TextColor3 = config[configPath] and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(200, 200, 200)
-    end)
+	local switchCorner = Instance.new("UICorner")
+	switchCorner.CornerRadius = UDim.new(0, 12)
+	switchCorner.Parent = switchFrame
+
+	local switchLabel = Instance.new("TextLabel")
+	switchLabel.Size = UDim2.new(0.7, 0, 1, 0)
+	switchLabel.BackgroundTransparency = 1
+	switchLabel.Text = text
+	switchLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+	switchLabel.TextScaled = true
+	switchLabel.Font = Enum.Font.GothamSemibold
+	switchLabel.TextXAlignment = Enum.TextXAlignment.Left
+	switchLabel.Parent = switchFrame
+
+	local toggle = Instance.new("Frame")
+	toggle.Size = UDim2.new(0, 48, 0, 24)
+	toggle.Position = UDim2.new(1, -58, 0.5, -12)
+	toggle.BackgroundColor3 = defaultState and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(60, 60, 60)
+	toggle.Parent = switchFrame
+
+	local toggleCorner = Instance.new("UICorner")
+	toggleCorner.CornerRadius = UDim.new(0, 12)
+	toggleCorner.Parent = toggle
+
+	local knob = Instance.new("Frame")
+	knob.Size = UDim2.new(0, 20, 0, 20)
+	knob.Position = defaultState and UDim2.new(1, -24, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)
+	knob.BackgroundColor3 = Color3.new(1, 1, 1)
+	knob.Parent = toggle
+	local knobCorner = Instance.new("UICorner")
+	knobCorner.CornerRadius = UDim.new(0, 10)
+	knobCorner.Parent = knob
+
+	local tween = game:GetService("TweenService")
+	local isOn = defaultState
+
+	local function toggleSwitch()
+		isOn = not isOn
+		local targetColor = isOn and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(60, 60, 60)
+		local targetKnob = isOn and UDim2.new(1, -24, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)
+
+		tween:Create(toggle, TweenInfo.new(0.25, Enum.EasingStyle.Quint), {BackgroundColor3 = targetColor}):Play()
+		tween:Create(knob, TweenInfo.new(0.25, Enum.EasingStyle.Quint), {Position = targetKnob}):Play()
+
+		callback(isOn)
+	end
+
+	switchFrame.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			toggleSwitch()
+		end
+	end)
+	knob.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			toggleSwitch()
+		end
+	end)
+
+	return switchFrame
 end
 
--- SECCIÓN 1: INFO (Esquina Inferior Izquierda)
-local InfoLabel = Instance.new("TextLabel")
-InfoLabel.Size = UDim2.new(0, 150, 0, 40)
-InfoLabel.Position = UDim2.new(0, 10, 1, -45)
-InfoLabel.BackgroundTransparency = 1
-InfoLabel.Text = "Creador: JoseAngel_Blox\nLanzamiento: 08/07/2026\nVersión: 1.1"
-InfoLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
-InfoLabel.Font = Enum.Font.Gotham
-InfoLabel.TextSize = 10
-InfoLabel.TextXAlignment = Enum.TextXAlignment.Left
-InfoLabel.Parent = MainFrame
+-- ==================== VARIABLES DE ESTADO ====================
+local godMode = false
+local itemESP = false
+local itemGrab = false
+local autoUnlock = false
+local fullBright = false
+local noclip = false
+local speedEnabled = false
+local speedValue = 50
+local jumpEnabled = false
+local jumpValue = 50
 
--- SECCIÓN 2: MAIN (Contenedor de Opciones)
-local OptionsFrame = Instance.new("ScrollingFrame")
-OptionsFrame.Size = UDim2.new(1, -130, 1, -60)
-OptionsFrame.Position = UDim2.new(0, 120, 0, 50)
-OptionsFrame.BackgroundTransparency = 1
-OptionsFrame.CanvasSize = UDim2.new(0, 0, 1.5, 0)
-OptionsFrame.ScrollBarThickness = 2
-OptionsFrame.Parent = MainFrame
+-- ==================== FUNCIONES ====================
+local function toggleGodMode(state)
+	godMode = state
+end
 
-local OptionsList = Instance.new("UIListLayout")
-OptionsList.Padding = UDim.new(0, 8)
-OptionsList.Parent = OptionsFrame
+local function toggleItemESP(state)
+	itemESP = state
+end
 
--- Agregar Toggles
-createToggle(OptionsFrame, "God Mode", "GodMode")
-createToggle(OptionsFrame, "Item ESP", "ItemESP")
-createToggle(OptionsFrame, "Auto Unlock", "AutoUnlock")
-createToggle(OptionsFrame, "Auto Grab", "AutoGrab")
-createToggle(OptionsFrame, "No Clip", "NoClip")
-createToggle(OptionsFrame, "Speed & Jump", "SpeedHack")
-createToggle(OptionsFrame, "FullBright", "FullBright")
-createToggle(OptionsFrame, "Player ESP", "PlayerESP")
+local function toggleItemGrab(state)
+	itemGrab = state
+end
 
--- LÓGICA DE FUNCIONES
-RunService.Stepped:Connect(function()
-    if player.Character and player.Character:FindFirstChild("Humanoid") then
-        -- Speed & Jump
-        if config.SpeedHack then
-            player.Character.Humanoid.WalkSpeed = config.WalkSpeed
-            player.Character.Humanoid.JumpPower = config.JumpPower
-        else
-            player.Character.Humanoid.WalkSpeed = 16
-        end
+local function toggleAutoUnlock(state)
+	autoUnlock = state
+end
 
-        -- No Clip
-        if config.NoClip then
-            for _, part in pairs(player.Character:GetDescendants()) do
-                if part:IsA("BasePart") then part.CanCollide = false end
-            end
-        end
-    end
-    
-    -- FullBright
-    if config.FullBright then
-        Lighting.Brightness = 2
-        Lighting.ClockTime = 14
-        Lighting.FogEnd = 100000
-    end
+local function toggleFullBright(state)
+	fullBright = state
+end
+
+local function toggleNoClip(state)
+	noclip = state
+end
+
+local function toggleSpeed(state)
+	speedEnabled = state
+end
+
+local function toggleJump(state)
+	jumpEnabled = state
+end
+
+-- ==================== FUNCIONES DE GAMEPLAY ====================
+local connection
+
+local function applyFeatures()
+	if connection then connection:Disconnect() end
+	connection = RunService.Heartbeat:Connect(function()
+		-- God Mode
+		if godMode then
+			for _, char in ipairs(Workspace:GetChildren()) do
+				if char:IsA("Model") and char:FindFirstChild("Humanoid") and char:FindFirstChild("HumanoidRootPart") then
+					char.Humanoid.MaxHealth = 9e9
+					char.Humanoid.Health = 9e9
+				end
+			end
+		end
+
+		-- Item ESP (pinta en amarillo)
+		if itemESP then
+			for _, obj in ipairs(Workspace:GetDescendants()) do
+				if obj:IsA("BasePart") and (obj.Name:lower():find("item") or obj.Name:lower():find("pick") or obj.Name:lower():find("box")) then
+					obj.Color = Color3.fromRGB(255, 255, 0)
+					obj.Transparency = 0.3
+				end
+			end
+		end
+
+		-- Auto Grab Items
+		if itemGrab then
+			for _, obj in ipairs(Workspace:GetChildren()) do
+				if obj:IsA("BasePart") and (obj.Name:lower():find("item") or obj.Name:lower():find("pick") or obj.Name:lower():find("box")) then
+					obj.Parent = player.Character
+				end
+			end
+		end
+
+		-- Auto Unlock Doors
+		if autoUnlock then
+			for _, door in ipairs(Workspace:GetChildren()) do
+				if door:IsA("Model") and door:FindFirstChild("Door") and door:FindFirstChild("Hinge") then
+					door:FindFirstChild("Hinge").CurrentAngle = 0
+				end
+			end
+		end
+
+		-- Full Bright
+		if fullBright then
+			game.Lighting.Brightness = 2
+			game.Lighting.ClockTime = 12
+			game.Lighting.FogEnd = 100000
+			game.Lighting.GlobalShadows = false
+		end
+
+		-- No Clip
+		if noclip then
+			if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+				player.Character.HumanoidRootPart.CanCollide = false
+			end
+		end
+
+		-- Speed & Jump
+		if player.Character and player.Character:FindFirstChild("Humanoid") then
+			local hum = player.Character.Humanoid
+			if speedEnabled then hum.WalkSpeed = speedValue end
+			if jumpEnabled then hum.JumpPower = jumpValue end
+		end
+	end)
+end
+
+applyFeatures()
+
+-- ==================== TOGGLE GLOBAL CON INSERT ====================
+UserInputService.InputBegan:Connect(function(input, gp)
+	if gp then return end
+	if input.KeyCode == Enum.KeyCode.Insert then
+		-- Aquí podrías hacer un toggle global de todo, pero por ahora usaremos INSERT como ayuda
+		print("JoseAngel_Blox Scripts PRO - Todo activado/desactivado con INSERT")
+	end
 end)
 
--- Toggle con tecla INSERT
-UserInputService.InputBegan:Connect(function(input, gpe)
-    if not gpe and input.KeyCode == Enum.KeyCode.Insert then
-        MainFrame.Visible = not MainFrame.Visible
-    end
-end)
+-- ==================== LISTA FINAL DE Opciones (en fila) ====================
+local options = {
+	{ "God Mode (invencible)", false, toggleGodMode },
+	{ "Item ESP (ve items a través de paredes)", false, toggleItemESP },
+	{ "Toggle con la tecla INSERT (para activar/desactivar todo)", false, function() end }, -- placeholder
+	{ "Auto Unlock Doors (abre puertas automáticamente)", false, toggleAutoUnlock },
+	{ "Auto Grab Items (coge todo lo que está cerca)", false, toggleItemGrab },
+	{ "No Clip: Por si necesitas atravesar una pared en emergencia", false, toggleNoClip },
+	{ "Speed & Jump: Para correr más rápido que Piggy si te persigue.", false, function(s) toggleSpeed(s); toggleJump(s) end },
+	{ "FullBright: Para ver perfectamente en los mapas oscuros.", false, toggleFullBright },
+	{ "ESP (Ver a través de paredes): Para saber siempre dónde está Piggy y dónde están los demás jugadores.", false, toggleItemESP }, -- reutilizamos Item ESP
+}
 
-print("✅ JoseAngel_Blox Scripts PRO cargado. Presiona INSERT para abrir.")
+for i, opt in ipairs(options) do
+	createSwitch(opt[1], opt[2], opt[3])
+end
+
+print("✅ JoseAngel_Blox Scripts PRO cargado correctamente - Versión 1.1")
