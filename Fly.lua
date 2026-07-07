@@ -1,12 +1,12 @@
 -- =============================================
--- JOSEANGEL_BLOX_FLY - Script Profesional v1.2
+-- JOSEANGEL_BLOX_FLY - Script Profesional v1.3
 -- Fly + Noclip | Speed ajustable | Info PC + Celular
 -- Compatible con PC y Móvil (Delta Executor)
+-- Notificaciones y pantalla en el CENTRO
 -- =============================================
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
@@ -22,7 +22,7 @@ local minSpeed = 10
 
 local bv, bg
 
--- ==================== NOTIFICACIONES ====================
+-- ==================== NOTIFICACIONES EN EL CENTRO ====================
 local function notify(title, message, duration)
     local screenGui = Instance.new("ScreenGui")
     screenGui.Name = "JoseAngel_Notify"
@@ -31,7 +31,7 @@ local function notify(title, message, duration)
     
     local main = Instance.new("Frame")
     main.Size = UDim2.new(0, 280, 0, 110)
-    main.Position = UDim2.new(0.5, -140, 0.85, 0)
+    main.Position = UDim2.new(0.5, -140, 0.75, 0)  -- CENTRO
     main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     main.BorderSizePixel = 0
     main.Parent = screenGui
@@ -61,6 +61,7 @@ local function notify(title, message, duration)
     messageLabel.Font = Enum.Font.Gotham
     messageLabel.Parent = main
     
+    -- Animación de aparición
     main.Size = UDim2.new(0, 280, 0, 0)
     TweenService:Create(main, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {Size = UDim2.new(0, 280, 0, 110)}):Play()
     
@@ -71,7 +72,7 @@ local function notify(title, message, duration)
     end)
 end
 
--- ==================== INFO SCREEN ====================
+-- ==================== PANTALLA DE INFO EN EL CENTRO ====================
 local function showInfoScreen()
     local screenGui = Instance.new("ScreenGui")
     screenGui.Name = "JoseAngel_InfoScreen"
@@ -80,7 +81,7 @@ local function showInfoScreen()
     
     local main = Instance.new("Frame")
     main.Size = UDim2.new(0.45, 0, 0.6, 0)
-    main.Position = UDim2.new(0.275, 0, 0.2, 0)
+    main.Position = UDim2.new(0.275, 0, 0.2, 0)  -- CENTRO
     main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
     main.BorderSizePixel = 0
     main.Parent = screenGui
@@ -95,13 +96,12 @@ local function showInfoScreen()
     local title = Instance.new("TextLabel")
     title.Size = UDim2.new(1, 0, 0.15, 0)
     title.BackgroundTransparency = 1
-    title.Text = "JoseAngel_Blox_Fly - v1.2"
+    title.Text = "JoseAngel_Blox_Fly - v1.3"
     title.TextColor3 = Color3.fromRGB(255, 215, 0)
     title.TextScaled = true
     title.Font = Enum.Font.GothamBlack
     title.Parent = main
     
-    -- Línea
     local line = Instance.new("Frame")
     line.Size = UDim2.new(0.9, 0, 0, 2)
     line.Position = UDim2.new(0.05, 0, 0.15, 0)
@@ -138,13 +138,12 @@ local function showInfoScreen()
     version.Size = UDim2.new(1, 0, 0.2, 0)
     version.Position = UDim2.new(0, 0, 0.44, 0)
     version.BackgroundTransparency = 1
-    version.Text = "Versión: 1.2"
+    version.Text = "Versión: 1.3"
     version.TextColor3 = Color3.fromRGB(255, 215, 0)
     version.TextScaled = true
     version.Font = Enum.Font.GothamBold
     version.Parent = infoFrame
     
-    -- Cómo usar
     local useLabel = Instance.new("TextLabel")
     useLabel.Size = UDim2.new(1, 0, 0.35, 0)
     useLabel.Position = UDim2.new(0, 0, 0.67, 0)
@@ -170,7 +169,6 @@ local function showInfoScreen()
     useLabel.TextWrapped = true
     useLabel.Parent = infoFrame
     
-    -- Botón Cerrar
     local closeBtn = Instance.new("TextButton")
     closeBtn.Size = UDim2.new(0.3, 0, 0.1, 0)
     closeBtn.Position = UDim2.new(0.35, 0, 0.9, 0)
@@ -285,12 +283,12 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Celular: botón grande de volar
+-- Botón de volar en celular (centro)
 local mobileFlyButton
 if UserInputService.TouchEnabled then
     mobileFlyButton = Instance.new("TextButton")
     mobileFlyButton.Size = UDim2.new(0.3, 0, 0.12, 0)
-    mobileFlyButton.Position = UDim2.new(0.35, 0, 0.78, 0)
+    mobileFlyButton.Position = UDim2.new(0.35, 0, 0.78, 0)  -- CENTRO
     mobileFlyButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
     mobileFlyButton.Text = "🛫 VOLAR"
     mobileFlyButton.TextColor3 = Color3.new(1, 1, 1)
@@ -313,5 +311,5 @@ end)
 
 humanoid.Died:Connect(cleanup)
 
-print("✅ JoseAngel_Blox_Fly v1.2 cargado correctamente")
-notify("JoseAngel_Blox_Fly", "v1.2 - Presiona F / Y / Botón Celular\nZ + X para velocidad", 6)
+print("✅ JoseAngel_Blox_Fly v1.3 cargado correctamente")
+notify("JoseAngel_Blox_Fly", "v1.3 - Notificaciones en el CENTRO\nPresiona F / Y / Botón Celular\nZ + X para velocidad", 6)
