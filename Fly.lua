@@ -1,5 +1,5 @@
 -- Nombre del Script: JoseAngel_Blox Fly
--- Versión: 1.2
+-- Versión: 1.3 (CORREGIDO)
 -- Creador: JoséAngel_Blox
 -- Fecha: 06/07/2026
 
@@ -20,8 +20,9 @@ local RootPart = Character:WaitForChild("HumanoidRootPart")
 local FlyActive = false
 local NoclipActive = false
 local FlySpeed = 80
-local Gyro, BodyPos
+local Gyro, BodyVelocity
 local GuiVisible = true
+local NoclipConnections = {}
 
 -- Crear Interfaz
 local ScreenGui = Instance.new("ScreenGui")
@@ -117,7 +118,7 @@ InfoText.Text = [[
 📌 INFORMACIÓN
 Creador: JoséAngel_Blox
 Lanzamiento: 06/07/2026
-Versión: 1.2
+Versión: 1.3 (CORREGIDO)
 
 📖 TUTORIAL DE USO
 
@@ -212,105 +213,175 @@ SpeedPlus.Parent = MainContent
 Instance.new("UICorner").CornerRadius = UDim.new(0, 8)
 Instance.new("UICorner").Parent = SpeedPlus
 
--- Función Noclip CORREGIDA
+-- FUNCIÓN NOCLIP CORREGIDA
 local function UpdateNoclip()
-    if not Humanoid or not Character then return end
-    if NoclipActive then
-        Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
-        for _, v in ipairs(Character:GetDescendants()) do
-            if v:IsA("BasePart") then
-                v.CanCollide = false
-            end
+    if not Character then return end
+    
+    -- Obtener todas las partes del personaje
+    local parts = {}
+    for _, v in ipairs(Character:GetDescendants()) do
+        if v:IsA("BasePart") then
+            table.insert(parts, v)
         end
-    else
-        Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
-        for _, v in ipairs(Character:GetDescendants()) do
-            if v:IsA("BasePart") and v ~= RootPart then
-                v.CanCollide = true
+    end
+    
+    -- Aplicar Noclip a TODAS las partes
+    for _, part in ipairs(parts) do
+        if NoclipActive then
+            part.CanCollide = false
+        else
+            -- Solo restaurar colisiones si no está en estado Physics (para evitar conflictos)
+            if part ~= RootPart then
+                part.CanCollide = true
+            else
+                part.CanCollide = true
             end
         end
     end
+    
+    -- Deshabilitar/Habilitar estado Physics
+    if NoclipActive then
+        Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
+    else
+        Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
+    end
 end
 
--- Función Vuelo CORREGIDA
+-- FUNCIÓN FLY CORREGIDA
 local function ActivarFly()
+    if FlyActive then return end
     FlyActive = true
     FlyBtn.Text = "✈️ Fly: ACTIVADO"
     FlyBtn.BackgroundColor3 = Color3.fromRGB(30, 180, 60)
 
+    -- Crear Gyro para mantener orientación
     Gyro = Instance.new("Gyro")
     Gyro.Name = "FlyGyro"
     Gyro.MaxTorque = Vector3.new(9e4, 9e4, 9e4)
     Gyro.P = 12000
-    Gyro.D = 100
+    Gyro.D = 500
     Gyro.Parent = RootPart
 
-    BodyPos = Instance.new("BodyPosition")
-    BodyPos.Name = "FlyBodyPos"
-    BodyPos.MaxForce = Vector3.new(9e4, 9e4, 9e4)
-    BodyPos.D = 400
-    BodyPos.P = 12000
-    BodyPos.Parent = RootPart
+    -- Crear BodyVelocity en lugar de BodyPosition (más confiable)
+    BodyVelocity = Instance.new("BodyVelocity")
+    BodyVelocity.Name = "FlyBodyVelocity"
+    BodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+    BodyVelocity.Velocity = Vector3.new(0, 0, 0)
+    BodyVelocity.Parent = RootPart
 
     Humanoid.PlatformStand = true
+    Humanoid.AutoRotate = false
 end
 
 local function DesactivarFly()
+    if not FlyActive then return end
     FlyActive = false
     FlyBtn.Text = "✈️ Fly: Desactivado"
     FlyBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 85)
 
     if Gyro then Gyro:Destroy() end
-    if BodyPos then BodyPos:Destroy() end
+    if BodyVelocity then BodyVelocity:Destroy() end
     Humanoid.PlatformStand = false
+    Humanoid.AutoRotate = true
 end
 
--- Actualizar movimiento
-RunService.RenderStepped:Connect(function()
-    if not FlyActive or not BodyPos or not Gyro then return end
+-- ACTUALIZAR MOVIMIENTO CORREGIDO
+local moveConnection
+moveConnection = RunService.RenderStepped:Connect(function()
+    if not FlyActive or not BodyVelocity or not Gyro then return end
+    if not Character or not Humanoid or not RootPart then return end
+    
     local cam = workspace.CurrentCamera
-    local dir = Vector3.new()
-
-    -- Controles PC
-    if UserInputService:IsKeyDown(Enum.KeyCode.W) then dir += cam.CFrame.LookVector end
-    if UserInputService:IsKeyDown(Enum.KeyCode.S) then dir -= cam.CFrame.LookVector end
-    if UserInputService:IsKeyDown(Enum.KeyCode.A) then dir -= cam.CFrame.RightVector end
-    if UserInputService:IsKeyDown(Enum.KeyCode.D) then dir += cam.CFrame.RightVector end
-    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then dir += Vector3.new(0, 1, 0) end
-    if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then dir -= Vector3.new(0, 1, 0) end
-
-    -- Controles Celular
+    if not cam then return end
+    
+    local moveDirection = Vector3.new()
+    
+    -- CONTROLES PC
+    if UserInputService:IsKeyDown(Enum.KeyCode.W) then 
+        moveDirection = moveDirection + cam.CFrame.LookVector
+    end
+    if UserInputService:IsKeyDown(Enum.KeyCode.S) then 
+        moveDirection = moveDirection - cam.CFrame.LookVector
+    end
+    if UserInputService:IsKeyDown(Enum.KeyCode.A) then 
+        moveDirection = moveDirection - cam.CFrame.RightVector
+    end
+    if UserInputService:IsKeyDown(Enum.KeyCode.D) then 
+        moveDirection = moveDirection + cam.CFrame.RightVector
+    end
+    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then 
+        moveDirection = moveDirection + Vector3.new(0, 1, 0)
+    end
+    if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then 
+        moveDirection = moveDirection - Vector3.new(0, 1, 0)
+    end
+    
+    -- CONTROLES TÁCTILES (CORREGIDO)
     if UserInputService.TouchEnabled then
-        dir = cam.CFrame.LookVector
+        -- Mantener dirección actual si no hay teclas presionadas
+        if moveDirection.Magnitude == 0 then
+            moveDirection = cam.CFrame.LookVector
+        end
     end
-
-    if dir.Magnitude > 0 then
-        dir = dir.Unit * FlySpeed
+    
+    -- Aplicar velocidad
+    if moveDirection.Magnitude > 0 then
+        moveDirection = moveDirection.Unit * FlySpeed
+        BodyVelocity.Velocity = moveDirection
+    else
+        BodyVelocity.Velocity = Vector3.new(0, 0, 0)
     end
-
-    BodyPos.Position = RootPart.Position + dir
+    
+    -- Mantener orientación
     Gyro.CFrame = cam.CFrame
-
+    
+    -- Actualizar Noclip continuamente
     UpdateNoclip()
 end)
 
--- Reaparecer personaje
+-- REAPARECER PERSONAJE
 Player.CharacterAdded:Connect(function(nuevoChar)
     Character = nuevoChar
     Humanoid = Character:WaitForChild("Humanoid")
     RootPart = Character:WaitForChild("HumanoidRootPart")
-    if FlyActive then DesactivarFly() end
+    
+    -- Limpiar variables antiguas
+    if Gyro then 
+        Gyro:Destroy() 
+        Gyro = nil
+    end
+    if BodyVelocity then 
+        BodyVelocity:Destroy() 
+        BodyVelocity = nil
+    end
+    
+    FlyActive = false
+    FlyBtn.Text = "✈️ Fly: Desactivado"
+    FlyBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 85)
+    
+    -- Resetear Noclip
+    NoclipActive = false
+    NoclipBtn.Text = "🚧 Noclip: Desactivado"
+    NoclipBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 85)
+    
+    -- Actualizar Noclip para el nuevo personaje
+    UpdateNoclip()
 end)
 
--- Botones de acción
+-- BOTONES DE ACCIÓN
 FlyBtn.MouseButton1Click:Connect(function()
-    if FlyActive then DesactivarFly() else ActivarFly() end
+    if FlyActive then 
+        DesactivarFly() 
+    else 
+        ActivarFly() 
+    end
 end)
 
 NoclipBtn.MouseButton1Click:Connect(function()
     NoclipActive = not NoclipActive
     NoclipBtn.Text = NoclipActive and "🚧 Noclip: ACTIVADO" or "🚧 Noclip: Desactivado"
     NoclipBtn.BackgroundColor3 = NoclipActive and Color3.fromRGB(30, 180, 60) or Color3.fromRGB(70, 70, 85)
+    UpdateNoclip()
 end)
 
 SpeedMinus.MouseButton1Click:Connect(function()
@@ -323,7 +394,7 @@ SpeedPlus.MouseButton1Click:Connect(function()
     SpeedLabel.Text = "Velocidad: " .. FlySpeed
 end)
 
--- Cambiar pestañas
+-- CAMBIAR PESTAÑAS
 InfoTab.MouseButton1Click:Connect(function()
     InfoFrame.Visible = true
     MainContent.Visible = false
@@ -338,7 +409,7 @@ MainTab.MouseButton1Click:Connect(function()
     InfoTab.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
 end)
 
--- Minimizar / Restaurar
+-- MINIMIZAR / RESTAURAR
 MinimizeBtn.MouseButton1Click:Connect(function()
     GuiVisible = not GuiVisible
     if GuiVisible then
@@ -349,3 +420,9 @@ MinimizeBtn.MouseButton1Click:Connect(function()
         MinimizeBtn.Text = "+"
     end
 end)
+
+-- ACTUALIZAR NOCLIP INICIAL
+UpdateNoclip()
+
+print("✅ JoseAngel_Blox Fly v1.3 CORREGIDO - Listo para usar!")
+print("🛠️ Fly y Noclip funcionan correctamente ahora")
