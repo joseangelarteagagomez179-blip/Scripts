@@ -1,325 +1,281 @@
--- =============================================
--- JoseAngel_Blox Scripts PRO
--- Versión: 1.1
--- Creado por: JoseAngel_Blox
--- Fecha de lanzamiento: 08/07/2026
--- =============================================
+--[[
+▓▒░ JOSEANGEL_BLOX SCRIPTS PRO ░▒▓
+Relación: 1:1 | Esquinas redondeadas | Interfaz optimizada
+Fecha: 08/07/2026 | Versión: 1.1
+]]
 
--- Servicios
+-- Servicios necesarios
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
-local Lighting = game:GetService("Lighting")
+local StarterGui = game:GetService("StarterGui")
 
--- Jugador
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
 
--- ==================== INTERFAZ - RELACIÓN 4:3 ====================
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "JoseAngel_Blox_Pro"
-screenGui.ResetOnSpawn = false
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-screenGui.Parent = playerGui
+-- ⚙️ CONFIGURACIÓN PRINCIPAL
+local Config = {
+    InterfazActiva = true,
+    GodMode = false,
+    ItemESP = false,
+    AutoUnlockDoors = false,
+    AutoGrabItems = false,
+    NoClip = false,
+    Speed = false,
+    SpeedValor = 40,
+    Jump = false,
+    JumpValor = 80,
+    FullBright = false,
+    JugadorESP = false
+}
 
--- Ventana principal (640x480 = 4:3)
-local mainFrame = Instance.new("Frame")
-mainFrame.Name = "MainWindow"
-mainFrame.Size = UDim2.new(0, 640, 0, 480)
-mainFrame.Position = UDim2.new(0.5, -320, 0.5, -240)
-mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-mainFrame.BorderSizePixel = 0
-mainFrame.Active = true
-mainFrame.Draggable = true
-mainFrame.Parent = screenGui
+-- 🎨 CREACIÓN DE LA INTERFAZ (CUADRADA 1:1, ESQUINAS REDONDEADAS)
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "JoseAngelBlox_UI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainWindow"
+MainFrame.Size = UDim2.new(0, 350, 0, 350) -- Relación 1:1
+MainFrame.Position = UDim2.new(0.02, 0, 0.1, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+MainFrame.BorderSizePixel = 0
+MainFrame.BorderMode = Enum.BorderMode.Outline
+MainFrame.ClipsDescendants = true
+MainFrame.Parent = ScreenGui
 
 -- Esquinas redondeadas
-local mainCorner = Instance.new("UICorner")
-mainCorner.CornerRadius = UDim.new(0, 18)
-mainCorner.Parent = mainFrame
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 12)
+UICorner.Parent = MainFrame
 
--- Borde exterior
-local mainStroke = Instance.new("UIStroke")
-mainStroke.Thickness = 3
-mainStroke.Color = Color3.fromRGB(0, 255, 100)
-mainStroke.Parent = mainFrame
+-- Barra superior
+local TopBar = Instance.new("Frame")
+TopBar.Size = UDim2.new(1, 0, 0, 35)
+TopBar.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+TopBar.BorderSizePixel = 0
+TopBar.Parent = MainFrame
 
--- Título principal
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, 0, 0, 60)
-titleLabel.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
-titleLabel.Text = "JoseAngel_Blox Scripts PRO"
-titleLabel.TextColor3 = Color3.fromRGB(0, 255, 100)
-titleLabel.Font = Enum.Font.GothamBold
-titleLabel.TextScaled = true
-titleLabel.Parent = mainFrame
+local UICornerTop = Instance.new("UICorner")
+UICornerTop.CornerRadius = UDim.new(0, 12)
+UICornerTop.Parent = TopBar
 
-local titleCorner = Instance.new("UICorner")
-titleCorner.CornerRadius = UDim.new(0, 18)
-titleCorner.Parent = titleLabel
+local Titulo = Instance.new("TextLabel")
+Titulo.Size = UDim2.new(1, -10, 1, 0)
+Titulo.Position = UDim2.new(0, 10, 0, 0)
+Titulo.Text = "JoseAngel_Blox Scripts PRO"
+Titulo.Font = Enum.Font.GothamBold
+Titulo.TextSize = 16
+Titulo.TextColor3 = Color3.fromRGB(255, 215, 0)
+Titulo.BackgroundTransparency = 1
+Titulo.TextXAlignment = Enum.TextXAlignment.Left
+Titulo.Parent = TopBar
 
--- ==================== SECCIÓN DE INFORMACIÓN ====================
-local infoFrame = Instance.new("Frame")
-infoFrame.Size = UDim2.new(0.45, 0, 0, 120)
-infoFrame.Position = UDim2.new(0.025, 0, 0.18, 0)
-infoFrame.BackgroundTransparency = 0.9
-infoFrame.Parent = mainFrame
+-- Área de contenido
+local ContenidoFrame = Instance.new("ScrollingFrame")
+ContenidoFrame.Size = UDim2.new(1, -20, 1, -45)
+ContenidoFrame.Position = UDim2.new(0, 10, 0, 40)
+ContenidoFrame.BackgroundTransparency = 1
+ContenidoFrame.BorderSizePixel = 0
+ContenidoFrame.ScrollBarThickness = 4
+ContenidoFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 150)
+ContenidoFrame.Parent = MainFrame
 
-local infoTitle = Instance.new("TextLabel")
-infoTitle.Size = UDim2.new(1, 0, 0, 25)
-infoTitle.BackgroundTransparency = 1
-infoTitle.Text = "ℹ️ Info ↓"
-infoTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
-infoTitle.Font = Enum.Font.GothamBold
-infoTitle.TextXAlignment = Enum.TextXAlignment.Left
-infoTitle.Parent = infoFrame
+local Layout = Instance.new("UIListLayout")
+Layout.Padding = UDim.new(0, 8)
+Layout.SortOrder = Enum.SortOrder.LayoutOrder
+Layout.Parent = ContenidoFrame
 
-local infoText = Instance.new("TextLabel")
-infoText.Size = UDim2.new(1, 0, 0, 90)
-infoText.Position = UDim2.new(0, 0, 0, 25)
-infoText.BackgroundTransparency = 1
-infoText.Text = [[Nombre del Creador: JoseAngel_Blox
-Fecha de lanzamiento: 08/07/2026
-Versión: 1.1]]
-infoText.TextColor3 = Color3.fromRGB(180, 180, 180)
-infoText.Font = Enum.Font.GothamSemibold
-infoText.TextSize = 14
-infoText.TextXAlignment = Enum.TextXAlignment.Left
-infoText.TextWrapped = true
-infoText.Parent = infoFrame
+-- 📋 FUNCIÓN PARA CREAR INTERRUPTORES
+local function CrearInterruptor(texto, posicion)
+    local BotonFrame = Instance.new("Frame")
+    BotonFrame.Size = UDim2.new(1, 0, 0, 30)
+    BotonFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+    BotonFrame.BorderSizePixel = 0
+    BotonFrame.LayoutOrder = posicion
+    BotonFrame.Parent = ContenidoFrame
 
--- ==================== CONTENEDOR DE OPCIONES ====================
-local optionsFrame = Instance.new("Frame")
-optionsFrame.Size = UDim2.new(0.95, 0, 0.60, 0)
-optionsFrame.Position = UDim2.new(0.025, 0, 0.38, 0)
-optionsFrame.BackgroundTransparency = 1
-optionsFrame.Parent = mainFrame
+    local UICornerBtn = Instance.new("UICorner")
+    UICornerBtn.CornerRadius = UDim.new(0, 6)
+    UICornerBtn.Parent = BotonFrame
 
-local optionsTitle = Instance.new("TextLabel")
-optionsTitle.Size = UDim2.new(1, 0, 0, 25)
-optionsTitle.BackgroundTransparency = 1
-optionsTitle.Text = "⚙️ Main ↓"
-optionsTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
-optionsTitle.Font = Enum.Font.GothamBold
-optionsTitle.TextXAlignment = Enum.TextXAlignment.Left
-optionsTitle.Parent = optionsFrame
+    local TextoOpcion = Instance.new("TextLabel")
+    TextoOpcion.Size = UDim2.new(0.8, -10, 1, 0)
+    TextoOpcion.Position = UDim2.new(0, 10, 0, 0)
+    TextoOpcion.Text = texto
+    TextoOpcion.Font = Enum.Font.GothamSemibold
+    TextoOpcion.TextSize = 13
+    TextoOpcion.TextColor3 = Color3.fromRGB(230, 230, 255)
+    TextoOpcion.BackgroundTransparency = 1
+    TextoOpcion.TextXAlignment = Enum.TextXAlignment.Left
+    TextoOpcion.Parent = BotonFrame
 
-local listLayout = Instance.new("UIListLayout")
-listLayout.Padding = UDim.new(0, 10)
-listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-listLayout.VerticalAlignment = Enum.VerticalAlignment.Top
-listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-listLayout.Parent = optionsFrame
+    local Interruptor = Instance.new("Frame")
+    Interruptor.Size = UDim2.new(0, 36, 0, 18)
+    Interruptor.Position = UDim2.new(1, -45, 0.5, -9)
+    Interruptor.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+    Interruptor.BorderSizePixel = 0
+    Interruptor.Parent = BotonFrame
 
--- ==================== FUNCIÓN PARA CREAR INTERRUPTORES ====================
-local function createToggle(name, defaultState, callback)
-    local toggleContainer = Instance.new("Frame")
-    toggleContainer.Size = UDim2.new(1, 0, 0, 40)
-    toggleContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    toggleContainer.BorderSizePixel = 0
-    toggleContainer.Parent = optionsFrame
+    local UICornerInt = Instance.new("UICorner")
+    UICornerInt.CornerRadius = UDim.new(1, 0)
+    UICornerInt.Parent = Interruptor
 
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 10)
-    corner.Parent = toggleContainer
+    local Bola = Instance.new("Frame")
+    Bola.Size = UDim2.new(0, 14, 0, 14)
+    Bola.Position = UDim2.new(0, 2, 0.5, -7)
+    Bola.BackgroundColor3 = Color3.fromRGB(200, 200, 220)
+    Bola.BorderSizePixel = 0
+    Bola.Parent = Interruptor
 
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(0.8, 0, 1, 0)
-    label.Position = UDim2.new(0, 12, 0, 0)
-    label.BackgroundTransparency = 1
-    label.Text = name
-    label.TextColor3 = Color3.fromRGB(230, 230, 230)
-    label.Font = Enum.Font.GothamSemibold
-    label.TextSize = 13
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = toggleContainer
+    local UICornerBola = Instance.new("UICorner")
+    UICornerBola.CornerRadius = UDim.new(1, 0)
+    UICornerBola.Parent = Bola
 
-    local toggleBackground = Instance.new("Frame")
-    toggleBackground.Size = UDim2.new(0, 44, 0, 22)
-    toggleBackground.Position = UDim2.new(1, -54, 0.5, -11)
-    toggleBackground.BackgroundColor3 = defaultState and Color3.fromRGB(0, 200, 80) or Color3.fromRGB(60, 60, 60)
-    toggleBackground.Parent = toggleContainer
-
-    local toggleCorner = Instance.new("UICorner")
-    toggleCorner.CornerRadius = UDim.new(0, 11)
-    toggleCorner.Parent = toggleBackground
-
-    local toggleKnob = Instance.new("Frame")
-    toggleKnob.Size = UDim2.new(0, 18, 0, 18)
-    toggleKnob.Position = defaultState and UDim2.new(1, -20, 0.5, -9) or UDim2.new(0, 2, 0.5, -9)
-    toggleKnob.BackgroundColor3 = Color3.new(1, 1, 1)
-    toggleKnob.Parent = toggleBackground
-
-    local knobCorner = Instance.new("UICorner")
-    knobCorner.CornerRadius = UDim.new(0, 9)
-    knobCorner.Parent = toggleKnob
-
-    local isActive = defaultState
-
-    local function switchState()
-        isActive = not isActive
-        local tweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quint)
-
-        TweenService:Create(toggleBackground, tweenInfo, {
-            BackgroundColor3 = isActive and Color3.fromRGB(0, 200, 80) or Color3.fromRGB(60, 60, 60)
-        }):Play()
-
-        TweenService:Create(toggleKnob, tweenInfo, {
-            Position = isActive and UDim2.new(1, -20, 0.5, -9) or UDim2.new(0, 2, 0.5, -9)
-        }):Play()
-
-        if callback then callback(isActive) end
-    end
-
-    toggleContainer.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            switchState()
+    local activado = false
+    return {
+        Frame = BotonFrame,
+        Interruptor = Interruptor,
+        Bola = Bola,
+        Toggle = function()
+            activado = not activado
+            if activado then
+                Interruptor.BackgroundColor3 = Color3.fromRGB(50, 180, 80)
+                Bola.Position = UDim2.new(0, 20, 0.5, -7)
+            else
+                Interruptor.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+                Bola.Position = UDim2.new(0, 2, 0.5, -7)
+            end
+            return activado
         end
-    end)
-
-    return toggleContainer
+    }
 end
 
--- ==================== VARIABLES DE ESTADO ====================
-local features = {
-    godMode = false,
-    itemESP = false,
-    autoUnlock = false,
-    autoGrab = false,
-    noClip = false,
-    speedJump = false,
-    fullBright = false,
-    playerESP = false,
-    menuVisible = true
-}
+-- 📄 SECCIÓN INFORMACIÓN
+local InfoLabel = Instance.new("TextLabel")
+InfoLabel.Size = UDim2.new(1, 0, 0, 60)
+InfoLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+InfoLabel.BorderSizePixel = 0
+InfoLabel.Text = [[1) INFO ↓
+• Creador: JoseAngel_Blox
+• Lanzamiento: 08/07/2026
+• Versión: 1.1]]
+InfoLabel.Font = Enum.Font.Gotham
+InfoLabel.TextSize = 12
+InfoLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
+InfoLabel.TextWrapped = true
+InfoLabel.TextXAlignment = Enum.TextXAlignment.Left
+InfoLabel.TextYAlignment = Enum.TextYAlignment.Top
+InfoLabel.LayoutOrder = 1
+InfoLabel.Parent = ContenidoFrame
 
-local originalWalkSpeed = humanoid.WalkSpeed
-local originalJumpPower = humanoid.JumpPower
-local originalLighting = {
-    Brightness = Lighting.Brightness,
-    ClockTime = Lighting.ClockTime,
-    FogEnd = Lighting.FogEnd,
-    GlobalShadows = Lighting.GlobalShadows
-}
+local UICornerInfo = Instance.new("UICorner")
+UICornerInfo.CornerRadius = UDim.new(0, 6)
+UICornerInfo.Parent = InfoLabel
 
--- Actualizar personaje si reaparece
-player.CharacterAdded:Connect(function(newChar)
-    character = newChar
-    humanoid = newChar:WaitForChild("Humanoid")
-    originalWalkSpeed = humanoid.WalkSpeed
-    originalJumpPower = humanoid.JumpPower
+-- 🎮 SECCIÓN DE FUNCIONES PRINCIPALES
+local MainLabel = Instance.new("TextLabel")
+MainLabel.Size = UDim2.new(1, 0, 0, 25)
+MainLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+MainLabel.BorderSizePixel = 0
+MainLabel.Text = "2) MAIN ↓"
+MainLabel.Font = Enum.Font.GothamBold
+MainLabel.TextSize = 14
+MainLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+MainLabel.LayoutOrder = 2
+MainLabel.Parent = ContenidoFrame
+
+local UICornerMain = Instance.new("UICorner")
+UICornerMain.CornerRadius = UDim.new(0, 6)
+UICornerMain.Parent = MainLabel
+
+-- Crear todos los interruptores
+local GodModeBtn = CrearInterruptor("God Mode (Invencible)", 3)
+local ItemESPBtn = CrearInterruptor("Item ESP", 4)
+local AutoDoorsBtn = CrearInterruptor("Auto Unlock Doors", 5)
+local AutoGrabBtn = CrearInterruptor("Auto Grab Items", 6)
+local NoClipBtn = CrearInterruptor("No Clip", 7)
+local SpeedBtn = CrearInterruptor("Speed & Jump", 8)
+local FullBrightBtn = CrearInterruptor("FullBright", 9)
+local JugadorESPBtn = CrearInterruptor("ESP (Jugadores / Piggy)", 10)
+
+-- ⌨️ TECLA DE ACTIVACIÓN GENERAL (INSERT)
+UserInputService.InputBegan:Connect(function(entrada, procesada)
+    if procesada then return end
+    if entrada.KeyCode == Enum.KeyCode.Insert then
+        Config.InterfazActiva = not Config.InterfazActiva
+        MainFrame.Visible = Config.InterfazActiva
+    end
 end)
 
--- ==================== FUNCIÓN PRINCIPAL DE EFECTOS ====================
-RunService.Heartbeat:Connect(function()
-    if not character or not humanoid or humanoid.Health <= 0 then return end
+-- 🚀 CONEXIÓN DE FUNCIONES A LOS INTERRUPTORES
+GodModeBtn.Frame.MouseButton1Click:Connect(function()
+    Config.GodMode = GodModeBtn.Toggle()
+end)
+
+ItemESPBtn.Frame.MouseButton1Click:Connect(function()
+    Config.ItemESP = ItemESPBtn.Toggle()
+end)
+
+AutoDoorsBtn.Frame.MouseButton1Click:Connect(function()
+    Config.AutoUnlockDoors = AutoDoorsBtn.Toggle()
+end)
+
+AutoGrabBtn.Frame.MouseButton1Click:Connect(function()
+    Config.AutoGrabItems = AutoGrabBtn.Toggle()
+end)
+
+NoClipBtn.Frame.MouseButton1Click:Connect(function()
+    Config.NoClip = NoClipBtn.Toggle()
+end)
+
+SpeedBtn.Frame.MouseButton1Click:Connect(function()
+    Config.Speed = SpeedBtn.Toggle()
+    Config.Jump = Config.Speed
+end)
+
+FullBrightBtn.Frame.MouseButton1Click:Connect(function()
+    Config.FullBright = FullBrightBtn.Toggle()
+end)
+
+JugadorESPBtn.Frame.MouseButton1Click:Connect(function()
+    Config.JugadorESP = JugadorESPBtn.Toggle()
+end)
+
+-- ⚡ EJECUCIÓN DE FUNCIONES EN BUCLE
+RunService.RenderStepped:Connect(function()
+    if not Character or not Humanoid then return end
+    if Humanoid.Health <= 0 then return end
 
     -- God Mode
-    if features.godMode then
-        humanoid.MaxHealth = math.huge
-        humanoid.Health = humanoid.MaxHealth
-    end
-
-    -- Item ESP
-    if features.itemESP then
-        for _, obj in ipairs(Workspace:GetDescendants()) do
-            if obj:IsA("BasePart") and not obj:FindFirstAncestorOfClass("Player") then
-                local name = obj.Name:lower()
-                if name:find("item") or name:find("key") or name:find("tool") or name:find("box") then
-                    obj.Color = Color3.new(1, 1, 0)
-                    obj.Transparency = 0.3
-                end
-            end
-        end
-    end
-
-    -- Auto Unlock Doors
-    if features.autoUnlock then
-        for _, door in ipairs(Workspace:GetDescendants()) do
-            if door:IsA("BasePart") and door.Name:lower():find("door") then
-                door.CanCollide = false
-                door.Transparency = 0.4
-            end
-        end
-    end
-
-    -- Auto Grab Items
-    if features.autoGrab and character:FindFirstChild("HumanoidRootPart") then
-        local root = character.HumanoidRootPart
-        for _, obj in ipairs(Workspace:GetDescendants()) do
-            if (obj:IsA("Tool") or obj:IsA("BasePart")) and (obj.Name:lower():find("item") or obj.Name:lower():find("key")) then
-                if (root.Position - obj.Position).Magnitude < 16 then
-                    obj.Parent = character
-                end
-            end
-        end
-    end
+    Humanoid.MaxHealth = Config.GodMode and math.huge or 100
+    Humanoid.Health = Config.GodMode and Humanoid.MaxHealth or Humanoid.Health
 
     -- No Clip
-    if features.noClip then
-        for _, part in ipairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
-            end
+    for _, parte in ipairs(Character:GetDescendants()) do
+        if parte:IsA("BasePart") then
+            parte.CanCollide = not Config.NoClip
         end
     end
 
-    -- Speed & Jump
-    if features.speedJump then
-        humanoid.WalkSpeed = 70
-        humanoid.JumpPower = 75
-    else
-        humanoid.WalkSpeed = originalWalkSpeed
-        humanoid.JumpPower = originalJumpPower
-    end
+    -- Velocidad y Salto
+    Humanoid.WalkSpeed = Config.Speed and Config.SpeedValor or 16
+    Humanoid.JumpPower = Config.Jump and Config.JumpValor or 50
 
     -- FullBright
-    if features.fullBright then
-        Lighting.Brightness = 3
-        Lighting.ClockTime = 12
-        Lighting.FogEnd = 200000
-        Lighting.GlobalShadows = false
-    else
-        Lighting.Brightness = originalLighting.Brightness
-        Lighting.ClockTime = originalLighting.ClockTime
-        Lighting.FogEnd = originalLighting.FogEnd
-        Lighting.GlobalShadows = originalLighting.GlobalShadows
-    end
+    Workspace.Lighting.Brightness = Config.FullBright and 2 or 1
+    Workspace.Lighting.ClockTime = Config.FullBright and 14 or 12
+    Workspace.Lighting.FogEnd = Config.FullBright and 100000 or 1000
 
-    -- ESP Jugadores / Piggy
-    if features.playerESP then
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                local root = plr.Character.HumanoidRootPart
-                root.Color = Color3.new(1, 0, 0)
-                root.Transparency = 0.2
-            end
-        end
-    end
 end)
 
--- ==================== TECLA INSERT MOSTRAR/OCULTAR ====================
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if input.KeyCode == Enum.KeyCode.Insert then
-        features.menuVisible = not features.menuVisible
-        mainFrame.Visible = features.menuVisible
-    end
-end)
-
--- ==================== CREAR TODAS LAS OPCIONES ====================
-createToggle("God Mode (invencible)", false, function(s) features.godMode = s end)
-createToggle("Item ESP (ve items a través de paredes)", false, function(s) features.itemESP = s end)
-createToggle("Toggle con la tecla INSERT (activar/desactivar todo)", false, function() end)
-createToggle("Auto Unlock Doors (abre puertas automáticamente)", false, function(s) features.autoUnlock = s end)
-createToggle("Auto Grab Items (coge todo lo que está cerca)", false, function(s) features.autoGrab = s end)
-createToggle("No Clip: Atravesar paredes en emergencia", false, function(s) features.noClip = s end)
-createToggle("Speed & Jump: Correr más rápido que Piggy", false, function(s) features.speedJump = s end)
-createToggle("FullBright: Ver en mapas oscuros", false, function(s) features.fullBright = s end)
-createToggle("ESP: Ver dónde está Piggy y otros jugadores", false, function(s) features.playerESP = s end)
-
-print("✅ JoseAngel_Blox Scripts PRO v1.1 cargado correctamente")
+-- Mensaje de inicio
+StarterGui:SetCore("SendNotification", {
+    Title = "JoseAngel_Blox Scripts PRO",
+    Text = "Cargado correctamente | Presiona INSERT para mostrar/ocultar",
+    Duration = 5
+})
