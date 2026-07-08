@@ -1,12 +1,11 @@
 --[[
 ▓▒░ JOSEANGEL_BLOX SCRIPTS PRO ░▒▓
 Versión: 1.1 | Fecha: 08/07/2026
-Estilo: Oscuro Azul Neón | Proporción 3:2
-Mejoras: God Mode, ESP, Auto Puertas, Auto Recoger, Minimizar
+Interfaz corregida: Arrastrable, visible, completa
 ]]
 
 -- =============================================
--- SERVICIOS DEL JUEGO
+-- SERVICIOS
 -- =============================================
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -24,14 +23,13 @@ local Camera = Workspace.CurrentCamera
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 
--- Actualizar personaje si reaparece
 LocalPlayer.CharacterAdded:Connect(function(nuevoChar)
     Character = nuevoChar
-    Humanoid = Character:WaitForChild("Humanoid", 10)
+    Humanoid = nuevoChar:WaitForChild("Humanoid", 10)
 end)
 
 -- =============================================
--- CONFIGURACIÓN PRINCIPAL
+-- CONFIGURACIÓN
 -- =============================================
 local Config = {
     UI_Visible = true,
@@ -50,7 +48,7 @@ local Config = {
 local ESP_Objetos = {}
 
 -- =============================================
--- CREACIÓN DE LA INTERFAZ (IGUAL A LA IMAGEN)
+-- INTERFAZ COMPLETA Y ARRATRABLE
 -- =============================================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "JoseAngelBlox_ScriptsPRO"
@@ -61,23 +59,25 @@ ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 -- Ventana Principal
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "Ventana"
-MainFrame.Size = UDim2.new(0, 420, 0, 320)
+MainFrame.Size = UDim2.new(0, 420, 0, 380)
 MainFrame.Position = UDim2.new(0.05, 0, 0.12, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 22, 30)
+MainFrame.BackgroundColor3 = Color3.fromRGB(18, 20, 28)
 MainFrame.BorderSizePixel = 1
-MainFrame.BorderColor3 = Color3.fromRGB(45, 50, 65)
+MainFrame.BorderColor3 = Color3.fromRGB(40, 44, 56)
 MainFrame.ClipsDescendants = true
 MainFrame.Visible = true
+MainFrame.Active = true
+MainFrame.Draggable = true -- ✅ Se puede arrastrar por la pantalla
 MainFrame.Parent = ScreenGui
 
 local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 8)
 MainCorner.Parent = MainFrame
 
--- Barra Superior con Botón Minimizar
+-- Barra Superior
 local TopBar = Instance.new("Frame")
 TopBar.Size = UDim2.new(1, 0, 0, 40)
-TopBar.BackgroundColor3 = Color3.fromRGB(25, 28, 40)
+TopBar.BackgroundColor3 = Color3.fromRGB(24, 26, 36)
 TopBar.BorderSizePixel = 0
 TopBar.Parent = MainFrame
 
@@ -85,6 +85,7 @@ local TopCorner = Instance.new("UICorner")
 TopCorner.CornerRadius = UDim.new(0, 8)
 TopCorner.Parent = TopBar
 
+-- Título
 local Titulo = Instance.new("TextLabel")
 Titulo.Size = UDim2.new(1, -50, 1, 0)
 Titulo.Position = UDim2.new(12, 0, 0, 0)
@@ -98,9 +99,9 @@ Titulo.Parent = TopBar
 
 -- Botón Minimizar
 local BtnMinimizar = Instance.new("TextButton")
-BtnMinimizar.Size = UDim2.new(0, 30, 0, 25)
-BtnMinimizar.Position = UDim2.new(1, -35, 0.5, -12)
-BtnMinimizar.BackgroundColor3 = Color3.fromRGB(35, 40, 55)
+BtnMinimizar.Size = UDim2.new(0, 26, 0, 26)
+BtnMinimizar.Position = UDim2.new(1, -32, 0.5, -13)
+BtnMinimizar.BackgroundColor3 = Color3.fromRGB(35, 38, 50)
 BtnMinimizar.Text = "-"
 BtnMinimizar.Font = Enum.Font.GothamBold
 BtnMinimizar.TextSize = 18
@@ -112,36 +113,41 @@ local MinimizarCorner = Instance.new("UICorner")
 MinimizarCorner.CornerRadius = UDim.new(0, 5)
 MinimizarCorner.Parent = BtnMinimizar
 
--- Área de Contenido
+-- Área de Contenido con desplazamiento
 local Contenido = Instance.new("ScrollingFrame")
-Contenido.Size = UDim2.new(1, -20, 1, -50)
-Contenido.Position = UDim2.new(10, 0, 45, 0)
+Contenido.Name = "Contenido"
+Contenido.Size = UDim2.new(1, -16, 1, -50)
+Contenido.Position = UDim2.new(8, 0, 42, 0)
 Contenido.BackgroundTransparency = 1
 Contenido.BorderSizePixel = 0
-Contenido.ScrollBarThickness = 4
+Contenido.ScrollBarThickness = 5
 Contenido.ScrollBarImageColor3 = Color3.fromRGB(45, 120, 255)
+Contenido.CanvasSize = UDim2.new(0, 0, 0, 0)
+Contenido.Visible = true
 Contenido.Parent = MainFrame
 
 local Layout = Instance.new("UIListLayout")
-Layout.Padding = UDim.new(0, 10)
+Layout.Padding = UDim.new(0, 12)
+Layout.HorizontalAlignment = Enum.HorizontalAlignment.Left
 Layout.Parent = Contenido
 
+-- Ajustar tamaño automático al contenido
 Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    Contenido.CanvasSize = UDim2.new(0, 0, 0, Layout.AbsoluteContentSize.Y)
+    Contenido.CanvasSize = UDim2.new(0, 0, 0, Layout.AbsoluteContentSize.Y + 10)
 end)
 
 -- =============================================
--- FUNCIÓN PARA CREAR INTERRUPTORES FUNCIONALES
+-- FUNCIÓN DE INTERRUPTORES
 -- =============================================
 local function CrearInterruptor(nombre, claveConfig)
     local Fila = Instance.new("Frame")
-    Fila.Size = UDim2.new(1, 0, 0, 36)
+    Fila.Size = UDim2.new(1, -4, 0, 36)
     Fila.BackgroundTransparency = 1
     Fila.Parent = Contenido
 
     local TextoOpcion = Instance.new("TextLabel")
-    TextoOpcion.Size = UDim2.new(0.75, 0, 1, 0)
-    TextoOpcion.Position = UDim2.new(5, 0, 0, 0)
+    TextoOpcion.Size = UDim2.new(0.72, 0, 1, 0)
+    TextoOpcion.Position = UDim2.new(6, 0, 0, 0)
     TextoOpcion.Text = nombre
     TextoOpcion.Font = Enum.Font.GothamSemibold
     TextoOpcion.TextSize = 14
@@ -153,7 +159,7 @@ local function CrearInterruptor(nombre, claveConfig)
     -- Interruptor
     local Interruptor = Instance.new("Frame")
     Interruptor.Size = UDim2.new(0, 42, 0, 20)
-    Interruptor.Position = UDim2.new(1, -47, 0.5, -10)
+    Interruptor.Position = UDim2.new(1, -48, 0.5, -10)
     Interruptor.BackgroundColor3 = Color3.fromRGB(40, 45, 60)
     Interruptor.Parent = Fila
 
@@ -171,7 +177,7 @@ local function CrearInterruptor(nombre, claveConfig)
     BolaEsquina.CornerRadius = UDim.new(1, 0)
     BolaEsquina.Parent = Bola
 
-    -- Lógica de cambio
+    -- Cambiar estado
     local function CambiarEstado()
         Config[claveConfig] = not Config[claveConfig]
         if Config[claveConfig] then
@@ -189,6 +195,46 @@ local function CrearInterruptor(nombre, claveConfig)
         end
     end)
 end
+
+-- =============================================
+-- SECCIÓN INFORMACIÓN
+-- =============================================
+local InfoBox = Instance.new("TextLabel")
+InfoBox.Size = UDim2.new(1, -4, 0, 65)
+InfoBox.BackgroundColor3 = Color3.fromRGB(22, 25, 35)
+InfoBox.BorderSizePixel = 1
+InfoBox.BorderColor3 = Color3.fromRGB(35, 40, 52)
+InfoBox.Text = [[1) INFO ↓
+• Creador: JoseAngel_Blox
+• Lanzamiento: 08/07/2026
+• Versión: 1.1]]
+InfoBox.Font = Enum.Font.Gotham
+InfoBox.TextSize = 12
+InfoBox.TextColor3 = Color3.fromRGB(160, 200, 255)
+InfoBox.TextWrapped = true
+InfoBox.TextXAlignment = Enum.TextXAlignment.Left
+InfoBox.TextYAlignment = Enum.TextYAlignment.Top
+InfoBox.Parent = Contenido
+
+local InfoCorner = Instance.new("UICorner")
+InfoCorner.CornerRadius = UDim.new(0, 6)
+InfoCorner.Parent = InfoBox
+
+-- Título Principal
+local MainTitulo = Instance.new("TextLabel")
+MainTitulo.Size = UDim2.new(1, -4, 0, 28)
+MainTitulo.BackgroundColor3 = Color3.fromRGB(24, 27, 38)
+MainTitulo.BorderSizePixel = 1
+MainTitulo.BorderColor3 = Color3.fromRGB(35, 40, 52)
+MainTitulo.Text = "2) MAIN ↓"
+MainTitulo.Font = Enum.Font.GothamBold
+MainTitulo.TextSize = 14
+MainTitulo.TextColor3 = Color3.fromRGB(75, 160, 255)
+MainTitulo.Parent = Contenido
+
+local MainTituloCorner = Instance.new("UICorner")
+MainTituloCorner.CornerRadius = UDim.new(0, 6)
+MainTituloCorner.Parent = MainTitulo
 
 -- =============================================
 -- CREAR TODAS LAS OPCIONES
@@ -236,7 +282,7 @@ local function CrearESP(parte, color, texto)
 end
 
 -- =============================================
--- BOTÓN MINIMIZAR / MAXIMIZAR
+-- LÓGICA MINIMIZAR / MAXIMIZAR
 -- =============================================
 local minimizado = false
 BtnMinimizar.MouseButton1Click:Connect(function()
@@ -247,13 +293,13 @@ BtnMinimizar.MouseButton1Click:Connect(function()
         BtnMinimizar.Text = "+"
     else
         Contenido.Visible = true
-        MainFrame.Size = UDim2.new(0, 420, 0, 320)
+        MainFrame.Size = UDim2.new(0, 420, 0, 380)
         BtnMinimizar.Text = "-"
     end
 end)
 
 -- =============================================
--- TECLA INSERT PARA OCULTAR / MOSTRAR TODO
+-- TECLA INSERT
 -- =============================================
 UserInputService.InputBegan:Connect(function(input, procesado)
     if procesado then return end
@@ -264,7 +310,7 @@ UserInputService.InputBegan:Connect(function(input, procesado)
 end)
 
 -- =============================================
--- BUCLE PRINCIPAL CON FUNCIONES CORREGIDAS
+-- BUCLE PRINCIPAL DE FUNCIONES
 -- =============================================
 RunService.RenderStepped:Connect(function()
     if not Character or not Humanoid or Humanoid.Health <= 0 then
@@ -272,13 +318,12 @@ RunService.RenderStepped:Connect(function()
         return
     end
 
-    -- ✅ GOD MODE ARREGLADO
+    -- God Mode
     if Config.GodMode then
         Humanoid.MaxHealth = math.huge
         Humanoid.Health = Humanoid.MaxHealth
         Humanoid.BreakJointsOnDeath = false
         Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
-        Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
     else
         Humanoid.MaxHealth = 100
         if Humanoid.Health > 100 then Humanoid.Health = 100 end
@@ -286,34 +331,29 @@ RunService.RenderStepped:Connect(function()
         Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
     end
 
-    -- ✅ NO CLIP SIN BUG
+    -- No Clip corregido
     if Config.NoClip then
         for _, parte in ipairs(Character:GetDescendants()) do
-            if parte:IsA("BasePart") then
-                parte.CanCollide = false
-            end
+            if parte:IsA("BasePart") then parte.CanCollide = false end
         end
     else
-        -- Restaurar colisiones correctamente al desactivar
         for _, parte in ipairs(Character:GetDescendants()) do
-            if parte:IsA("BasePart") and parte.Name ~= "HumanoidRootPart" then
-                parte.CanCollide = true
-            end
+            if parte:IsA("BasePart") and parte.Name ~= "HumanoidRootPart" then parte.CanCollide = true end
         end
         Humanoid:ChangeState(Enum.HumanoidStateType.Running)
     end
 
-    -- ✅ VELOCIDAD Y SALTO
+    -- Velocidad y Salto
     Humanoid.WalkSpeed = Config.SpeedJump and Config.SpeedValue or 16
     Humanoid.JumpPower = Config.SpeedJump and Config.JumpValue or 50
 
-    -- ✅ FULLBRIGHT
+    -- FullBright
     Lighting.Brightness = Config.FullBright and 3 or 1
     Lighting.FogEnd = Config.FullBright and 100000 or 150
     Lighting.ClockTime = Config.FullBright and 14 or 12
     Lighting.Ambient = Config.FullBright and Color3.new(1,1,1) or Color3.new(0.5,0.5,0.5)
 
-    -- ✅ ITEM ESP ARREGLADO
+    -- Item ESP
     if Config.ItemESP then
         for _, obj in ipairs(Workspace:GetDescendants()) do
             if obj:IsA("Model") or obj:IsA("Tool") then
@@ -328,15 +368,13 @@ RunService.RenderStepped:Connect(function()
         for _, v in pairs(ESP_Objetos) do if v.Etiqueta.Text:find("📦") then v.Marco.Visible = false; v.Etiqueta.Visible = false end end
     end
 
-    -- ✅ ESP JUGADORES Y PIGGY
+    -- ESP Jugadores y Piggy
     if Config.PlayerESP then
-        -- Jugadores
         for _, plr in ipairs(Players:GetPlayers()) do
             if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character.Humanoid.Health > 0 then
                 CrearESP(plr.Character.HumanoidRootPart, Color3.new(0, 0.8, 1), "👤 "..plr.Name)
             end
         end
-        -- Piggy / Enemigos
         for _, npc in ipairs(Workspace:GetDescendants()) do
             if npc:IsA("Model") and npc.Name:find("Piggy") and npc:FindFirstChild("HumanoidRootPart") then
                 CrearESP(npc.HumanoidRootPart, Color3.new(1, 0, 0), "⚠️ PIGGY")
@@ -346,7 +384,7 @@ RunService.RenderStepped:Connect(function()
         for _, v in pairs(ESP_Objetos) do if v.Etiqueta.Text:find("👤") or v.Etiqueta.Text:find("⚠️") then v.Marco.Visible = false; v.Etiqueta.Visible = false end end
     end
 
-    -- Actualizar posición ESP
+    -- Actualizar ESP
     for parte, datos in pairs(ESP_Objetos) do
         if parte and parte:IsDescendantOf(Workspace) then
             local pantalla, visible = Camera:WorldToViewportPoint(parte.Position)
@@ -361,28 +399,26 @@ RunService.RenderStepped:Connect(function()
         end
     end
 
-    -- ✅ AUTO ABRIR PUERTAS
+    -- Auto Puertas
     if Config.AutoUnlockDoors then
-        local miPos = Character.HumanoidRootPart.Position
+        local pos = Character.HumanoidRootPart.Position
         for _, obj in ipairs(Workspace:GetDescendants()) do
             if obj.Name:find("Door") or obj.Name:find("Puerta") then
-                local detector = obj:FindFirstChildOfClass("ClickDetector")
-                if detector and (miPos - obj.Position).Magnitude < 25 then
-                    fireclickdetector(detector)
-                end
+                local det = obj:FindFirstChildOfClass("ClickDetector")
+                if det and (pos - obj.Position).Magnitude < 25 then fireclickdetector(det) end
             end
         end
     end
 
-    -- ✅ AUTO COGER ITEMS
+    -- Auto Recoger
     if Config.AutoGrabItems then
-        local miPos = Character.HumanoidRootPart.Position
-        for _, herramienta in ipairs(Workspace:GetDescendants()) do
-            if herramienta:IsA("Tool") and herramienta:FindFirstChild("Handle") then
-                if (miPos - herramienta.Handle.Position).Magnitude < 16 then
-                    firetouchinterest(Character.HumanoidRootPart, herramienta.Handle, 0)
+        local pos = Character.HumanoidRootPart.Position
+        for _, tool in ipairs(Workspace:GetDescendants()) do
+            if tool:IsA("Tool") and tool:FindFirstChild("Handle") then
+                if (pos - tool.Handle.Position).Magnitude < 16 then
+                    firetouchinterest(Character.HumanoidRootPart, tool.Handle, 0)
                     task.wait(0.03)
-                    firetouchinterest(Character.HumanoidRootPart, herramienta.Handle, 1)
+                    firetouchinterest(Character.HumanoidRootPart, tool.Handle, 1)
                 end
             end
         end
@@ -390,11 +426,9 @@ RunService.RenderStepped:Connect(function()
 
 end)
 
--- =============================================
--- MENSAJE DE CARGA
--- =============================================
+-- Mensaje final
 StarterGui:SetCore("SendNotification", {
-    Title = "✅ SCRIPT CARGADO",
-    Text = "JoseAngel_Blox Scripts PRO | INSERT = Mostrar/Ocultar | -/+ = Minimizar",
+    Title = "✅ SCRIPT LISTO",
+    Text = "Arrastra la barra superior para moverlo | INSERT para ocultar",
     Duration = 5
 })
