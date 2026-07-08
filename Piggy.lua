@@ -1,449 +1,396 @@
--- =============================================
--- JoseAngel_Blox Piggy PRO v1.3
--- Script 100% SIN librerías externas
--- Creado por ti: JoseAngel_Blox
--- Fecha: 07/06/2026 | Versión: 1.3
--- Compatible PC y Celular (Delta, Fluxus, Wave, etc.)
--- GUI cuadrada con esquinas redondeadas (no tapa pantalla)
--- Más de 20 funciones Premium + Pro con interruptores
--- =============================================
-
+-- ==========================================================
+-- Nombre del Creador: JoseAngel_Blox
+-- Fecha de Lanzamiento: 09/07/2026
+-- Versión: 1.2
+-- Juego: Piggy
+-- ==========================================================
+local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
-local Camera = Workspace.CurrentCamera
-
--- Variables Globales
-local GodMode = false
-local ESPEnabled = false
-local AutoItems = false
-local Noclip = false
-local FlyEnabled = false
-local WalkSpeedValue = 16
-local JumpPowerValue = 50
-local InfiniteStamina = false
-local Fullbright = false
-local NoFog = false
-local AutoFarmTokens = false
-local KillPiggy = false
-local SuperSpeed = false
-local NoKnockback = false
-local AutoEat = false
-local AutoBoss = false
-local AutoChapter = false
-local InfiniteCash = false
-local AntiAFK = false
-local LockCamera = false
-local CustomWalkSpeed = 16
-local CustomJumpPower = 50
-
--- GUI CREADA MANUALMENTE (cuadrada con esquinas redondeadas, no tapa pantalla)
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "JoseAngel_Blox_Piggy_PRO"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = game:GetService("CoreGui")
-
+-- ==========================================================
+-- INTERFAZ DE USUARIO (GUI)
+-- ==========================================================
+local PiggyHub = Instance.new("ScreenGui")
+PiggyHub.Name = "JoseAngel_Blox_Piggy_PRO"
+-- Protegemos la GUI colocándola en CoreGui si el ejecutor lo permite
+local success, err = pcall(function() PiggyHub.Parent = CoreGui end)
+if not success then PiggyHub.Parent = LocalPlayer:WaitForChild("PlayerGui") end
+-- Marco Principal (Bajito y ancho)
 local MainFrame = Instance.new("Frame")
-MainFrame.Name = "Main"
-MainFrame.Size = UDim2.new(0, 480, 0, 280) -- Cuadrada (480x280)
-MainFrame.Position = UDim2.new(0.5, -240, 0.5, -140) -- Centrada
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
-MainFrame.BorderSizePixel = 0
-MainFrame.Parent = ScreenGui
-
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = PiggyHub
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30) -- Tema oscuro moderno
+MainFrame.Position = UDim2.new(0.5, -225, 0.5, -125)
+MainFrame.Size = UDim2.new(0, 450, 0, 250)
+MainFrame.Active = true
+MainFrame.Draggable = true
+-- Bordes redondeados para el marco principal
 local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 12) -- Esquinas redondeadas
+UICorner.CornerRadius = UDim.new(0, 15)
 UICorner.Parent = MainFrame
-
-local UIStroke = Instance.new("UIStroke")
-UIStroke.Color = Color3.fromRGB(180, 80, 200) -- Morado premium
-UIStroke.Thickness = 2
-UIStroke.Parent = MainFrame
-
--- Topbar (título)
-local Topbar = Instance.new("Frame")
-Topbar.Size = UDim2.new(1, 0, 0, 45)
-Topbar.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
-Topbar.Parent = MainFrame
-
+-- Barra de Título
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -100, 1, 0)
-Title.Position = UDim2.new(0, 10, 0, 0)
-Title.BackgroundTransparency = 1
-Title.Text = "JoseAngel_Blox Piggy PRO v1.3"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextScaled = true
+Title.Name = "Title"
+Title.Parent = MainFrame
+Title.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+Title.Size = UDim2.new(1, 0, 0, 40)
 Title.Font = Enum.Font.GothamBold
-Title.Parent = Topbar
-
-local VersionLabel = Instance.new("TextLabel")
-VersionLabel.Size = UDim2.new(0, 120, 0, 20)
-VersionLabel.Position = UDim2.new(1, -130, 0, 12)
-VersionLabel.BackgroundTransparency = 1
-VersionLabel.Text = "Creado por JoseAngel_Blox | 07/06/2026"
-VersionLabel.TextColor3 = Color3.fromRGB(180, 80, 200)
-VersionLabel.TextScaled = true
-VersionLabel.Font = Enum.Font.Gotham
-VersionLabel.Parent = Topbar
-
--- Tabs (Info y Main)
-local Tabs = Instance.new("Frame")
-Tabs.Size = UDim2.new(1, 0, 0, 35)
-Tabs.Position = UDim2.new(0, 0, 0, 45)
-Tabs.BackgroundTransparency = 1
-Tabs.Parent = MainFrame
-
-local InfoTab = Instance.new("TextButton")
-InfoTab.Size = UDim2.new(0.5, -5, 1, 0)
-InfoTab.Position = UDim2.new(0, 0, 0, 0)
-InfoTab.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
-InfoTab.Text = "Info ↓"
-InfoTab.TextColor3 = Color3.fromRGB(255, 255, 255)
-InfoTab.TextScaled = true
-InfoTab.Font = Enum.Font.GothamBold
-InfoTab.Parent = Tabs
-local InfoCorner = Instance.new("UICorner")
-InfoCorner.CornerRadius = UDim.new(0, 8)
-InfoCorner.Parent = InfoTab
-
-local MainTab = Instance.new("TextButton")
-MainTab.Size = UDim2.new(0.5, -5, 1, 0)
-MainTab.Position = UDim2.new(0.5, 5, 0, 0)
-MainTab.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
-MainTab.Text = "Main ↓"
-MainTab.TextColor3 = Color3.fromRGB(180, 80, 200)
-MainTab.TextScaled = true
-MainTab.Font = Enum.Font.GothamBold
-MainTab.Parent = Tabs
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 8)
-MainCorner.Parent = MainTab
-
--- Contenido
-local Content = Instance.new("Frame")
-Content.Size = UDim2.new(1, 0, 1, -80)
-Content.Position = UDim2.new(0, 0, 0, 80)
-Content.BackgroundTransparency = 1
-Content.Parent = MainFrame
-
-local InfoContent = Instance.new("ScrollingFrame")
-InfoContent.Size = UDim2.new(1, 0, 1, 0)
-InfoContent.BackgroundTransparency = 1
-InfoContent.ScrollBarThickness = 4
-InfoContent.Parent = Content
-
-local InfoLayout = Instance.new("UIListLayout")
-InfoLayout.SortOrder = Enum.SortOrder.LayoutOrder
-InfoLayout.Parent = InfoContent
-
-local MainContent = Instance.new("ScrollingFrame")
-MainContent.Size = UDim2.new(1, 0, 1, 0)
-MainContent.BackgroundTransparency = 1
-MainContent.ScrollBarThickness = 4
-MainContent.Parent = Content
-
-local MainLayout = Instance.new("UIListLayout")
-MainLayout.SortOrder = Enum.SortOrder.LayoutOrder
-MainLayout.Parent = MainContent
-
--- Funciones de los tabs
-InfoTab.MouseButton1Click:Connect(function()
-    InfoTab.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
-    MainTab.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
-    InfoContent.Visible = true
-    MainContent.Visible = false
-end)
-
-MainTab.MouseButton1Click:Connect(function()
-    InfoTab.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
-    MainTab.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
-    InfoContent.Visible = false
-    MainContent.Visible = true
-end)
-
--- === INFO ===
-local function CreateInfoLine(text, color)
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -20, 0, 25)
-    label.BackgroundTransparency = 1
-    label.Text = text
-    label.TextColor3 = color or Color3.fromRGB(255, 255, 255)
-    label.TextScaled = true
-    label.Font = Enum.Font.Gotham
-    label.Parent = InfoContent
-    return label
+Title.Text = "  JoseAngel_Blox Piggy PRO"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 16
+Title.TextXAlignment = Enum.TextXAlignment.Left
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 15)
+TitleCorner.Parent = Title
+-- Parche para que el borde inferior del título no sea redondeado
+local TitleBlock = Instance.new("Frame")
+TitleBlock.Size = UDim2.new(1, 0, 0, 10)
+TitleBlock.Position = UDim2.new(0, 0, 1, -10)
+TitleBlock.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+TitleBlock.BorderSizePixel = 0
+TitleBlock.Parent = Title
+-- Contenedores de las Pestañas (Tabs)
+local InfoTab = Instance.new("Frame")
+InfoTab.Name = "InfoTab"
+InfoTab.Parent = MainFrame
+InfoTab.BackgroundTransparency = 1
+InfoTab.Position = UDim2.new(0, 0, 0, 40)
+InfoTab.Size = UDim2.new(1, 0, 1, -40)
+InfoTab.Visible = true
+local MainTab = Instance.new("ScrollingFrame")
+MainTab.Name = "MainTab"
+MainTab.Parent = MainFrame
+MainTab.BackgroundTransparency = 1
+MainTab.Position = UDim2.new(0, 0, 0, 40)
+MainTab.Size = UDim2.new(1, 0, 1, -40)
+MainTab.ScrollBarThickness = 4
+MainTab.Visible = false
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Parent = MainTab
+UIListLayout.Padding = UDim.new(0, 8)
+UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+local UIPadding = Instance.new("UIPadding")
+UIPadding.Parent = MainTab
+UIPadding.PaddingTop = UDim.new(0, 10)
+UIPadding.PaddingBottom = UDim.new(0, 10)
+-- Sistema de Flechas para navegar
+local TabLabel = Instance.new("TextLabel")
+TabLabel.Parent = Title
+TabLabel.BackgroundTransparency = 1
+TabLabel.Position = UDim2.new(1, -120, 0, 0)
+TabLabel.Size = UDim2.new(0, 60, 1, 0)
+TabLabel.Font = Enum.Font.Gotham
+TabLabel.Text = "Info"
+TabLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+TabLabel.TextSize = 14
+local LeftArrow = Instance.new("TextButton")
+LeftArrow.Parent = Title
+LeftArrow.BackgroundTransparency = 1
+LeftArrow.Position = UDim2.new(1, -150, 0, 0)
+LeftArrow.Size = UDim2.new(0, 30, 1, 0)
+LeftArrow.Font = Enum.Font.GothamBold
+LeftArrow.Text = "<"
+LeftArrow.TextColor3 = Color3.fromRGB(255, 255, 255)
+LeftArrow.TextSize = 20
+local RightArrow = Instance.new("TextButton")
+RightArrow.Parent = Title
+RightArrow.BackgroundTransparency = 1
+RightArrow.Position = UDim2.new(1, -60, 0, 0)
+RightArrow.Size = UDim2.new(0, 30, 1, 0)
+RightArrow.Font = Enum.Font.GothamBold
+RightArrow.Text = ">"
+RightArrow.TextColor3 = Color3.fromRGB(255, 255, 255)
+RightArrow.TextSize = 20
+-- Lógica de las Flechas
+local currentTab = 1
+local function updateTabs()
+if currentTab == 1 then
+InfoTab.Visible = true
+MainTab.Visible = false
+TabLabel.Text = "Info"
+else
+InfoTab.Visible = false
+MainTab.Visible = true
+TabLabel.Text = "Main"
 end
-
-CreateInfoLine("Nombre del Creador: JoseAngel_Blox", Color3.fromRGB(180, 80, 200))
-CreateInfoLine("Fecha de lanzamiento: 07/06/2026", Color3.fromRGB(255, 255, 255))
-CreateInfoLine("Versión: 1.3", Color3.fromRGB(255, 255, 255))
-CreateInfoLine("Script Premium 100% SIN librerías externas", Color3.fromRGB(180, 80, 200))
-CreateInfoLine("Funciones Pro + Premium - Todas con interruptores", Color3.fromRGB(255, 255, 255))
-
--- === MAIN - 20+ FUNCIONES PREMIUM + PRO ===
-local function CreateToggle(name, state, callback)
-    local toggleFrame = Instance.new("Frame")
-    toggleFrame.Size = UDim2.new(1, -20, 0, 40)
-    toggleFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
-    toggleFrame.Parent = MainContent
-    local tCorner = Instance.new("UICorner")
-    tCorner.CornerRadius = UDim.new(0, 8)
-    tCorner.Parent = toggleFrame
-
-    local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(0.7, 0, 1, 0)
-    title.BackgroundTransparency = 1
-    title.Text = name
-    title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    title.TextScaled = true
-    title.Font = Enum.Font.GothamBold
-    title.Parent = toggleFrame
-
-    local toggleButton = Instance.new("TextButton")
-    toggleButton.Size = UDim2.new(0, 60, 0, 30)
-    toggleButton.Position = UDim2.new(1, -70, 0.5, -15)
-    toggleButton.BackgroundColor3 = state and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(255, 50, 50)
-    toggleButton.Text = state and "ON" or "OFF"
-    toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    toggleButton.TextScaled = true
-    toggleButton.Font = Enum.Font.GothamBold
-    toggleButton.Parent = toggleFrame
-    local tCorner2 = Instance.new("UICorner")
-    tCorner2.CornerRadius = UDim.new(0, 6)
-    tCorner2.Parent = toggleButton
-
-    toggleButton.MouseButton1Click:Connect(function()
-        state = not state
-        toggleButton.Text = state and "ON" or "OFF"
-        toggleButton.BackgroundColor3 = state and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(255, 50, 50)
-        callback(state)
-    end)
-    return toggleFrame
 end
-
--- FUNCIONES
-CreateToggle("God Mode (Invulnerabilidad)", GodMode, function(v)
-    GodMode = v
-    if v then
-        game:GetService("Players").LocalPlayer.Character.Humanoid.MaxHealth = math.huge
-        game:GetService("Players").LocalPlayer.Character.Humanoid.Health = math.huge
-    end
-end)
-
-CreateToggle("ESP (Box + Nombre + Salud)", ESPEnabled, function(v)
-    ESPEnabled = v
-    -- Código ESP simple (cajas y nombres en jugadores)
-    if v then
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr \~= LocalPlayer and plr.Character then
-                local box = Instance.new("BoxHandleAdornment")
-                box.Size = Vector3.new(4, 6, 4)
-                box.Color3 = Color3.fromRGB(255, 0, 0)
-                box.AlwaysOnTop = true
-                box.Parent = plr.Character
-                -- Nombre
-                local nametag = Instance.new("BillboardGui")
-                nametag.Size = UDim2.new(0, 200, 0, 50)
-                nametag.StudsOffset = Vector3.new(0, 4, 0)
-                local txt = Instance.new("TextLabel")
-                txt.Text = plr.Name .. " [HP: " .. (plr.Character:FindFirstChild("Humanoid") and plr.Character.Humanoid.Health or 0) .. "]"
-                txt.BackgroundTransparency = 1
-                txt.TextColor3 = Color3.fromRGB(255, 255, 255)
-                txt.TextScaled = true
-                txt.Parent = nametag
-                nametag.Parent = plr.Character
-            end
-        end
-    else
-        -- Limpiar ESP (simplificado)
-    end
-end)
-
-CreateToggle("Auto Items (Recolecta todo)", AutoItems, function(v) AutoItems = v end)
-CreateToggle("Noclip", Noclip, function(v) Noclip = v end)
-CreateToggle("Fly", FlyEnabled, function(v) FlyEnabled = v end)
-CreateToggle("Infinite Stamina", InfiniteStamina, function(v) InfiniteStamina = v end)
-CreateToggle("Fullbright", Fullbright, function(v) Fullbright = v end)
-CreateToggle("No Fog", NoFog, function(v) NoFog = v end)
-CreateToggle("Auto Farm Tokens", AutoFarmTokens, function(v) AutoFarmTokens = v end)
-CreateToggle("Kill Piggy", KillPiggy, function(v) KillPiggy = v end)
-CreateToggle("Super Speed", SuperSpeed, function(v) SuperSpeed = v end)
-CreateToggle("No Knockback", NoKnockback, function(v) NoKnockback = v end)
-CreateToggle("Auto Eat", AutoEat, function(v) AutoEat = v end)
-CreateToggle("Auto Boss", AutoBoss, function(v) AutoBoss = v end)
-CreateToggle("Auto Chapter", AutoChapter, function(v) AutoChapter = v end)
-CreateToggle("Infinite Cash", InfiniteCash, function(v) InfiniteCash = v end)
-CreateToggle("Anti AFK", AntiAFK, function(v) AntiAFK = v end)
-CreateToggle("Lock Camera", LockCamera, function(v) LockCamera = v end)
-
--- Sliders (WalkSpeed y JumpPower)
-local function CreateSlider(name, min, max, value, callback)
-    local sliderFrame = Instance.new("Frame")
-    sliderFrame.Size = UDim2.new(1, -20, 0, 50)
-    sliderFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
-    sliderFrame.Parent = MainContent
-    local sCorner = Instance.new("UICorner")
-    sCorner.CornerRadius = UDim.new(0, 8)
-    sCorner.Parent = sliderFrame
-
-    local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(0.4, 0, 0.4, 0)
-    title.BackgroundTransparency = 1
-    title.Text = name .. ": " .. value
-    title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    title.TextScaled = true
-    title.Font = Enum.Font.Gotham
-    title.Parent = sliderFrame
-
-    local bar = Instance.new("Frame")
-    bar.Size = UDim2.new(0.6, 0, 0.3, 0)
-    bar.Position = UDim2.new(0.4, 0, 0.5, -5)
-    bar.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-    bar.Parent = sliderFrame
-    local bCorner = Instance.new("UICorner")
-    bCorner.CornerRadius = UDim.new(0, 6)
-    bCorner.Parent = bar
-
-    local fill = Instance.new("Frame")
-    fill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
-    fill.BackgroundColor3 = Color3.fromRGB(180, 80, 200)
-    fill.Parent = bar
-    local fCorner = Instance.new("UICorner")
-    fCorner.CornerRadius = UDim.new(0, 6)
-    fCorner.Parent = fill
-
-    local dragging = false
-    bar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-        end
-    end)
-
-    bar.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
-        end
-    end)
-
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            local rel = (input.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X
-            value = math.clamp(min + (max - min) * rel, min, max)
-            fill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
-            title.Text = name .. ": " .. math.floor(value)
-            callback(value)
-        end
-    end)
-
-    return sliderFrame
+LeftArrow.MouseButton1Click:Connect(function() currentTab = 1 updateTabs() end)
+RightArrow.MouseButton1Click:Connect(function() currentTab = 2 updateTabs() end)
+-- Contenido de la Pestaña "Info"
+local InfoText = Instance.new("TextLabel")
+InfoText.Parent = InfoTab
+InfoText.BackgroundTransparency = 1
+InfoText.Size = UDim2.new(1, 0, 1, 0)
+InfoText.Font = Enum.Font.Gotham
+InfoText.TextColor3 = Color3.fromRGB(220, 220, 220)
+InfoText.TextSize = 16
+InfoText.Text = "Nombre del Creador: JoseAngel_Blox\nFecha de Lanzamiento: 09/07/2026\nVersión: 1.2\nJuego: Piggy"
+InfoText.TextYAlignment = Enum.TextYAlignment.Center
+-- Función constructora de Interruptores (Toggles)
+local function CreateToggle(name, parent, callback)
+local Frame = Instance.new("Frame")
+Frame.Parent = parent
+Frame.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+Frame.Size = UDim2.new(0, 420, 0, 35)
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0, 6)
+Corner.Parent = Frame
+local Label = Instance.new("TextLabel")
+Label.Parent = Frame
+Label.BackgroundTransparency = 1
+Label.Position = UDim2.new(0, 15, 0, 0)
+Label.Size = UDim2.new(0.7, 0, 1, 0)
+Label.Font = Enum.Font.Gotham
+Label.Text = name
+Label.TextColor3 = Color3.fromRGB(220, 220, 220)
+Label.TextSize = 13
+Label.TextXAlignment = Enum.TextXAlignment.Left
+local Button = Instance.new("TextButton")
+Button.Parent = Frame
+Button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Button.Position = UDim2.new(1, -55, 0.5, -10)
+Button.Size = UDim2.new(0, 40, 0, 20)
+Button.Text = ""
+local BtnCorner = Instance.new("UICorner")
+BtnCorner.CornerRadius = UDim.new(1, 0)
+BtnCorner.Parent = Button
+local Indicator = Instance.new("Frame")
+Indicator.Parent = Button
+Indicator.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+Indicator.Position = UDim2.new(0, 2, 0, 2)
+Indicator.Size = UDim2.new(0, 16, 0, 16)
+local IndCorner = Instance.new("UICorner")
+IndCorner.CornerRadius = UDim.new(1, 0)
+IndCorner.Parent = Indicator
+local toggled = false
+Button.MouseButton1Click:Connect(function()
+toggled = not toggled
+if toggled then
+Indicator:TweenPosition(UDim2.new(1, -18, 0, 2), "Out", "Quad", 0.2, true)
+Indicator.BackgroundColor3 = Color3.fromRGB(60, 255, 60)
+else
+Indicator:TweenPosition(UDim2.new(0, 2, 0, 2), "Out", "Quad", 0.2, true)
+Indicator.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 end
-
-CreateSlider("WalkSpeed", 16, 200, WalkSpeedValue, function(v) WalkSpeedValue = v end)
-CreateSlider("JumpPower", 50, 200, JumpPowerValue, function(v) JumpPowerValue = v end)
-
--- Botón para guardar configuración (ejemplo)
-local SaveButton = Instance.new("TextButton")
-SaveButton.Size = UDim2.new(0.9, 0, 0, 40)
-SaveButton.Position = UDim2.new(0.05, 0, 1, -50)
-SaveButton.BackgroundColor3 = Color3.fromRGB(180, 80, 200)
-SaveButton.Text = "Guardar Configuración"
-SaveButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-SaveButton.TextScaled = true
-SaveButton.Font = Enum.Font.GothamBold
-SaveButton.Parent = MainContent
-local sbCorner = Instance.new("UICorner")
-sbCorner.CornerRadius = UDim.new(0, 8)
-sbCorner.Parent = SaveButton
-
-SaveButton.MouseButton1Click:Connect(function()
-    -- Aquí podrías guardar en un archivo local (getgenv o table)
-    game:GetService("Players").LocalPlayer:Kick("Configuración guardada (demo)")
+callback(toggled)
 end)
-
--- Noclip + Fly (actualización cada frame)
-RunService.RenderStepped:Connect(function()
-    local char = LocalPlayer.Character
-    if not char then return end
-    local root = char:FindFirstChild("HumanoidRootPart")
-    local hum = char:FindFirstChild("Humanoid")
-
-    -- WalkSpeed y JumpPower
-    if hum then
-        hum.WalkSpeed = WalkSpeedValue
-        hum.JumpPower = JumpPowerValue
-    end
-
-    -- Noclip
-    if Noclip and root then
-        for _, part in ipairs(char:GetChildren()) do
-            if part:IsA("BasePart") then part.CanCollide = false end
-        end
-    end
-
-    -- Fly (simple WASD + espacio + shift)
-    if FlyEnabled and root then
-        local bv = Instance.new("BodyVelocity")
-        bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-        bv.Velocity = Vector3.new(0, 0, 0)
-        bv.Parent = root
-
-        local bg = Instance.new("BodyGyro")
-        bg.MaxTorque = Vector3.new(1e5, 1e5, 1e5)
-        bg.P = 1e5
-        bg.Parent = root
-
-        if UserInputService:IsKeyDown(Enum.KeyCode.W) then bv.Velocity = bv.Velocity + Camera.CFrame.LookVector * 50 end
-        if UserInputService:IsKeyDown(Enum.KeyCode.S) then bv.Velocity = bv.Velocity - Camera.CFrame.LookVector * 50 end
-        if UserInputService:IsKeyDown(Enum.KeyCode.A) then bv.Velocity = bv.Velocity - Camera.CFrame.RightVector * 50 end
-        if UserInputService:IsKeyDown(Enum.KeyCode.D) then bv.Velocity = bv.Velocity + Camera.CFrame.RightVector * 50 end
-        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then bv.Velocity = bv.Velocity + Vector3.new(0, 50, 0) end
-        if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then bv.Velocity = bv.Velocity - Vector3.new(0, 50, 0) end
-
-        bg.CFrame = Camera.CFrame
-        task.wait(0.1)
-        bv:Destroy()
-        bg:Destroy()
-    end
-
-    -- ESP actualiza (opcional)
-    if ESPEnabled then
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr \~= LocalPlayer and plr.Character then
-                -- Aquí podrías actualizar boxes cada frame
-            end
-        end
-    end
-
-    -- Anti AFK
-    if AntiAFK then
-        if tick() - lastAFK > 30 then
-            UserInputService:SendKeyEvent(true, Enum.KeyCode.W, false, nil)
-            task.wait(0.1)
-            UserInputService:SendKeyEvent(false, Enum.KeyCode.W, false, nil)
-            lastAFK = tick()
-        end
-    end
+end
+-- ==========================================================
+-- LÓGICA DE FUNCIONES Y HACKS
+-- ==========================================================
+local Toggles = {
+ESP = false,
+ESPItems = false,
+SpeedJump = false,
+Noclip = false,
+AutoGrab = false,
+AutoUnlock = false,
+InfiniteStamina = false,
+Godmode = false
+}
+-- Función auxiliar para el ESP
+local function addESP(part, name, color)
+local bg = Instance.new("BillboardGui")
+bg.Name = "ProESP"
+bg.AlwaysOnTop = true
+bg.Size = UDim2.new(0, 200, 0, 50)
+bg.ExtentsOffset = Vector3.new(0, 2.5, 0)
+local tl = Instance.new("TextLabel")
+tl.Parent = bg
+tl.BackgroundTransparency = 1
+tl.Size = UDim2.new(1, 0, 1, 0)
+tl.Font = Enum.Font.GothamBold
+tl.Text = name
+tl.TextColor3 = color
+tl.TextSize = 13
+tl.TextStrokeTransparency = 0.3
+tl.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+bg.Parent = part
+-- Actualizar distancia en vivo
+task.spawn(function()
+while bg.Parent and (Toggles.ESP or Toggles.ESPItems) do
+pcall(function()
+local playerPos = LocalPlayer.Character.HumanoidRootPart.Position
+local dist = math.floor((playerPos - part.Position).Magnitude)
+tl.Text = name .. " [" .. dist .. " studs]"
 end)
-
-local lastAFK = tick()
-
--- Notificación de carga
-local notif = Instance.new("TextLabel")
-notif.Size = UDim2.new(0.6, 0, 0, 40)
-notif.Position = UDim2.new(0.2, 0, 1, -100)
-notif.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-notif.Text = "JoseAngel_Blox Piggy PRO cargado correctamente ✓"
-notif.TextColor3 = Color3.fromRGB(0, 0, 0)
-notif.TextScaled = true
-notif.Font = Enum.Font.GothamBold
-notif.Parent = ScreenGui
-local nCorner = Instance.new("UICorner")
-nCorner.CornerRadius = UDim.new(0, 10)
-nCorner.Parent = notif
-task.wait(3)
-notif:Destroy()
-
-print("JoseAngel_Blox Piggy PRO v1.3 cargado - 20+ funciones premium activadas")
+task.wait(0.2)
+end
+end)
+end
+-- 1. ESP (Jugadores / Bots / Piggy)
+CreateToggle("ESP (Jugadores = Azul, Bots/Piggy = Rojo)", MainTab, function(state)
+Toggles.ESP = state
+if state then
+task.spawn(function()
+while Toggles.ESP do
+pcall(function()
+for _, v in pairs(Workspace:GetDescendants()) do
+if v:IsA("Model") and v:FindFirstChild("HumanoidRootPart") and v.Name ~= LocalPlayer.Name then
+if not v.HumanoidRootPart:FindFirstChild("ProESP") then
+local isPlayer = Players:GetPlayerFromCharacter(v)
+local color = isPlayer and Color3.fromRGB(50, 150, 255) or Color3.fromRGB(255, 50, 50)
+local name = isPlayer and v.Name or "BOT / PIGGY"
+addESP(v.HumanoidRootPart, name, color)
+end
+end
+end
+end)
+task.wait(2)
+end
+-- Limpieza al apagar
+for _, v in pairs(Workspace:GetDescendants()) do
+if v.Name == "ProESP" and (v.TextLabel.TextColor3 == Color3.fromRGB(50,150,255) or v.TextLabel.TextColor3 == Color3.fromRGB(255,50,50)) then
+v:Destroy()
+end
+end
+end)
+end
+end)
+-- 2. ESP Items
+CreateToggle("ESP Items (Llaves, Objetos)", MainTab, function(state)
+Toggles.ESPItems = state
+if state then
+task.spawn(function()
+while Toggles.ESPItems do
+pcall(function()
+for _, v in pairs(Workspace:GetDescendants()) do
+if v:IsA("BasePart") and (v.Name:lower():find("key") or v.Name:lower():find("item")) then
+if not v:FindFirstChild("ProESP") then
+addESP(v, v.Name, Color3.fromRGB(255, 215, 0)) -- Color dorado
+end
+end
+end
+end)
+task.wait(2)
+end
+-- Limpieza de Items ESP
+for _, v in pairs(Workspace:GetDescendants()) do
+if v.Name == "ProESP" and v.TextLabel.TextColor3 == Color3.fromRGB(255, 215, 0) then
+v:Destroy()
+end
+end
+end)
+end
+end)
+-- 3. Speed + Jump
+CreateToggle("Speed + Jump", MainTab, function(state)
+Toggles.SpeedJump = state
+task.spawn(function()
+while Toggles.SpeedJump do
+pcall(function()
+local human = LocalPlayer.Character.Humanoid
+human.WalkSpeed = 35
+human.JumpPower = 65
+human.UseJumpPower = true
+end)
+task.wait(0.5)
+end
+-- Devolver a la normalidad al apagar
+pcall(function()
+LocalPlayer.Character.Humanoid.WalkSpeed = 16
+LocalPlayer.Character.Humanoid.JumpPower = 50
+end)
+end)
+end)
+-- 4. Noclip (Atravesar paredes)
+CreateToggle("Noclip (Atravesar Objetos)", MainTab, function(state)
+Toggles.Noclip = state
+end)
+RunService.Stepped:Connect(function()
+if Toggles.Noclip and LocalPlayer.Character then
+for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+if part:IsA("BasePart") then
+part.CanCollide = false
+end
+end
+end
+end)
+-- 5. Auto Grab Items
+CreateToggle("Auto Grab Items (Cercanos)", MainTab, function(state)
+Toggles.AutoGrab = state
+task.spawn(function()
+while Toggles.AutoGrab do
+pcall(function()
+for _, v in pairs(Workspace:GetDescendants()) do
+if v:IsA("ClickDetector") or v:IsA("ProximityPrompt") then
+local parentName = v.Parent.Name:lower()
+if parentName:find("key") or parentName:find("item") then
+local dist = (LocalPlayer.Character.HumanoidRootPart.Position - v.Parent.Position).Magnitude
+if dist <= 15 then -- Si estás a menos de 15 studs, lo recoge automático
+if v:IsA("ClickDetector") then fireclickdetector(v) end
+if v:IsA("ProximityPrompt") then fireproximityprompt(v) end
+end
+end
+end
+end
+end)
+task.wait(0.5)
+end
+end)
+end)
+-- 6. Auto Unlock Doors
+CreateToggle("Auto Unlock Doors", MainTab, function(state)
+Toggles.AutoUnlock = state
+task.spawn(function()
+while Toggles.AutoUnlock do
+pcall(function()
+for _, v in pairs(Workspace:GetDescendants()) do
+if v:IsA("ClickDetector") or v:IsA("ProximityPrompt") then
+local parentName = v.Parent.Name:lower()
+if parentName:find("door") or parentName:find("lock") then
+local dist = (LocalPlayer.Character.HumanoidRootPart.Position - v.Parent.Position).Magnitude
+if dist <= 15 then
+if v:IsA("ClickDetector") then fireclickdetector(v) end
+if v:IsA("ProximityPrompt") then fireproximityprompt(v) end
+end
+end
+end
+end
+end)
+task.wait(0.5)
+end
+end)
+end)
+-- 7. Infinite Stamina
+CreateToggle("Infinite Stamina", MainTab, function(state)
+Toggles.InfiniteStamina = state
+task.spawn(function()
+while Toggles.InfiniteStamina do
+pcall(function()
+-- Evita que la energía baje reseteando los valores del personaje
+if LocalPlayer.Character:FindFirstChild("Energy") then
+LocalPlayer.Character.Energy.Value = 100
+end
+if LocalPlayer.Character:FindFirstChild("Stamina") then
+LocalPlayer.Character.Stamina.Value = 100
+end
+end)
+task.wait(0.1)
+end
+end)
+end)
+-- 8. Godmode (Invencible)
+CreateToggle("Godmode (Invencible)", MainTab, function(state)
+Toggles.Godmode = state
+task.spawn(function()
+while Toggles.Godmode do
+pcall(function()
+-- Una técnica común de Godmode en juegos con bots es borrar las partes que los bots usan para detectar el daño (Touch Interests)
+for _, bot in pairs(Workspace:GetDescendants()) do
+if bot:IsA("Model") and bot.Name ~= LocalPlayer.Name and bot:FindFirstChild("HumanoidRootPart") then
+for _, weapon in pairs(bot:GetDescendants()) do
+if weapon:IsA("TouchTransmitter") then
+weapon:Destroy()
+end
+end
+end
+end
+end)
+task.wait(1)
+end
+end)
+end)
