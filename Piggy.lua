@@ -1,83 +1,220 @@
 -- ==========================================================
 -- Nombre del Creador: JoseAngel_Blox
 -- Fecha de Lanzamiento: 09/07/2026
--- Versión: 2.0 - ALL MAPS FIX
+-- Versión: 3.0 - ULTIMATE FIX
 -- Juego: Piggy (Libro 1 & Libro 2)
--- CORRECIONES: ESP Items universal + Auto Unlock mejorado
 -- ==========================================================
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
 -- ==========================================================
--- INTERFAZ DE USUARIO (GUI)
+-- FUNCIÓN PARA DESTRUIR EL SCRIPT LIMPIAMENTE
+-- ==========================================================
+local function DestroyScript()
+	-- Limpiar ESPs
+	for _, v in pairs(Workspace:GetDescendants()) do
+		if v.Name == "ProESP" then
+			pcall(function() v:Destroy() end)
+		end
+	end
+	-- Limpiar GUI
+	local gui = CoreGui:FindFirstChild("JoseAngel_Blox_Piggy_PRO")
+	if gui then gui:Destroy() end
+	gui = LocalPlayer:FindFirstChild("PlayerGui"):FindFirstChild("JoseAngel_Blox_Piggy_PRO")
+	if gui then gui:Destroy() end
+	-- Resetear stats del personaje
+	pcall(function()
+		LocalPlayer.Character.Humanoid.WalkSpeed = 16
+		LocalPlayer.Character.Humanoid.JumpPower = 50
+	end)
+	print("JoseAngel_Blox Piggy PRO - Script destruido correctamente.")
+end
+
+-- ==========================================================
+-- INTERFAZ DE USUARIO (GUI) CON DISEÑO MEJORADO
 -- ==========================================================
 local PiggyHub = Instance.new("ScreenGui")
 PiggyHub.Name = "JoseAngel_Blox_Piggy_PRO"
--- Protegemos la GUI colocándola en CoreGui si el ejecutor lo permite
+PiggyHub.ResetOnSpawn = false
+
 local success, err = pcall(function() PiggyHub.Parent = CoreGui end)
 if not success then PiggyHub.Parent = LocalPlayer:WaitForChild("PlayerGui") end
--- Marco Principal (Bajito y ancho)
+
+-- ==========================================================
+-- FONDO DE PANTALLA BONITO (OVERLAY GRADIENTE)
+-- ==========================================================
+local BackgroundOverlay = Instance.new("Frame")
+BackgroundOverlay.Name = "BackgroundOverlay"
+BackgroundOverlay.Parent = PiggyHub
+BackgroundOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+BackgroundOverlay.BackgroundTransparency = 0.55
+BackgroundOverlay.Size = UDim2.new(1, 0, 1, 0)
+BackgroundOverlay.ZIndex = 0
+
+local GradientOverlay = Instance.new("Frame")
+GradientOverlay.Name = "GradientOverlay"
+GradientOverlay.Parent = BackgroundOverlay
+GradientOverlay.BackgroundColor3 = Color3.fromRGB(120, 20, 200)
+GradientOverlay.BackgroundTransparency = 0.85
+GradientOverlay.Size = UDim2.new(1, 0, 1, 0)
+GradientOverlay.ZIndex = 1
+
+local GlowTop = Instance.new("Frame")
+GlowTop.Name = "GlowTop"
+GlowTop.Parent = BackgroundOverlay
+GlowTop.BackgroundColor3 = Color3.fromRGB(200, 80, 255)
+GlowTop.BackgroundTransparency = 0.92
+GlowTop.Size = UDim2.new(1, 0, 0, 8)
+GlowTop.Position = UDim2.new(0, 0, 0, 0)
+GlowTop.ZIndex = 2
+
+local GlowBottom = Instance.new("Frame")
+GlowBottom.Name = "GlowBottom"
+GlowBottom.Parent = BackgroundOverlay
+GlowBottom.BackgroundColor3 = Color3.fromRGB(80, 20, 200)
+GlowBottom.BackgroundTransparency = 0.92
+GlowBottom.Size = UDim2.new(1, 0, 0, 8)
+GlowBottom.Position = UDim2.new(0, 0, 1, -8)
+GlowBottom.ZIndex = 2
+
+-- Marco Principal
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = PiggyHub
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30) -- Tema oscuro moderno
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+MainFrame.BorderSizePixel = 0
 MainFrame.Position = UDim2.new(0.5, -225, 0.5, -125)
-MainFrame.Size = UDim2.new(0, 450, 0, 250)
+MainFrame.Size = UDim2.new(0, 450, 0, 260)
 MainFrame.Active = true
 MainFrame.Draggable = true
--- Bordes redondeados para el marco principal
+MainFrame.ZIndex = 5
+
+-- Borde con glow
+local FrameBorder = Instance.new("Frame")
+FrameBorder.Name = "FrameBorder"
+FrameBorder.Parent = MainFrame
+FrameBorder.BackgroundColor3 = Color3.fromRGB(140, 50, 230)
+FrameBorder.BackgroundTransparency = 0.6
+FrameBorder.Size = UDim2.new(1, 0, 1, 0)
+FrameBorder.ZIndex = 4
+local BorderCorner = Instance.new("UICorner")
+BorderCorner.CornerRadius = UDim.new(0, 17)
+BorderCorner.Parent = FrameBorder
+
 local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 15)
 UICorner.Parent = MainFrame
--- Barra de Título
+
+-- Barra de Título con estilo
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
 Title.Parent = MainFrame
-Title.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+Title.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+Title.BorderSizePixel = 0
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "  JoseAngel_Blox Piggy PRO v2.0"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Text = "  ⚡ JoseAngel_Blox Piggy PRO v3.0"
+Title.TextColor3 = Color3.fromRGB(235, 235, 255)
 Title.TextSize = 16
 Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.ZIndex = 7
+
 local TitleCorner = Instance.new("UICorner")
 TitleCorner.CornerRadius = UDim.new(0, 15)
 TitleCorner.Parent = Title
--- Parche para que el borde inferior del título no sea redondeado
+
 local TitleBlock = Instance.new("Frame")
 TitleBlock.Size = UDim2.new(1, 0, 0, 10)
 TitleBlock.Position = UDim2.new(0, 0, 1, -10)
-TitleBlock.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+TitleBlock.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 TitleBlock.BorderSizePixel = 0
 TitleBlock.Parent = Title
--- Contenedores de las Pestañas (Tabs)
+TitleBlock.ZIndex = 7
+
+-- Separador decorativo bajo el título
+local SepLine = Instance.new("Frame")
+SepLine.Name = "SepLine"
+SepLine.Parent = MainFrame
+SepLine.BackgroundColor3 = Color3.fromRGB(140, 50, 230)
+SepLine.BackgroundTransparency = 0.5
+SepLine.Size = UDim2.new(0.9, 0, 0, 1)
+SepLine.Position = UDim2.new(0.05, 0, 0, 40)
+SepLine.ZIndex = 7
+SepLine.BorderSizePixel = 0
+
+-- ==========================================================
+-- BOTÓN DE DESTRUIR (X) - QUITAR EL SCRIPT
+-- ==========================================================
+local DestroyBtn = Instance.new("TextButton")
+DestroyBtn.Parent = Title
+DestroyBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
+DestroyBtn.BackgroundTransparency = 0.2
+DestroyBtn.Position = UDim2.new(1, -32, 0.5, -10)
+DestroyBtn.Size = UDim2.new(0, 20, 0, 20)
+DestroyBtn.Font = Enum.Font.GothamBold
+DestroyBtn.Text = "✕"
+DestroyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+DestroyBtn.TextSize = 14
+DestroyBtn.ZIndex = 10
+DestroyBtn.BorderSizePixel = 0
+
+local DBtnCorner = Instance.new("UICorner")
+DBtnCorner.CornerRadius = UDim.new(1, 0)
+DBtnCorner.Parent = DestroyBtn
+
+DestroyBtn.MouseButton1Click:Connect(function()
+	DestroyScript()
+end)
+
+DestroyBtn.MouseEnter:Connect(function()
+	TweenService:Create(DestroyBtn, TweenInfo.new(0.15), {BackgroundTransparency = 0}):Play()
+end)
+DestroyBtn.MouseLeave:Connect(function()
+	TweenService:Create(DestroyBtn, TweenInfo.new(0.15), {BackgroundTransparency = 0.2}):Play()
+end)
+
+-- ==========================================================
+-- PESTAÑAS
+-- ==========================================================
 local InfoTab = Instance.new("Frame")
 InfoTab.Name = "InfoTab"
 InfoTab.Parent = MainFrame
 InfoTab.BackgroundTransparency = 1
-InfoTab.Position = UDim2.new(0, 0, 0, 40)
-InfoTab.Size = UDim2.new(1, 0, 1, -40)
+InfoTab.Position = UDim2.new(0, 0, 0, 44)
+InfoTab.Size = UDim2.new(1, 0, 1, -48)
 InfoTab.Visible = true
+InfoTab.ZIndex = 7
+
 local MainTab = Instance.new("ScrollingFrame")
 MainTab.Name = "MainTab"
 MainTab.Parent = MainFrame
 MainTab.BackgroundTransparency = 1
-MainTab.Position = UDim2.new(0, 0, 0, 40)
-MainTab.Size = UDim2.new(1, 0, 1, -40)
+MainTab.BorderSizePixel = 0
+MainTab.Position = UDim2.new(0, 0, 0, 44)
+MainTab.Size = UDim2.new(1, 0, 1, -48)
 MainTab.ScrollBarThickness = 4
+MainTab.ScrollBarImageColor3 = Color3.fromRGB(140, 50, 230)
+MainTab.CanvasSize = UDim2.new(0, 0, 0, 0)
 MainTab.Visible = false
+MainTab.ZIndex = 7
+
 local UIListLayout = Instance.new("UIListLayout")
 UIListLayout.Parent = MainTab
-UIListLayout.Padding = UDim.new(0, 8)
+UIListLayout.Padding = UDim.new(0, 6)
 UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
 local UIPadding = Instance.new("UIPadding")
 UIPadding.Parent = MainTab
-UIPadding.PaddingTop = UDim.new(0, 10)
-UIPadding.PaddingBottom = UDim.new(0, 10)
--- Sistema de Flechas para navegar
+UIPadding.PaddingTop = UDim.new(0, 8)
+UIPadding.PaddingBottom = UDim.new(0, 8)
+
+-- Navegación de pestañas
 local TabLabel = Instance.new("TextLabel")
 TabLabel.Parent = Title
 TabLabel.BackgroundTransparency = 1
@@ -87,6 +224,8 @@ TabLabel.Font = Enum.Font.Gotham
 TabLabel.Text = "Info"
 TabLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
 TabLabel.TextSize = 14
+TabLabel.ZIndex = 7
+
 local LeftArrow = Instance.new("TextButton")
 LeftArrow.Parent = Title
 LeftArrow.BackgroundTransparency = 1
@@ -94,8 +233,10 @@ LeftArrow.Position = UDim2.new(1, -150, 0, 0)
 LeftArrow.Size = UDim2.new(0, 30, 1, 0)
 LeftArrow.Font = Enum.Font.GothamBold
 LeftArrow.Text = "<"
-LeftArrow.TextColor3 = Color3.fromRGB(255, 255, 255)
+LeftArrow.TextColor3 = Color3.fromRGB(200, 200, 255)
 LeftArrow.TextSize = 20
+LeftArrow.ZIndex = 7
+
 local RightArrow = Instance.new("TextButton")
 RightArrow.Parent = Title
 RightArrow.BackgroundTransparency = 1
@@ -103,103 +244,135 @@ RightArrow.Position = UDim2.new(1, -60, 0, 0)
 RightArrow.Size = UDim2.new(0, 30, 1, 0)
 RightArrow.Font = Enum.Font.GothamBold
 RightArrow.Text = ">"
-RightArrow.TextColor3 = Color3.fromRGB(255, 255, 255)
+RightArrow.TextColor3 = Color3.fromRGB(200, 200, 255)
 RightArrow.TextSize = 20
--- Lógica de las Flechas
+RightArrow.ZIndex = 7
+
 local currentTab = 1
 local function updateTabs()
-if currentTab == 1 then
-InfoTab.Visible = true
-MainTab.Visible = false
-TabLabel.Text = "Info"
-else
-InfoTab.Visible = false
-MainTab.Visible = true
-TabLabel.Text = "Main"
+	if currentTab == 1 then
+		InfoTab.Visible = true
+		MainTab.Visible = false
+		TabLabel.Text = "Info"
+	else
+		InfoTab.Visible = false
+		MainTab.Visible = true
+		TabLabel.Text = "Main"
+	end
 end
-end
+
 LeftArrow.MouseButton1Click:Connect(function() currentTab = 1 updateTabs() end)
 RightArrow.MouseButton1Click:Connect(function() currentTab = 2 updateTabs() end)
--- Contenido de la Pestaña "Info"
+
+-- Info Tab content
 local InfoText = Instance.new("TextLabel")
 InfoText.Parent = InfoTab
 InfoText.BackgroundTransparency = 1
 InfoText.Size = UDim2.new(1, 0, 1, 0)
 InfoText.Font = Enum.Font.Gotham
-InfoText.TextColor3 = Color3.fromRGB(220, 220, 220)
-InfoText.TextSize = 16
-InfoText.Text = "Nombre del Creador: JoseAngel_Blox\nFecha de Lanzamiento: 09/07/2026\nVersión: 2.0 (All Maps Fix)\nJuego: Piggy (Libro 1 & Libro 2)\n\n✅ ESP Items universal\n✅ Auto Unlock mejorado"
+InfoText.TextColor3 = Color3.fromRGB(210, 210, 230)
+InfoText.TextSize = 15
+InfoText.Text = "  👑 JoseAngel_Blox Piggy PRO\n\n  📌 Versión 3.0 - Ultimate Fix\n  🎮 Piggy (Libro 1 & Libro 2)\n\n  ✅ ESP Items universal\n  ✅ Auto Unlock Doors mejorado\n  ✅ Diseño premium\n\n  ❌ Presiona ✕ para cerrar"
+InfoText.TextXAlignment = Enum.TextXAlignment.Left
 InfoText.TextYAlignment = Enum.TextYAlignment.Center
--- Función constructora de Interruptores (Toggles)
-local function CreateToggle(name, parent, callback)
-local Frame = Instance.new("Frame")
-Frame.Parent = parent
-Frame.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
-Frame.Size = UDim2.new(0, 420, 0, 35)
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0, 6)
-Corner.Parent = Frame
-local Label = Instance.new("TextLabel")
-Label.Parent = Frame
-Label.BackgroundTransparency = 1
-Label.Position = UDim2.new(0, 15, 0, 0)
-Label.Size = UDim2.new(0.7, 0, 1, 0)
-Label.Font = Enum.Font.Gotham
-Label.Text = name
-Label.TextColor3 = Color3.fromRGB(220, 220, 220)
-Label.TextSize = 13
-Label.TextXAlignment = Enum.TextXAlignment.Left
-local Button = Instance.new("TextButton")
-Button.Parent = Frame
-Button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-Button.Position = UDim2.new(1, -55, 0.5, -10)
-Button.Size = UDim2.new(0, 40, 0, 20)
-Button.Text = ""
-local BtnCorner = Instance.new("UICorner")
-BtnCorner.CornerRadius = UDim.new(1, 0)
-BtnCorner.Parent = Button
-local Indicator = Instance.new("Frame")
-Indicator.Parent = Button
-Indicator.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-Indicator.Position = UDim2.new(0, 2, 0, 2)
-Indicator.Size = UDim2.new(0, 16, 0, 16)
-local IndCorner = Instance.new("UICorner")
-IndCorner.CornerRadius = UDim.new(1, 0)
-IndCorner.Parent = Indicator
-local toggled = false
-Button.MouseButton1Click:Connect(function()
-toggled = not toggled
-if toggled then
-Indicator:TweenPosition(UDim2.new(1, -18, 0, 2), "Out", "Quad", 0.2, true)
-Indicator.BackgroundColor3 = Color3.fromRGB(60, 255, 60)
-else
-Indicator:TweenPosition(UDim2.new(0, 2, 0, 2), "Out", "Quad", 0.2, true)
-Indicator.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-end
-callback(toggled)
-end)
-end
+
 -- ==========================================================
--- LÓGICA DE FUNCIONES Y HACKS
+-- FUNCIÓN DE TOGGLE CON DISEÑO MEJORADO
+-- ==========================================================
+local function CreateToggle(name, parent, callback)
+	local Frame = Instance.new("Frame")
+	Frame.Parent = parent
+	Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+	Frame.BorderSizePixel = 0
+	Frame.Size = UDim2.new(0, 420, 0, 32)
+
+	local Corner = Instance.new("UICorner")
+	Corner.CornerRadius = UDim.new(0, 6)
+	Corner.Parent = Frame
+
+	-- Borde sutil al toggle
+	local TglBorder = Instance.new("Frame")
+	TglBorder.Parent = Frame
+	TglBorder.BackgroundColor3 = Color3.fromRGB(140, 50, 230)
+	TglBorder.BackgroundTransparency = 0.85
+	TglBorder.Size = UDim2.new(1, 0, 1, 0)
+	TglBorder.ZIndex = 6
+	local TglBorderCorner = Instance.new("UICorner")
+	TglBorderCorner.CornerRadius = UDim.new(0, 6)
+	TglBorderCorner.Parent = TglBorder
+
+	local Label = Instance.new("TextLabel")
+	Label.Parent = Frame
+	Label.BackgroundTransparency = 1
+	Label.Position = UDim2.new(0, 12, 0, 0)
+	Label.Size = UDim2.new(0.7, 0, 1, 0)
+	Label.Font = Enum.Font.Gotham
+	Label.Text = name
+	Label.TextColor3 = Color3.fromRGB(210, 210, 230)
+	Label.TextSize = 13
+	Label.TextXAlignment = Enum.TextXAlignment.Left
+	Label.ZIndex = 7
+
+	local Button = Instance.new("TextButton")
+	Button.Parent = Frame
+	Button.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+	Button.BorderSizePixel = 0
+	Button.Position = UDim2.new(1, -50, 0.5, -9)
+	Button.Size = UDim2.new(0, 38, 0, 18)
+	Button.Text = ""
+
+	local BtnCorner = Instance.new("UICorner")
+	BtnCorner.CornerRadius = UDim.new(1, 0)
+	BtnCorner.Parent = Button
+
+	local Indicator = Instance.new("Frame")
+	Indicator.Parent = Button
+	Indicator.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+	Indicator.Position = UDim2.new(0, 2, 0, 2)
+	Indicator.Size = UDim2.new(0, 14, 0, 14)
+	Indicator.BorderSizePixel = 0
+	local IndCorner = Instance.new("UICorner")
+	IndCorner.CornerRadius = UDim.new(1, 0)
+	IndCorner.Parent = Indicator
+
+	local toggled = false
+	Button.MouseButton1Click:Connect(function()
+		toggled = not toggled
+		if toggled then
+			TweenService:Create(Indicator, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				Position = UDim2.new(1, -16, 0, 2),
+				BackgroundColor3 = Color3.fromRGB(60, 220, 80)
+			}):Play()
+		else
+			TweenService:Create(Indicator, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				Position = UDim2.new(0, 2, 0, 2),
+				BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+			}):Play()
+		end
+		callback(toggled)
+	end)
+end
+
+-- ==========================================================
+-- LÓGICA DE FUNCIONES
 -- ==========================================================
 local Toggles = {
-ESP = false,
-ESPItems = false,
-SpeedJump = false,
-Noclip = false,
-AutoGrab = false,
-AutoUnlock = false,
-InfiniteStamina = false,
-Godmode = false
+	ESP = false,
+	ESPItems = false,
+	SpeedJump = false,
+	Noclip = false,
+	AutoGrab = false,
+	AutoUnlock = false,
+	InfiniteStamina = false,
+	Godmode = false
 }
+
 -- ==========================================================
 -- LISTA UNIVERSAL DE ÍTEMS (Libro 1 + Libro 2)
 -- ==========================================================
 local function isItemName(name)
 	local n = name:lower()
-	-- Llaves (todos los colores, ambos libros)
 	if n:find("key") then return true end
-	-- Herramientas / Objetos del Libro 1
 	local book1Items = {
 		"hammer", "wrench", "plank", "greengear", "redgear", "gas", "battery",
 		"redegg", "blueegg", "torch", "wood", "book", "syringe", "crossbow",
@@ -207,7 +380,6 @@ local function isItemName(name)
 		"munition", "arrow", "crank", "valve", "handle", "weed", "flowerpot",
 		"redbattery", "bluebattery", "keycard"
 	}
-	-- Herramientas / Objetos del Libro 2
 	local book2Items = {
 		"screwdriver", "broom", "scissors", "carrot", "ladder", "smoke",
 		"elevatorkey", "elevator_key", "lens", "crowbar", "gear", "plunger",
@@ -223,15 +395,15 @@ local function isItemName(name)
 end
 
 -- ==========================================================
--- LISTA DE PALABRAS RELACIONADAS A PUERTAS
+-- LISTA DE PUERTAS
 -- ==========================================================
 local function isDoorName(name)
 	local n = name:lower()
 	local doorKeywords = {
-		"door", "lock", "gate", "barrier", "obstacle", "fence", "wall",
-		"cage", "trap", "hold", "block", "barricade", "shield", "cover",
-		"entrance", "exit", "access", "panel", "hatch", "lid", "cover",
-		"window", "bars", "cell", "gateway", "portcullis", "fence"
+		"door", "lock", "gate", "barrier", "fence", "wall",
+		"cage", "trap", "hold", "block", "barricade", "hatch",
+		"entrance", "exit", "access", "panel", "cell", "bars",
+		"gateway", "window", "barrier", "lid"
 	}
 	for _, kw in pairs(doorKeywords) do
 		if n:find(kw) then return true end
@@ -239,8 +411,8 @@ local function isDoorName(name)
 	return false
 end
 
--- Función auxiliar para el ESP
-local function addESP(part, name, color, isItem)
+-- Función ESP
+local function addESP(part, name, color)
 	local bg = Instance.new("BillboardGui")
 	bg.Name = "ProESP"
 	bg.AlwaysOnTop = true
@@ -257,7 +429,6 @@ local function addESP(part, name, color, isItem)
 	tl.TextStrokeTransparency = 0.3
 	tl.TextStrokeColor3 = Color3.fromRGB(0,0,0)
 	bg.Parent = part
-	-- Actualizar distancia en vivo
 	task.spawn(function()
 		while bg.Parent and (Toggles.ESP or Toggles.ESPItems) do
 			pcall(function()
@@ -270,8 +441,8 @@ local function addESP(part, name, color, isItem)
 	end)
 end
 
--- 1. ESP (Jugadores / Bots / Piggy)
-CreateToggle("ESP (Jugadores = Azul, Bots/Piggy = Rojo)", MainTab, function(state)
+-- 1. ESP (Jugadores)
+CreateToggle("ESP (Jugadores/Bots)", MainTab, function(state)
 	Toggles.ESP = state
 	if state then
 		task.spawn(function()
@@ -282,15 +453,13 @@ CreateToggle("ESP (Jugadores = Azul, Bots/Piggy = Rojo)", MainTab, function(stat
 							if not v.HumanoidRootPart:FindFirstChild("ProESP") then
 								local isPlayer = Players:GetPlayerFromCharacter(v)
 								local color = isPlayer and Color3.fromRGB(50, 150, 255) or Color3.fromRGB(255, 50, 50)
-								local name = isPlayer and v.Name or "BOT / PIGGY"
-								addESP(v.HumanoidRootPart, name, color)
+								addESP(v.HumanoidRootPart, isPlayer and v.Name or "BOT / PIGGY", color)
 							end
 						end
 					end
 				end)
 				task.wait(2)
 			end
-			-- Limpieza al apagar
 			for _, v in pairs(Workspace:GetDescendants()) do
 				if v.Name == "ProESP" and (v.TextLabel.TextColor3 == Color3.fromRGB(50,150,255) or v.TextLabel.TextColor3 == Color3.fromRGB(255,50,50)) then
 					v:Destroy()
@@ -300,39 +469,26 @@ CreateToggle("ESP (Jugadores = Azul, Bots/Piggy = Rojo)", MainTab, function(stat
 	end
 end)
 
--- 2. ESP Items (VERSIÓN CORREGIDA - LISTA COMPLETA)
+-- 2. ESP Items (CORREGIDO - LISTA COMPLETA)
 CreateToggle("ESP Items (Llaves, Objetos)", MainTab, function(state)
 	Toggles.ESPItems = state
 	if state then
 		task.spawn(function()
 			while Toggles.ESPItems do
 				pcall(function()
-					-- Buscar TODOS los objetos que sean interactuables o tengan nombre de ítem
 					for _, v in pairs(Workspace:GetDescendants()) do
-						-- Caso 1: Es un BasePart con nombre de ítem conocido
 						if v:IsA("BasePart") and isItemName(v.Name) then
 							if not v:FindFirstChild("ProESP") then
 								addESP(v, v.Name, Color3.fromRGB(255, 215, 0))
 							end
-						-- Caso 2: Es un Model con PrimaryPart y nombre de ítem
 						elseif v:IsA("Model") and v.PrimaryPart and isItemName(v.Name) then
 							if not v.PrimaryPart:FindFirstChild("ProESP") then
 								addESP(v.PrimaryPart, v.Name, Color3.fromRGB(255, 215, 0))
 							end
-						-- Caso 3: Tiene un ClickDetector o ProximityPrompt (interactuable)
-						elseif v:IsA("BasePart") and v:FindFirstChildOfClass("ClickDetector") then
+						elseif v:IsA("BasePart") and (v:FindFirstChildOfClass("ClickDetector") or v:FindFirstChildOfClass("ProximityPrompt")) then
 							if not v:FindFirstChild("ProESP") and not isDoorName(v.Name) then
-								local pName = v.Name:gsub("ClickDetector", ""):gsub("ProximityPrompt", "")
-								if pName == "" then pName = "Item" end
-								addESP(v, pName, Color3.fromRGB(255, 215, 0))
+								addESP(v, v.Name, Color3.fromRGB(255, 215, 0))
 							end
-						elseif v:IsA("BasePart") and v:FindFirstChildOfClass("ProximityPrompt") then
-							if not v:FindFirstChild("ProESP") and not isDoorName(v.Name) then
-								local pName = v.Name:gsub("ClickDetector", ""):gsub("ProximityPrompt", "")
-								if pName == "" then pName = "Item" end
-								addESP(v, pName, Color3.fromRGB(255, 215, 0))
-							end
-						-- Caso 4: Model con ClickDetector o ProximityPrompt en sus hijos
 						elseif v:IsA("Model") and v.PrimaryPart then
 							local hasInteractive = v:FindFirstChildOfClass("ClickDetector") or v:FindFirstChildOfClass("ProximityPrompt")
 							if hasInteractive and not v.PrimaryPart:FindFirstChild("ProESP") and not isDoorName(v.Name) then
@@ -340,23 +496,9 @@ CreateToggle("ESP Items (Llaves, Objetos)", MainTab, function(state)
 							end
 						end
 					end
-					-- Buscar también en carpetas específicas de ítems (mapa por mapa)
-					for _, folder in pairs(Workspace:GetChildren()) do
-						if folder.Name:lower():find("item") or folder.Name:lower():find("pickup") or folder.Name:lower():find("interact") then
-							for _, item in pairs(folder:GetDescendants()) do
-								if item:IsA("BasePart") and not item:FindFirstChild("ProESP") then
-									local pName = item.Parent.Name
-									if pName and pName ~= "" then
-										addESP(item, pName, Color3.fromRGB(255, 215, 0))
-									end
-								end
-							end
-						end
-					end
 				end)
 				task.wait(2)
 			end
-			-- Limpieza de Items ESP
 			for _, v in pairs(Workspace:GetDescendants()) do
 				if v.Name == "ProESP" and v.TextLabel.TextColor3 == Color3.fromRGB(255, 215, 0) then
 					v:Destroy()
@@ -379,7 +521,6 @@ CreateToggle("Speed + Jump", MainTab, function(state)
 			end)
 			task.wait(0.5)
 		end
-		-- Devolver a la normalidad al apagar
 		pcall(function()
 			LocalPlayer.Character.Humanoid.WalkSpeed = 16
 			LocalPlayer.Character.Humanoid.JumpPower = 50
@@ -387,7 +528,7 @@ CreateToggle("Speed + Jump", MainTab, function(state)
 	end)
 end)
 
--- 4. Noclip (Atravesar paredes)
+-- 4. Noclip
 CreateToggle("Noclip (Atravesar Objetos)", MainTab, function(state)
 	Toggles.Noclip = state
 end)
@@ -401,7 +542,7 @@ RunService.Stepped:Connect(function()
 	end
 end)
 
--- 5. Auto Grab Items (MEJORADO)
+-- 5. Auto Grab Items
 CreateToggle("Auto Grab Items (Cercanos)", MainTab, function(state)
 	Toggles.AutoGrab = state
 	task.spawn(function()
@@ -428,53 +569,72 @@ CreateToggle("Auto Grab Items (Cercanos)", MainTab, function(state)
 	end)
 end)
 
--- 6. Auto Unlock Doors (VERSIÓN CORREGIDA - UNIVERSAL)
+-- ==========================================================
+-- 6. AUTO UNLOCK DOORS (VERSIÓN CORREGIDA - SUPER AGRESIVA)
+-- ==========================================================
 CreateToggle("Auto Unlock Doors", MainTab, function(state)
 	Toggles.AutoUnlock = state
-	task.spawn(function()
-		while Toggles.AutoUnlock do
-			pcall(function()
-				-- Método 1: ClickDetectors y ProximityPrompts en objetos con nombre de puerta
-				for _, v in pairs(Workspace:GetDescendants()) do
-					if v:IsA("ClickDetector") or v:IsA("ProximityPrompt") then
-						local parentPart = v.Parent
-						if parentPart:IsA("Model") and parentPart.PrimaryPart then
-							parentPart = parentPart.PrimaryPart
-						end
-						if parentPart and parentPart:IsA("BasePart") then
-							if isDoorName(parentPart.Name) or isDoorName(v.Parent.Name) then
-								local dist = (LocalPlayer.Character.HumanoidRootPart.Position - parentPart.Position).Magnitude
-								if dist <= 18 then
-									if v:IsA("ClickDetector") then fireclickdetector(v) end
-									if v:IsA("ProximityPrompt") then fireproximityprompt(v) end
+	if state then
+		task.spawn(function()
+			while Toggles.AutoUnlock do
+				pcall(function()
+					local char = LocalPlayer.Character
+					if not char then return end
+					local root = char:FindFirstChild("HumanoidRootPart")
+					if not root then return end
+					local playerPos = root.Position
+
+					-- MÉTODO 1: Disparar TODOS los ClickDetectors/ProximityPrompts 
+					-- cercanos, sin importar el nombre
+					for _, v in pairs(Workspace:GetDescendants()) do
+						if v:IsA("ClickDetector") or v:IsA("ProximityPrompt") then
+							local target = v.Parent
+							if target:IsA("Model") and target.PrimaryPart then
+								target = target.PrimaryPart
+							end
+							if target and target:IsA("BasePart") then
+								local dist = (playerPos - target.Position).Magnitude
+								if dist <= 22 then
+									if v:IsA("ClickDetector") then
+										fireclickdetector(v)
+									else
+										fireproximityprompt(v)
+									end
 								end
 							end
 						end
 					end
-				end
-				-- Método 2: Partes con nombre de puerta que tengan ClickDetector hijo
-				for _, v in pairs(Workspace:GetDescendants()) do
-					if v:IsA("BasePart") and isDoorName(v.Name) then
-						local detector = v:FindFirstChildOfClass("ClickDetector")
-						local prompt = v:FindFirstChildOfClass("ProximityPrompt")
-						if detector then
-							local dist = (LocalPlayer.Character.HumanoidRootPart.Position - v.Position).Magnitude
-							if dist <= 18 then
-								fireclickdetector(detector)
-							end
-						end
-						if prompt then
-							local dist = (LocalPlayer.Character.HumanoidRootPart.Position - v.Position).Magnitude
-							if dist <= 18 then
-								fireproximityprompt(prompt)
+
+					-- MÉTODO 2: Partes con nombre de puerta
+					for _, v in pairs(Workspace:GetDescendants()) do
+						if v:IsA("BasePart") and (isDoorName(v.Name) or v.Name:lower():find("unlock") or v.Name:lower():find("open")) then
+							local dist = (playerPos - v.Position).Magnitude
+							if dist <= 22 then
+								local detector = v:FindFirstChildOfClass("ClickDetector")
+								if detector then fireclickdetector(detector) end
+								local prompt = v:FindFirstChildOfClass("ProximityPrompt")
+								if prompt then fireproximityprompt(prompt) end
 							end
 						end
 					end
-				end
-			end)
-			task.wait(0.5)
-		end
-	end)
+
+					-- MÉTODO 3: Modelos con nombre de puerta
+					for _, v in pairs(Workspace:GetDescendants()) do
+						if v:IsA("Model") and v.PrimaryPart and (isDoorName(v.Name) or v.Name:lower():find("unlock") or v.Name:lower():find("open")) then
+							local dist = (playerPos - v.PrimaryPart.Position).Magnitude
+							if dist <= 22 then
+								local detector = v:FindFirstChildOfClass("ClickDetector")
+								if detector then fireclickdetector(detector) end
+								local prompt = v:FindFirstChildOfClass("ProximityPrompt")
+								if prompt then fireproximityprompt(prompt) end
+							end
+						end
+					end
+				end)
+				task.wait(0.4)
+			end
+		end)
+	end
 end)
 
 -- 7. Infinite Stamina
@@ -495,7 +655,7 @@ CreateToggle("Infinite Stamina", MainTab, function(state)
 	end)
 end)
 
--- 8. Godmode (Invencible)
+-- 8. Godmode
 CreateToggle("Godmode (Invencible)", MainTab, function(state)
 	Toggles.Godmode = state
 	task.spawn(function()
@@ -516,4 +676,8 @@ CreateToggle("Godmode (Invencible)", MainTab, function(state)
 	end)
 end)
 
-print("JoseAngel_Blox Piggy PRO v2.0 - All Maps Fix cargado correctamente!")
+-- Ajustar CanvasSize del ScrollingFrame
+task.wait(0.1)
+MainTab.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 20)
+
+print("JoseAngel_Blox Piggy PRO v3.0 - Ultimate Fix cargado correctamente!")
