@@ -1,8 +1,9 @@
 -- ==========================================================
 -- Nombre del Creador: JoseAngel_Blox
 -- Fecha de Lanzamiento: 09/07/2026
--- Versión: 1.2
--- Juego: Piggy
+-- Versión: 2.0 - ALL MAPS FIX
+-- Juego: Piggy (Libro 1 & Libro 2)
+-- CORRECIONES: ESP Items universal + Auto Unlock mejorado
 -- ==========================================================
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
@@ -37,7 +38,7 @@ Title.Parent = MainFrame
 Title.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "  JoseAngel_Blox Piggy PRO"
+Title.Text = "  JoseAngel_Blox Piggy PRO v2.0"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16
 Title.TextXAlignment = Enum.TextXAlignment.Left
@@ -127,7 +128,7 @@ InfoText.Size = UDim2.new(1, 0, 1, 0)
 InfoText.Font = Enum.Font.Gotham
 InfoText.TextColor3 = Color3.fromRGB(220, 220, 220)
 InfoText.TextSize = 16
-InfoText.Text = "Nombre del Creador: JoseAngel_Blox\nFecha de Lanzamiento: 09/07/2026\nVersión: 1.2\nJuego: Piggy"
+InfoText.Text = "Nombre del Creador: JoseAngel_Blox\nFecha de Lanzamiento: 09/07/2026\nVersión: 2.0 (All Maps Fix)\nJuego: Piggy (Libro 1 & Libro 2)\n\n✅ ESP Items universal\n✅ Auto Unlock mejorado"
 InfoText.TextYAlignment = Enum.TextYAlignment.Center
 -- Función constructora de Interruptores (Toggles)
 local function CreateToggle(name, parent, callback)
@@ -191,206 +192,328 @@ AutoUnlock = false,
 InfiniteStamina = false,
 Godmode = false
 }
+-- ==========================================================
+-- LISTA UNIVERSAL DE ÍTEMS (Libro 1 + Libro 2)
+-- ==========================================================
+local function isItemName(name)
+	local n = name:lower()
+	-- Llaves (todos los colores, ambos libros)
+	if n:find("key") then return true end
+	-- Herramientas / Objetos del Libro 1
+	local book1Items = {
+		"hammer", "wrench", "plank", "greengear", "redgear", "gas", "battery",
+		"redegg", "blueegg", "torch", "wood", "book", "syringe", "crossbow",
+		"transmitter", "chain", "hook", "grass", "shovel", "code", "purpletube",
+		"munition", "arrow", "crank", "valve", "handle", "weed", "flowerpot",
+		"redbattery", "bluebattery", "keycard"
+	}
+	-- Herramientas / Objetos del Libro 2
+	local book2Items = {
+		"screwdriver", "broom", "scissors", "carrot", "ladder", "smoke",
+		"elevatorkey", "elevator_key", "lens", "crowbar", "gear", "plunger",
+		"cog", "dynamite", "rope", "keypad", "remote", "coin", "token"
+	}
+	for _, item in pairs(book1Items) do
+		if n:find(item) then return true end
+	end
+	for _, item in pairs(book2Items) do
+		if n:find(item) then return true end
+	end
+	return false
+end
+
+-- ==========================================================
+-- LISTA DE PALABRAS RELACIONADAS A PUERTAS
+-- ==========================================================
+local function isDoorName(name)
+	local n = name:lower()
+	local doorKeywords = {
+		"door", "lock", "gate", "barrier", "obstacle", "fence", "wall",
+		"cage", "trap", "hold", "block", "barricade", "shield", "cover",
+		"entrance", "exit", "access", "panel", "hatch", "lid", "cover",
+		"window", "bars", "cell", "gateway", "portcullis", "fence"
+	}
+	for _, kw in pairs(doorKeywords) do
+		if n:find(kw) then return true end
+	end
+	return false
+end
+
 -- Función auxiliar para el ESP
-local function addESP(part, name, color)
-local bg = Instance.new("BillboardGui")
-bg.Name = "ProESP"
-bg.AlwaysOnTop = true
-bg.Size = UDim2.new(0, 200, 0, 50)
-bg.ExtentsOffset = Vector3.new(0, 2.5, 0)
-local tl = Instance.new("TextLabel")
-tl.Parent = bg
-tl.BackgroundTransparency = 1
-tl.Size = UDim2.new(1, 0, 1, 0)
-tl.Font = Enum.Font.GothamBold
-tl.Text = name
-tl.TextColor3 = color
-tl.TextSize = 13
-tl.TextStrokeTransparency = 0.3
-tl.TextStrokeColor3 = Color3.fromRGB(0,0,0)
-bg.Parent = part
--- Actualizar distancia en vivo
-task.spawn(function()
-while bg.Parent and (Toggles.ESP or Toggles.ESPItems) do
-pcall(function()
-local playerPos = LocalPlayer.Character.HumanoidRootPart.Position
-local dist = math.floor((playerPos - part.Position).Magnitude)
-tl.Text = name .. " [" .. dist .. " studs]"
-end)
-task.wait(0.2)
+local function addESP(part, name, color, isItem)
+	local bg = Instance.new("BillboardGui")
+	bg.Name = "ProESP"
+	bg.AlwaysOnTop = true
+	bg.Size = UDim2.new(0, 200, 0, 50)
+	bg.ExtentsOffset = Vector3.new(0, 2.5, 0)
+	local tl = Instance.new("TextLabel")
+	tl.Parent = bg
+	tl.BackgroundTransparency = 1
+	tl.Size = UDim2.new(1, 0, 1, 0)
+	tl.Font = Enum.Font.GothamBold
+	tl.Text = name
+	tl.TextColor3 = color
+	tl.TextSize = 13
+	tl.TextStrokeTransparency = 0.3
+	tl.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+	bg.Parent = part
+	-- Actualizar distancia en vivo
+	task.spawn(function()
+		while bg.Parent and (Toggles.ESP or Toggles.ESPItems) do
+			pcall(function()
+				local playerPos = LocalPlayer.Character.HumanoidRootPart.Position
+				local dist = math.floor((playerPos - part.Position).Magnitude)
+				tl.Text = name .. " [" .. dist .. " studs]"
+			end)
+			task.wait(0.2)
+		end
+	end)
 end
-end)
-end
+
 -- 1. ESP (Jugadores / Bots / Piggy)
 CreateToggle("ESP (Jugadores = Azul, Bots/Piggy = Rojo)", MainTab, function(state)
-Toggles.ESP = state
-if state then
-task.spawn(function()
-while Toggles.ESP do
-pcall(function()
-for _, v in pairs(Workspace:GetDescendants()) do
-if v:IsA("Model") and v:FindFirstChild("HumanoidRootPart") and v.Name ~= LocalPlayer.Name then
-if not v.HumanoidRootPart:FindFirstChild("ProESP") then
-local isPlayer = Players:GetPlayerFromCharacter(v)
-local color = isPlayer and Color3.fromRGB(50, 150, 255) or Color3.fromRGB(255, 50, 50)
-local name = isPlayer and v.Name or "BOT / PIGGY"
-addESP(v.HumanoidRootPart, name, color)
-end
-end
-end
+	Toggles.ESP = state
+	if state then
+		task.spawn(function()
+			while Toggles.ESP do
+				pcall(function()
+					for _, v in pairs(Workspace:GetDescendants()) do
+						if v:IsA("Model") and v:FindFirstChild("HumanoidRootPart") and v.Name ~= LocalPlayer.Name then
+							if not v.HumanoidRootPart:FindFirstChild("ProESP") then
+								local isPlayer = Players:GetPlayerFromCharacter(v)
+								local color = isPlayer and Color3.fromRGB(50, 150, 255) or Color3.fromRGB(255, 50, 50)
+								local name = isPlayer and v.Name or "BOT / PIGGY"
+								addESP(v.HumanoidRootPart, name, color)
+							end
+						end
+					end
+				end)
+				task.wait(2)
+			end
+			-- Limpieza al apagar
+			for _, v in pairs(Workspace:GetDescendants()) do
+				if v.Name == "ProESP" and (v.TextLabel.TextColor3 == Color3.fromRGB(50,150,255) or v.TextLabel.TextColor3 == Color3.fromRGB(255,50,50)) then
+					v:Destroy()
+				end
+			end
+		end)
+	end
 end)
-task.wait(2)
-end
--- Limpieza al apagar
-for _, v in pairs(Workspace:GetDescendants()) do
-if v.Name == "ProESP" and (v.TextLabel.TextColor3 == Color3.fromRGB(50,150,255) or v.TextLabel.TextColor3 == Color3.fromRGB(255,50,50)) then
-v:Destroy()
-end
-end
-end)
-end
-end)
--- 2. ESP Items
+
+-- 2. ESP Items (VERSIÓN CORREGIDA - LISTA COMPLETA)
 CreateToggle("ESP Items (Llaves, Objetos)", MainTab, function(state)
-Toggles.ESPItems = state
-if state then
-task.spawn(function()
-while Toggles.ESPItems do
-pcall(function()
-for _, v in pairs(Workspace:GetDescendants()) do
-if v:IsA("BasePart") and (v.Name:lower():find("key") or v.Name:lower():find("item")) then
-if not v:FindFirstChild("ProESP") then
-addESP(v, v.Name, Color3.fromRGB(255, 215, 0)) -- Color dorado
-end
-end
-end
+	Toggles.ESPItems = state
+	if state then
+		task.spawn(function()
+			while Toggles.ESPItems do
+				pcall(function()
+					-- Buscar TODOS los objetos que sean interactuables o tengan nombre de ítem
+					for _, v in pairs(Workspace:GetDescendants()) do
+						-- Caso 1: Es un BasePart con nombre de ítem conocido
+						if v:IsA("BasePart") and isItemName(v.Name) then
+							if not v:FindFirstChild("ProESP") then
+								addESP(v, v.Name, Color3.fromRGB(255, 215, 0))
+							end
+						-- Caso 2: Es un Model con PrimaryPart y nombre de ítem
+						elseif v:IsA("Model") and v.PrimaryPart and isItemName(v.Name) then
+							if not v.PrimaryPart:FindFirstChild("ProESP") then
+								addESP(v.PrimaryPart, v.Name, Color3.fromRGB(255, 215, 0))
+							end
+						-- Caso 3: Tiene un ClickDetector o ProximityPrompt (interactuable)
+						elseif v:IsA("BasePart") and v:FindFirstChildOfClass("ClickDetector") then
+							if not v:FindFirstChild("ProESP") and not isDoorName(v.Name) then
+								local pName = v.Name:gsub("ClickDetector", ""):gsub("ProximityPrompt", "")
+								if pName == "" then pName = "Item" end
+								addESP(v, pName, Color3.fromRGB(255, 215, 0))
+							end
+						elseif v:IsA("BasePart") and v:FindFirstChildOfClass("ProximityPrompt") then
+							if not v:FindFirstChild("ProESP") and not isDoorName(v.Name) then
+								local pName = v.Name:gsub("ClickDetector", ""):gsub("ProximityPrompt", "")
+								if pName == "" then pName = "Item" end
+								addESP(v, pName, Color3.fromRGB(255, 215, 0))
+							end
+						-- Caso 4: Model con ClickDetector o ProximityPrompt en sus hijos
+						elseif v:IsA("Model") and v.PrimaryPart then
+							local hasInteractive = v:FindFirstChildOfClass("ClickDetector") or v:FindFirstChildOfClass("ProximityPrompt")
+							if hasInteractive and not v.PrimaryPart:FindFirstChild("ProESP") and not isDoorName(v.Name) then
+								addESP(v.PrimaryPart, v.Name, Color3.fromRGB(255, 215, 0))
+							end
+						end
+					end
+					-- Buscar también en carpetas específicas de ítems (mapa por mapa)
+					for _, folder in pairs(Workspace:GetChildren()) do
+						if folder.Name:lower():find("item") or folder.Name:lower():find("pickup") or folder.Name:lower():find("interact") then
+							for _, item in pairs(folder:GetDescendants()) do
+								if item:IsA("BasePart") and not item:FindFirstChild("ProESP") then
+									local pName = item.Parent.Name
+									if pName and pName ~= "" then
+										addESP(item, pName, Color3.fromRGB(255, 215, 0))
+									end
+								end
+							end
+						end
+					end
+				end)
+				task.wait(2)
+			end
+			-- Limpieza de Items ESP
+			for _, v in pairs(Workspace:GetDescendants()) do
+				if v.Name == "ProESP" and v.TextLabel.TextColor3 == Color3.fromRGB(255, 215, 0) then
+					v:Destroy()
+				end
+			end
+		end)
+	end
 end)
-task.wait(2)
-end
--- Limpieza de Items ESP
-for _, v in pairs(Workspace:GetDescendants()) do
-if v.Name == "ProESP" and v.TextLabel.TextColor3 == Color3.fromRGB(255, 215, 0) then
-v:Destroy()
-end
-end
-end)
-end
-end)
+
 -- 3. Speed + Jump
 CreateToggle("Speed + Jump", MainTab, function(state)
-Toggles.SpeedJump = state
-task.spawn(function()
-while Toggles.SpeedJump do
-pcall(function()
-local human = LocalPlayer.Character.Humanoid
-human.WalkSpeed = 35
-human.JumpPower = 65
-human.UseJumpPower = true
+	Toggles.SpeedJump = state
+	task.spawn(function()
+		while Toggles.SpeedJump do
+			pcall(function()
+				local human = LocalPlayer.Character.Humanoid
+				human.WalkSpeed = 35
+				human.JumpPower = 65
+				human.UseJumpPower = true
+			end)
+			task.wait(0.5)
+		end
+		-- Devolver a la normalidad al apagar
+		pcall(function()
+			LocalPlayer.Character.Humanoid.WalkSpeed = 16
+			LocalPlayer.Character.Humanoid.JumpPower = 50
+		end)
+	end)
 end)
-task.wait(0.5)
-end
--- Devolver a la normalidad al apagar
-pcall(function()
-LocalPlayer.Character.Humanoid.WalkSpeed = 16
-LocalPlayer.Character.Humanoid.JumpPower = 50
-end)
-end)
-end)
+
 -- 4. Noclip (Atravesar paredes)
 CreateToggle("Noclip (Atravesar Objetos)", MainTab, function(state)
-Toggles.Noclip = state
+	Toggles.Noclip = state
 end)
 RunService.Stepped:Connect(function()
-if Toggles.Noclip and LocalPlayer.Character then
-for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-if part:IsA("BasePart") then
-part.CanCollide = false
-end
-end
-end
+	if Toggles.Noclip and LocalPlayer.Character then
+		for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
+			end
+		end
+	end
 end)
--- 5. Auto Grab Items
+
+-- 5. Auto Grab Items (MEJORADO)
 CreateToggle("Auto Grab Items (Cercanos)", MainTab, function(state)
-Toggles.AutoGrab = state
-task.spawn(function()
-while Toggles.AutoGrab do
-pcall(function()
-for _, v in pairs(Workspace:GetDescendants()) do
-if v:IsA("ClickDetector") or v:IsA("ProximityPrompt") then
-local parentName = v.Parent.Name:lower()
-if parentName:find("key") or parentName:find("item") then
-local dist = (LocalPlayer.Character.HumanoidRootPart.Position - v.Parent.Position).Magnitude
-if dist <= 15 then -- Si estás a menos de 15 studs, lo recoge automático
-if v:IsA("ClickDetector") then fireclickdetector(v) end
-if v:IsA("ProximityPrompt") then fireproximityprompt(v) end
-end
-end
-end
-end
+	Toggles.AutoGrab = state
+	task.spawn(function()
+		while Toggles.AutoGrab do
+			pcall(function()
+				for _, v in pairs(Workspace:GetDescendants()) do
+					if v:IsA("ClickDetector") or v:IsA("ProximityPrompt") then
+						local parentPart = v.Parent
+						if parentPart:IsA("Model") and parentPart.PrimaryPart then
+							parentPart = parentPart.PrimaryPart
+						end
+						if parentPart and parentPart:IsA("BasePart") and isItemName(parentPart.Name) then
+							local dist = (LocalPlayer.Character.HumanoidRootPart.Position - parentPart.Position).Magnitude
+							if dist <= 15 then
+								if v:IsA("ClickDetector") then fireclickdetector(v) end
+								if v:IsA("ProximityPrompt") then fireproximityprompt(v) end
+							end
+						end
+					end
+				end
+			end)
+			task.wait(0.5)
+		end
+	end)
 end)
-task.wait(0.5)
-end
-end)
-end)
--- 6. Auto Unlock Doors
+
+-- 6. Auto Unlock Doors (VERSIÓN CORREGIDA - UNIVERSAL)
 CreateToggle("Auto Unlock Doors", MainTab, function(state)
-Toggles.AutoUnlock = state
-task.spawn(function()
-while Toggles.AutoUnlock do
-pcall(function()
-for _, v in pairs(Workspace:GetDescendants()) do
-if v:IsA("ClickDetector") or v:IsA("ProximityPrompt") then
-local parentName = v.Parent.Name:lower()
-if parentName:find("door") or parentName:find("lock") then
-local dist = (LocalPlayer.Character.HumanoidRootPart.Position - v.Parent.Position).Magnitude
-if dist <= 15 then
-if v:IsA("ClickDetector") then fireclickdetector(v) end
-if v:IsA("ProximityPrompt") then fireproximityprompt(v) end
-end
-end
-end
-end
+	Toggles.AutoUnlock = state
+	task.spawn(function()
+		while Toggles.AutoUnlock do
+			pcall(function()
+				-- Método 1: ClickDetectors y ProximityPrompts en objetos con nombre de puerta
+				for _, v in pairs(Workspace:GetDescendants()) do
+					if v:IsA("ClickDetector") or v:IsA("ProximityPrompt") then
+						local parentPart = v.Parent
+						if parentPart:IsA("Model") and parentPart.PrimaryPart then
+							parentPart = parentPart.PrimaryPart
+						end
+						if parentPart and parentPart:IsA("BasePart") then
+							if isDoorName(parentPart.Name) or isDoorName(v.Parent.Name) then
+								local dist = (LocalPlayer.Character.HumanoidRootPart.Position - parentPart.Position).Magnitude
+								if dist <= 18 then
+									if v:IsA("ClickDetector") then fireclickdetector(v) end
+									if v:IsA("ProximityPrompt") then fireproximityprompt(v) end
+								end
+							end
+						end
+					end
+				end
+				-- Método 2: Partes con nombre de puerta que tengan ClickDetector hijo
+				for _, v in pairs(Workspace:GetDescendants()) do
+					if v:IsA("BasePart") and isDoorName(v.Name) then
+						local detector = v:FindFirstChildOfClass("ClickDetector")
+						local prompt = v:FindFirstChildOfClass("ProximityPrompt")
+						if detector then
+							local dist = (LocalPlayer.Character.HumanoidRootPart.Position - v.Position).Magnitude
+							if dist <= 18 then
+								fireclickdetector(detector)
+							end
+						end
+						if prompt then
+							local dist = (LocalPlayer.Character.HumanoidRootPart.Position - v.Position).Magnitude
+							if dist <= 18 then
+								fireproximityprompt(prompt)
+							end
+						end
+					end
+				end
+			end)
+			task.wait(0.5)
+		end
+	end)
 end)
-task.wait(0.5)
-end
-end)
-end)
+
 -- 7. Infinite Stamina
 CreateToggle("Infinite Stamina", MainTab, function(state)
-Toggles.InfiniteStamina = state
-task.spawn(function()
-while Toggles.InfiniteStamina do
-pcall(function()
--- Evita que la energía baje reseteando los valores del personaje
-if LocalPlayer.Character:FindFirstChild("Energy") then
-LocalPlayer.Character.Energy.Value = 100
-end
-if LocalPlayer.Character:FindFirstChild("Stamina") then
-LocalPlayer.Character.Stamina.Value = 100
-end
+	Toggles.InfiniteStamina = state
+	task.spawn(function()
+		while Toggles.InfiniteStamina do
+			pcall(function()
+				if LocalPlayer.Character:FindFirstChild("Energy") then
+					LocalPlayer.Character.Energy.Value = 100
+				end
+				if LocalPlayer.Character:FindFirstChild("Stamina") then
+					LocalPlayer.Character.Stamina.Value = 100
+				end
+			end)
+			task.wait(0.1)
+		end
+	end)
 end)
-task.wait(0.1)
-end
-end)
-end)
+
 -- 8. Godmode (Invencible)
 CreateToggle("Godmode (Invencible)", MainTab, function(state)
-Toggles.Godmode = state
-task.spawn(function()
-while Toggles.Godmode do
-pcall(function()
--- Una técnica común de Godmode en juegos con bots es borrar las partes que los bots usan para detectar el daño (Touch Interests)
-for _, bot in pairs(Workspace:GetDescendants()) do
-if bot:IsA("Model") and bot.Name ~= LocalPlayer.Name and bot:FindFirstChild("HumanoidRootPart") then
-for _, weapon in pairs(bot:GetDescendants()) do
-if weapon:IsA("TouchTransmitter") then
-weapon:Destroy()
-end
-end
-end
-end
+	Toggles.Godmode = state
+	task.spawn(function()
+		while Toggles.Godmode do
+			pcall(function()
+				for _, bot in pairs(Workspace:GetDescendants()) do
+					if bot:IsA("Model") and bot.Name ~= LocalPlayer.Name and bot:FindFirstChild("HumanoidRootPart") then
+						for _, weapon in pairs(bot:GetDescendants()) do
+							if weapon:IsA("TouchTransmitter") then
+								weapon:Destroy()
+							end
+						end
+					end
+				end
+			end)
+			task.wait(1)
+		end
+	end)
 end)
-task.wait(1)
-end
-end)
-end)
+
+print("JoseAngel_Blox Piggy PRO v2.0 - All Maps Fix cargado correctamente!")
