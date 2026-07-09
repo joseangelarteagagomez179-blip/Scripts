@@ -19,7 +19,7 @@ end
 -- LISTA MAESTRA DE ITEMS (LIBRO 1 Y LIBRO 2)
 -- ==========================================
 local ItemWhitelist = {
-    -- Llaves (Ambos Libros)
+    -- Llaves
     "Key", "Llave", "GreenKey", "RedKey", "BlueKey", "PurpleKey", "WhiteKey", "YellowKey", "OrangeKey",
     -- Libro 1: Herramientas
     "Hammer", "Wrench", "Plank", "GreenGear", "RedGear", "Gasoline", "Battery", "RedEgg", 
@@ -33,13 +33,13 @@ local ItemWhitelist = {
     "Destornillador", "Escoba", "Tijeras", "Zanahoria", "Escalera", "Humo", "Llave ascensor", "Lente", "Palanca", "Engranaje"
 }
 
--- Estados Globales de las Funciones
+-- Estados Globales
 local ESP_Mobs, ESP_Items = false, false
 local Noclip, SpeedJump, InfiniteStamina, GodMode, AutoUnlock, AutoGrab = false, false, false, false, false, false
 local KillAura, AutoTraps, PiggyInvis = false, false, false
 
 -- ==========================================
--- DISEÑO DE INTERFAZ (CUADRADA, BAJA Y ANCHA)
+-- DISEÑO DE INTERFAZ (MÁS CERRADO Y COMPACTO)
 -- ==========================================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "JoseAngelPiggyPro"
@@ -47,8 +47,8 @@ ScreenGui.Parent = CoreGui
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 680, 0, 310) -- Estructura baja y ancha
-MainFrame.Position = UDim2.new(0.5, -340, 0.5, -155)
+MainFrame.Size = UDim2.new(0, 480, 0, 340) -- Reducido de 680 a 480 de ancho (Más cerrado)
+MainFrame.Position = UDim2.new(0.5, -240, 0.5, -170)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -64,7 +64,7 @@ UIStroke.Color = Color3.fromRGB(180, 40, 40)
 UIStroke.Thickness = 2
 UIStroke.Parent = MainFrame
 
--- Línea estética decorativa superior
+-- Línea decorativa superior
 local TopLine = Instance.new("Frame")
 TopLine.Size = UDim2.new(1, 0, 0, 4)
 TopLine.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
@@ -78,25 +78,25 @@ Title.BackgroundTransparency = 1
 Title.Text = "JoseAngel_Blox Piggy PRO"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 20
+Title.TextSize = 18
 Title.Parent = MainFrame
 
--- Fila de Fichas Cliqueables (Ordenadas en Fila Horizontal)
+-- Fila de Fichas Cliqueables (Ajustadas al nuevo ancho)
 local TabContainer = Instance.new("Frame")
-TabContainer.Size = UDim2.new(1, -20, 0, 35)
-TabContainer.Position = UDim2.new(0, 10, 0, 50)
+TabContainer.Size = UDim2.new(1, -20, 0, 32)
+TabContainer.Position = UDim2.new(0, 10, 0, 45)
 TabContainer.BackgroundTransparency = 1
 TabContainer.Parent = MainFrame
 
 local TabListLayout = Instance.new("UIListLayout")
 TabListLayout.FillDirection = Enum.FillDirection.Horizontal
 TabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-TabListLayout.Padding = UDim.new(0, 10)
+TabListLayout.Padding = UDim.new(0, 6)
 TabListLayout.Parent = TabContainer
 
 local PageContainer = Instance.new("Frame")
-PageContainer.Size = UDim2.new(1, -20, 1, -110)
-PageContainer.Position = UDim2.new(0, 10, 0, 95)
+PageContainer.Size = UDim2.new(1, -20, 1, -100)
+PageContainer.Position = UDim2.new(0, 10, 0, 85)
 PageContainer.BackgroundTransparency = 1
 PageContainer.Parent = MainFrame
 
@@ -104,12 +104,12 @@ local tabs, pages = {}, {}
 
 local function createTab(name, order)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 210, 1, 0)
+    btn.Size = UDim2.new(0, 148, 1, 0) -- Ajustado milimétricamente para que quepan los 3 en 480px
     btn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
     btn.Text = name
     btn.TextColor3 = Color3.fromRGB(230, 230, 230)
     btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 13
+    btn.TextSize = 11
     btn.LayoutOrder = order
     btn.Parent = TabContainer
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
@@ -117,17 +117,16 @@ local function createTab(name, order)
     local page = Instance.new("ScrollingFrame")
     page.Size = UDim2.new(1, 0, 1, 0)
     page.BackgroundTransparency = 1
-    page.ScrollBarThickness = 5
-    page.CanvasSize = UDim2.new(0, 0, 0, 0)
+    page.ScrollBarThickness = 4
+    page.CanvasSize = UDim2.new(0, 0, 0, 380) -- Permite hacer scroll vertical de forma limpia
     page.Visible = false
     page.Parent = PageContainer
     
-    local pageLayout = Instance.new("UIHorizontalLayout") or Instance.new("UIGridLayout")
-    -- Usamos UIGridLayout para ordenar las opciones de forma limpia dentro de las fichas
-    local grid = Instance.new("UIGridLayout")
-    grid.CellSize = UDim2.new(0, 315, 0, 38)
-    grid.CellPadding = UDim2.new(0, 15, 0, 10)
-    grid.Parent = page
+    local pageLayout = Instance.new("UIListLayout")
+    pageLayout.FillDirection = Enum.FillDirection.Vertical
+    pageLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    pageLayout.Padding = UDim.new(0, 6)
+    pageLayout.Parent = page
     
     btn.MouseButton1Click:Connect(function()
         for _, p in pairs(pages) do p.Visible = false end
@@ -144,12 +143,13 @@ end
 
 local function createToggle(page, text, callback)
     local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -6, 0, 34)
     btn.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
     btn.Text = "  [OFF] " .. text
     btn.TextColor3 = Color3.fromRGB(200, 200, 200)
     btn.TextXAlignment = Enum.TextXAlignment.Left
     btn.Font = Enum.Font.GothamSemibold
-    btn.TextSize = 13
+    btn.TextSize = 12
     btn.Parent = page
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
     
@@ -168,43 +168,40 @@ local function createToggle(page, text, callback)
     end)
 end
 
--- Generación de las Pestañas Principales ordenadas en fila
+-- Crear Pestañas Ordenadas en Fila
 local PageInfo = createTab("1) info↓", 1)
 local PagePlayers = createTab("2) Funciones players", 2)
 local PagePiggy = createTab("3) funciones de Piggy↓", 3)
 
--- Activar primera pestaña por defecto
+-- Activar pestaña de información por defecto
 tabs[1].BackgroundColor3 = Color3.fromRGB(255, 50, 50)
 pages[1].Visible = true
 
 -- ==========================================
--- SECCIÓN 1: ASIGNACIÓN DE INFO
+-- SECCIÓN 1: PANEL DE INFORMACIÓN
 -- ==========================================
-local function addInfoLabel(page, title, val)
-    local f = Instance.new("Frame")
-    f.BackgroundTransparency = 1
-    f.Parent = page
-    local tl = Instance.new("TextLabel")
-    tl.Size = UDim2.new(1, 0, 1, 0)
-    tl.BackgroundTransparency = 1
-    tl.Text = title .. ": " .. val
-    tl.TextColor3 = Color3.fromRGB(220, 220, 220)
-    tl.Font = Enum.Font.Gotham
-    tl.TextSize = 13
-    tl.TextXAlignment = Enum.TextXAlignment.Left
-    tl.Parent = f
+local function createInfoLabel(page, labelText)
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, -6, 0, 30)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = "  " .. labelText
+    lbl.TextColor3 = Color3.fromRGB(210, 210, 210)
+    lbl.Font = Enum.Font.GothamMedium
+    lbl.TextSize = 12
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = page
 end
 
-addInfoLabel(PageInfo, "Nombre del Creador", "JoseAngel_Blox")
-addInfoLabel(PageInfo, "Fecha de lanzamiento", "09/06/2026")
-addInfoLabel(PageInfo, "Versión", "1.2")
+createInfoLabel(PageInfo, "Nombre del Creador: JoseAngel_Blox")
+createInfoLabel(PageInfo, "Fecha de lanzamiento: 09/06/2026")
+createInfoLabel(PageInfo, "Versión: 1.2")
 
 -- ==========================================
--- SECCIÓN 2: LOGICA CORREGIDA (PLAYERS)
+-- SECCIÓN 2: FUNCIONES PLAYERS (CORREGIDAS)
 -- ==========================================
 
--- 1. ESP Mobs (Jugadores, Bots, Piggy, Transformados)
-createToggle(PagePlayers, "Esp (Players/Bots/Piggy)", function(state)
+-- 1. ESP Mobs (Jugadores, Bots y Piggy)
+createToggle(PagePlayers, "Esp (Jugadores / Bots / Piggy)", function(state)
     ESP_Mobs = state
     if not state then
         for _, v in pairs(Workspace:GetDescendants()) do
@@ -216,22 +213,18 @@ end)
 task.spawn(function()
     while task.wait(0.5) do
         if ESP_Mobs then
-            -- Escaneo de Jugadores Reales y Transformados
             for _, p in pairs(Players:GetPlayers()) do
                 if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                     local char = p.Character
                     local isPiggy = (p.TeamColor == BrickColor.new("Really red") or char:FindFirstChild("Bat") or char.Name:lower():find("piggy"))
-                    
                     local hl = char:FindFirstChild("PlayerESP")
                     if not hl then
                         hl = Instance.new("Highlight", char)
                         hl.Name = "PlayerESP"
                     end
                     hl.FillColor = isPiggy and Color3.fromRGB(255, 0, 50) or Color3.fromRGB(50, 150, 255)
-                    hl.OutlineColor = Color3.fromRGB(255, 255, 255)
                 end
             end
-            -- Escaneo de Bots del Servidor
             for _, v in pairs(Workspace:GetChildren()) do
                 if v:IsA("Model") and v:FindFirstChild("Humanoid") and not Players:GetPlayerFromCharacter(v) then
                     if v.Name:lower():find("piggy") or v.Name:lower():find("bot") or v:FindFirstChild("Bat") then
@@ -248,7 +241,7 @@ task.spawn(function()
     end
 end)
 
--- 2. ESP Items Completo (Lista del Libro 1 y 2)
+-- 2. ESP Items (Lista Completa Libro 1 y 2)
 createToggle(PagePlayers, "Esp items", function(state)
     ESP_Items = state
     if not state then
@@ -259,40 +252,40 @@ createToggle(PagePlayers, "Esp items", function(state)
 end)
 
 task.spawn(function()
-    while task.wait(0.6) do
+    while task.wait(0.5) do
         if ESP_Items and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
             local root = LocalPlayer.Character.HumanoidRootPart
             for _, item in pairs(Workspace:GetDescendants()) do
                 if item:IsA("ProximityPrompt") or item:IsA("ClickDetector") then
-                    local folder = item.Parent
-                    if folder and (folder:IsA("BasePart") or folder:IsA("Model")) then
+                    local parentObj = item.Parent
+                    if parentObj and (parentObj:IsA("BasePart") or parentObj:IsA("Model")) then
                         local matchFound = false
-                        for _, matchName in pairs(ItemWhitelist) do
-                            if folder.Name:lower():find(matchName:lower()) then
+                        for _, name in pairs(ItemWhitelist) do
+                            if parentObj.Name:lower():find(name:lower()) then
                                 matchFound = true
                                 break
                             end
                         end
                         
                         if matchFound then
-                            local part = folder:IsA("Model") and folder.PrimaryPart or folder
+                            local part = parentObj:IsA("Model") and parentObj.PrimaryPart or parentObj
                             if part then
                                 local bg = part:FindFirstChild("ItemMarker")
                                 if not bg then
                                     bg = Instance.new("BillboardGui", part)
                                     bg.Name = "ItemMarker"
-                                    bg.Size = UDim2.new(0, 140, 0, 45)
+                                    bg.Size = UDim2.new(0, 130, 0, 40)
                                     bg.AlwaysOnTop = true
                                     local txt = Instance.new("TextLabel", bg)
                                     txt.Size = UDim2.new(1, 0, 1, 0)
                                     txt.BackgroundTransparency = 1
                                     txt.TextColor3 = Color3.fromRGB(255, 215, 0)
                                     txt.Font = Enum.Font.GothamBold
-                                    txt.TextSize = 13
+                                    txt.TextSize = 12
                                     txt.TextStrokeTransparency = 0
                                 end
                                 local dist = math.round((root.Position - part.Position).Magnitude)
-                                bg.TextLabel.Text = folder.Name .. "\n[" .. dist .. " Studs]"
+                                bg.TextLabel.Text = parentObj.Name .. "\n[" .. dist .. " Studs]"
                             end
                         end
                     end
@@ -302,22 +295,20 @@ task.spawn(function()
     end
 end)
 
--- 3. Noclip (Corregido sin caídas infinitas)
-createToggle(PagePlayers, "Noclip (Paredes)", function(state)
+-- 3. Noclip
+createToggle(PagePlayers, "Noclip (Atravesar paredes)", function(state)
     Noclip = state
 end)
 
 RunService.Stepped:Connect(function()
     if Noclip and LocalPlayer.Character then
         for _, part in pairs(LocalPlayer.Character:GetChildren()) do
-            if part:IsA("BasePart") and part.Name ~= "Terrain" then
-                part.CanCollide = false
-            end
+            if part:IsA("BasePart") then part.CanCollide = false end
         end
     end
 end)
 
--- 4. Speed + Jump 
+-- 4. Speed + Jump
 createToggle(PagePlayers, "Speed + Jump 🦘", function(state)
     SpeedJump = state
     if not state and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
@@ -334,19 +325,18 @@ end)
 RunService.Heartbeat:Connect(function()
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         if SpeedJump then
-            LocalPlayer.Character.Humanoid.WalkSpeed = 48
+            LocalPlayer.Character.Humanoid.WalkSpeed = 45
             LocalPlayer.Character.Humanoid.JumpPower = 75
             LocalPlayer.Character.Humanoid.UseJumpPower = true
         elseif InfiniteStamina then
-            -- Mantiene la velocidad máxima de carrera nativa sin cansancio
             LocalPlayer.Character.Humanoid.WalkSpeed = 24
         end
     end
 end)
 
--- 6. God Mode (CORREGIDO - Bloqueo de colisiones letales)
+-- 6. God Mode (Totalmente Corregido contra Bots)
 createToggle(PagePlayers, "God Mode", function(state)
-    GodMode = state
+    制造GodMode = state
     if not state and LocalPlayer.Character then
         for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
             if part:IsA("BasePart") then part.CanTouch = true end
@@ -356,18 +346,24 @@ end)
 
 task.spawn(function()
     while task.wait(0.1) do
-        if GodMode and LocalPlayer.Character then
-            -- Desactivamos CanTouch en nuestro personaje constantemente para anular los eventos .Touched del enemigo
+        if 制造GodMode and LocalPlayer.Character then
+            -- Forzar de forma continua que nada del mapa pueda registrar toques con nuestro personaje
             for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-                if part:IsA("BasePart") and part.CanTouch == true then
-                    part.CanTouch = false
+                if part:IsA("BasePart") then part.CanTouch = false end
+            end
+            -- Desactivar también los hitboxes de daño de los bots cercanos localmente
+            for _, v in pairs(Workspace:GetChildren()) do
+                if v:IsA("Model") and v:FindFirstChild("Humanoid") and v.Name:lower():find("bot") then
+                    for _, bp in pairs(v:GetChildren()) do
+                        if bp:IsA("BasePart") then bp.CanTouch = false end
+                    end
                 end
             end
         end
     end
 end)
 
--- 7. Unlock Doors (Auto Desbloqueo Inteligente)
+-- 7. Unlock Doors
 createToggle(PagePlayers, "Unlock Doors", function(state)
     AutoUnlock = state
 end)
@@ -376,20 +372,15 @@ task.spawn(function()
     while task.wait(0.4) do
         if AutoUnlock and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
             local root = LocalPlayer.Character.HumanoidRootPart
-            local currentTool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
-            
-            if currentTool then
+            if LocalPlayer.Character:FindFirstChildOfClass("Tool") then
                 for _, prompt in pairs(Workspace:GetDescendants()) do
                     if prompt:IsA("ProximityPrompt") or prompt:IsA("ClickDetector") then
                         local door = prompt.Parent
-                        if door and door.Name:lower():find("door") or door.Name:lower():find("padlock") or door.Name:lower():find("puerta") then
+                        if door and (door.Name:lower():find("door") or door.Name:lower():find("padlock") or door.Name:lower():find("puerta")) then
                             local part = door:IsA("Model") and door.PrimaryPart or door
                             if part and (root.Position - part.Position).Magnitude <= 20 then
-                                if prompt:IsA("ProximityPrompt") then
-                                    fireproximityprompt(prompt, 1, true)
-                                elseif prompt:IsA("ClickDetector") then
-                                    fireclickdetector(prompt)
-                                end
+                                if prompt:IsA("ProximityPrompt") then fireproximityprompt(prompt, 1, true)
+                                elseif prompt:IsA("ClickDetector") then fireclickdetector(prompt) end
                             end
                         end
                     end
@@ -405,7 +396,7 @@ createToggle(PagePlayers, "Auto Grab items", function(state)
 end)
 
 task.spawn(function()
-    while task.wait(1.2) do -- Delay lento configurado estructuralmente para evitar bugs de inventario
+    while task.wait(1.2) do
         if AutoGrab and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
             local root = LocalPlayer.Character.HumanoidRootPart
             for _, prompt in pairs(Workspace:GetDescendants()) do
@@ -418,12 +409,9 @@ task.spawn(function()
                             break
                         end
                     end
-                    
-                    if isItem and itemModel:IsA("BasePart") then
-                        if (root.Position - itemModel.Position).Magnitude <= 18 then
-                            fireproximityprompt(prompt, 1, true)
-                            break -- Pausa el ciclo actual para asegurar la recolección limpia de un ítem por segundo
-                        end
+                    if isItem and itemModel:IsA("BasePart") and (root.Position - itemModel.Position).Magnitude <= 18 then
+                        fireproximityprompt(prompt, 1, true)
+                        break
                     end
                 end
             end
@@ -432,10 +420,9 @@ task.spawn(function()
 end)
 
 -- ==========================================
--- SECCIÓN 3: LOGICA CORREGIDA (PIGGY)
+-- SECCIÓN 3: FUNCIONES DE PIGGY
 -- ==========================================
 
--- 1. Kill Aura 
 createToggle(PagePiggy, "Kill Aura", function(state)
     KillAura = state
 end)
@@ -449,7 +436,7 @@ task.spawn(function()
                 for _, p in pairs(Players:GetPlayers()) do
                     if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
                         local enemyRoot = p.Character.HumanoidRootPart
-                        if (myRoot.Position - enemyRoot.Position).Magnitude <= 15 then
+                        if (myRoot.Position - enemyRoot.Position).Magnitude <= 14 then
                             firetouchinterest(weapon.Handle, enemyRoot, 0)
                             firetouchinterest(weapon.Handle, enemyRoot, 1)
                         end
@@ -460,7 +447,6 @@ task.spawn(function()
     end
 end)
 
--- 2. Auto-poner Trampas
 createToggle(PagePiggy, "Auto Traps", function(state)
     AutoTraps = state
 end)
@@ -477,16 +463,12 @@ task.spawn(function()
     end
 end)
 
--- 3. Invisibilidad de Piggy Glitch
 createToggle(PagePiggy, "Invisibilidad", function(state)
     PiggyInvis = state
     if LocalPlayer.Character then
         for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
-            if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" then
-                v.Transparency = PiggyInvis and 1 or 0
-            elseif v:IsA("Decal") then
-                v.Transparency = PiggyInvis and 1 or 0
-            end
+            if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" then v.Transparency = PiggyInvis and 1 or 0
+            elseif v:IsA("Decal") then v.Transparency = PiggyInvis and 1 or 0 end
         end
     end
 end)
