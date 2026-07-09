@@ -1,9 +1,9 @@
 -- ==========================================================
 -- Nombre del Creador: JoseAngel_Blox
 -- Fecha de Lanzamiento: 09/07/2026
--- Versión: 2.1 - ALL MAPS FIX (Libro 1 & 2 Items Completos)
+-- Versión: 2.2 - Nombres Limpios & Auto-Fixes
 -- Juego: Piggy (Libro 1 & Libro 2)
--- CORRECIONES: ESP Items universal + Auto Unlock mejorado
+-- CORRECIONES: Nombres en ESP traducidos, AutoGrab/Unlock reparados
 -- ==========================================================
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
@@ -17,33 +17,31 @@ local LocalPlayer = Players.LocalPlayer
 local PiggyHub = Instance.new("ScreenGui")
 PiggyHub.Name = "JoseAngel_Blox_Piggy_PRO"
 
--- Protegemos la GUI colocándola en CoreGui si el ejecutor lo permite
+-- Protegemos la GUI
 local success, err = pcall(function() PiggyHub.Parent = CoreGui end)
 if not success then PiggyHub.Parent = LocalPlayer:WaitForChild("PlayerGui") end
 
--- Marco Principal (Bajito y ancho)
+-- Marco Principal
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = PiggyHub
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30) -- Tema oscuro moderno
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
 MainFrame.Position = UDim2.new(0.5, -225, 0.5, -125)
 MainFrame.Size = UDim2.new(0, 450, 0, 250)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
--- Bordes redondeados para el marco principal
 local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 15)
 UICorner.Parent = MainFrame
 
--- Barra de Título
 local Title = Instance.new("TextLabel")
 Title.Name = "Title"
 Title.Parent = MainFrame
 Title.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "  JoseAngel_Blox Piggy PRO v2.1"
+Title.Text = "  JoseAngel_Blox Piggy PRO v2.2"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16
 Title.TextXAlignment = Enum.TextXAlignment.Left
@@ -52,7 +50,6 @@ local TitleCorner = Instance.new("UICorner")
 TitleCorner.CornerRadius = UDim.new(0, 15)
 TitleCorner.Parent = Title
 
--- Parche para que el borde inferior del título no sea redondeado
 local TitleBlock = Instance.new("Frame")
 TitleBlock.Size = UDim2.new(1, 0, 0, 10)
 TitleBlock.Position = UDim2.new(0, 0, 1, -10)
@@ -60,7 +57,6 @@ TitleBlock.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
 TitleBlock.BorderSizePixel = 0
 TitleBlock.Parent = Title
 
--- Contenedores de las Pestañas (Tabs)
 local InfoTab = Instance.new("Frame")
 InfoTab.Name = "InfoTab"
 InfoTab.Parent = MainFrame
@@ -89,7 +85,6 @@ UIPadding.Parent = MainTab
 UIPadding.PaddingTop = UDim.new(0, 10)
 UIPadding.PaddingBottom = UDim.new(0, 10)
 
--- Sistema de Flechas para navegar
 local TabLabel = Instance.new("TextLabel")
 TabLabel.Parent = Title
 TabLabel.BackgroundTransparency = 1
@@ -120,7 +115,6 @@ RightArrow.Text = ">"
 RightArrow.TextColor3 = Color3.fromRGB(255, 255, 255)
 RightArrow.TextSize = 20
 
--- Lógica de las Flechas
 local currentTab = 1
 local function updateTabs()
 	if currentTab == 1 then
@@ -136,7 +130,6 @@ end
 LeftArrow.MouseButton1Click:Connect(function() currentTab = 1 updateTabs() end)
 RightArrow.MouseButton1Click:Connect(function() currentTab = 2 updateTabs() end)
 
--- Contenido de la Pestaña "Info"
 local InfoText = Instance.new("TextLabel")
 InfoText.Parent = InfoTab
 InfoText.BackgroundTransparency = 1
@@ -144,10 +137,9 @@ InfoText.Size = UDim2.new(1, 0, 1, 0)
 InfoText.Font = Enum.Font.Gotham
 InfoText.TextColor3 = Color3.fromRGB(220, 220, 220)
 InfoText.TextSize = 16
-InfoText.Text = "Nombre del Creador: JoseAngel_Blox\nFecha de Lanzamiento: 09/07/2026\nVersión: 2.1 (All Maps Fix)\nJuego: Piggy (Libro 1 & Libro 2)\n\n✅ ESP Items universal\n✅ Auto Unlock mejorado"
+InfoText.Text = "Creador: JoseAngel_Blox\nVersión: 2.2 (Nombres Limpios)\n\n✅ Nombres de ESP corregidos\n✅ Auto Grab & Unlock agresivos"
 InfoText.TextYAlignment = Enum.TextYAlignment.Center
 
--- Función constructora de Interruptores (Toggles)
 local function CreateToggle(name, parent, callback)
 	local Frame = Instance.new("Frame")
 	Frame.Parent = parent
@@ -205,72 +197,62 @@ local function CreateToggle(name, parent, callback)
 end
 
 -- ==========================================================
--- LÓGICA DE FUNCIONES Y HACKS
+-- LÓGICA DE FUNCIONES Y DICCIONARIO
 -- ==========================================================
-local Toggles = {
-	ESP = false,
-	ESPItems = false,
-	SpeedJump = false,
-	Noclip = false,
-	AutoGrab = false,
-	AutoUnlock = false,
-	InfiniteStamina = false,
-	Godmode = false
-}
+local Toggles = {ESP = false, ESPItems = false, SpeedJump = false, Noclip = false, AutoGrab = false, AutoUnlock = false, InfiniteStamina = false, Godmode = false}
 
--- ==========================================================
--- LISTA UNIVERSAL DE ÍTEMS CORREGIDA (Libro 1 + Libro 2)
--- ==========================================================
-local function isItemName(name)
-	local n = name:lower()
+-- Diccionario para traducir IDs/Nombres feos a Nombres Limpios
+local function getCleanItemName(rawName)
+	if not rawName then return nil end
+	local n = rawName:lower()
 	
-	-- Llaves (todos los colores, ambos libros)
-	if n:find("key") then return true end
+	-- Llaves de colores
+	if n:find("red") and n:find("key") then return "Llave Roja" end
+	if n:find("blue") and n:find("key") then return "Llave Azul" end
+	if n:find("green") and n:find("key") then return "Llave Verde" end
+	if n:find("yellow") and n:find("key") then return "Llave Amarilla" end
+	if n:find("white") and n:find("key") then return "Llave Blanca" end
+	if n:find("purple") and n:find("key") then return "Llave Morada" end
+	if n:find("orange") and n:find("key") then return "Llave Naranja" end
+	if n:find("cyan") and n:find("key") then return "Llave Cian" end
+	if n:find("elevator") and n:find("key") then return "Llave Ascensor" end
+	if n:find("key") then return "Llave" end
 	
-	-- Lista combinada y traducida a los nombres internos del juego 
-	-- Basada en tu lista de Libro 1 y Libro 2
-	local allItems = {
-		-- Herramientas comunes (Libro 1 & 2)
-		"hammer", "wrench", "plank", "board", "screwdriver", "crowbar", "shovel", "ladder", "scissors", "broom",
-		-- Engranajes y Mecanismos
-		"gear", "greengear", "redgear", "cog", "crank", "valve", "handle", "lens",
-		-- Energía y Combustibles
-		"gas", "gasoline", "battery", "redbattery", "bluebattery", "torch", "wood", "smoke", "extinguisher",
-		-- Claves y Códigos
-		"book", "code", "keypad", "remote", "keycard", "elevatorkey", "elevator_key",
-		-- Armas y Municiones
-		"crossbow", "munition", "ammo", "arrow", "dynamite", "syringe",
-		-- Objetos misceláneos de mapas específicos
-		"redegg", "blueegg", "chain", "hook", "grass", "weed", "purpletube",
-		"carrot", "plunger", "rope", "coin", "token", "flowerpot", "transmitter"
+	-- Herramientas Libro 1 y 2
+	local items = {
+		["hammer"] = "Martillo", ["wrench"] = "Llave Inglesa", ["plank"] = "Tabla", ["board"] = "Tabla",
+		["greengear"] = "Engranaje Verde", ["redgear"] = "Engranaje Rojo", ["gear"] = "Engranaje", ["cog"] = "Engranaje",
+		["gas"] = "Gasolina", ["gasoline"] = "Gasolina", ["redbattery"] = "Batería Roja", ["bluebattery"] = "Batería Azul", ["battery"] = "Batería",
+		["redegg"] = "Huevo Rojo", ["blueegg"] = "Huevo Azul", ["torch"] = "Antorcha", ["wood"] = "Leña",
+		["book"] = "Libro", ["syringe"] = "Jeringa", ["crossbow"] = "Ballesta", ["munition"] = "Munición", ["ammo"] = "Munición",
+		["chain"] = "Cadena", ["hook"] = "Gancho", ["grass"] = "Pasto", ["shovel"] = "Pala",
+		["code"] = "Código", ["purpletube"] = "Tubo Morado", ["screwdriver"] = "Destornillador",
+		["broom"] = "Escoba", ["scissors"] = "Tijeras", ["carrot"] = "Zanahoria", ["ladder"] = "Escalera",
+		["smoke"] = "Humo", ["lens"] = "Lente", ["crowbar"] = "Palanca", ["dynamite"] = "Dinamita",
+		["rope"] = "Cuerda", ["keypad"] = "Teclado", ["coin"] = "Moneda"
 	}
 	
-	for _, item in pairs(allItems) do
-		if n:find(item) then return true end
+	for key, clean in pairs(items) do
+		if n:find(key) then return clean end
 	end
 	
-	return false
+	return nil
 end
 
--- ==========================================================
--- LISTA DE PALABRAS RELACIONADAS A PUERTAS
--- ==========================================================
 local function isDoorName(name)
+	if not name then return false end
 	local n = name:lower()
-	local doorKeywords = {
-		"door", "lock", "gate", "barrier", "obstacle", "fence", "wall",
-		"cage", "trap", "hold", "block", "barricade", "shield", "cover",
-		"entrance", "exit", "access", "panel", "hatch", "lid", "cover",
-		"window", "bars", "cell", "gateway", "portcullis", "fence"
-	}
+	local doorKeywords = {"door", "lock", "gate", "barrier", "obstacle", "fence", "wall", "cage", "trap", "block", "barricade", "shield", "cover", "entrance", "exit", "access", "panel", "hatch", "window", "bars", "cell"}
 	for _, kw in pairs(doorKeywords) do
 		if n:find(kw) then return true end
 	end
 	return false
 end
 
--- Función auxiliar para el ESP
-local function addESP(part, name, color, isItem)
+local function addESP(part, cleanName, color)
+	-- Prevenir duplicados en la misma pieza
+	if part:FindFirstChild("ProESP") then return end
+	
 	local bg = Instance.new("BillboardGui")
 	bg.Name = "ProESP"
 	bg.AlwaysOnTop = true
@@ -282,20 +264,19 @@ local function addESP(part, name, color, isItem)
 	tl.BackgroundTransparency = 1
 	tl.Size = UDim2.new(1, 0, 1, 0)
 	tl.Font = Enum.Font.GothamBold
-	tl.Text = name
+	tl.Text = cleanName
 	tl.TextColor3 = color
 	tl.TextSize = 13
 	tl.TextStrokeTransparency = 0.3
 	tl.TextStrokeColor3 = Color3.fromRGB(0,0,0)
 	bg.Parent = part
 	
-	-- Actualizar distancia en vivo
 	task.spawn(function()
 		while bg.Parent and (Toggles.ESP or Toggles.ESPItems) do
 			pcall(function()
 				local playerPos = LocalPlayer.Character.HumanoidRootPart.Position
 				local dist = math.floor((playerPos - part.Position).Magnitude)
-				tl.Text = name .. " [" .. dist .. " studs]"
+				tl.Text = cleanName .. " [" .. dist .. "]"
 			end)
 			task.wait(0.2)
 		end
@@ -311,18 +292,15 @@ CreateToggle("ESP (Jugadores = Azul, Bots/Piggy = Rojo)", MainTab, function(stat
 				pcall(function()
 					for _, v in pairs(Workspace:GetDescendants()) do
 						if v:IsA("Model") and v:FindFirstChild("HumanoidRootPart") and v.Name ~= LocalPlayer.Name then
-							if not v.HumanoidRootPart:FindFirstChild("ProESP") then
-								local isPlayer = Players:GetPlayerFromCharacter(v)
-								local color = isPlayer and Color3.fromRGB(50, 150, 255) or Color3.fromRGB(255, 50, 50)
-								local name = isPlayer and v.Name or "BOT / PIGGY"
-								addESP(v.HumanoidRootPart, name, color)
-							end
+							local isPlayer = Players:GetPlayerFromCharacter(v)
+							local color = isPlayer and Color3.fromRGB(50, 150, 255) or Color3.fromRGB(255, 50, 50)
+							local name = isPlayer and v.Name or "BOT / PIGGY"
+							addESP(v.HumanoidRootPart, name, color)
 						end
 					end
 				end)
 				task.wait(2)
 			end
-			-- Limpieza al apagar
 			for _, v in pairs(Workspace:GetDescendants()) do
 				if v.Name == "ProESP" and (v.TextLabel.TextColor3 == Color3.fromRGB(50,150,255) or v.TextLabel.TextColor3 == Color3.fromRGB(255,50,50)) then
 					v:Destroy()
@@ -332,63 +310,28 @@ CreateToggle("ESP (Jugadores = Azul, Bots/Piggy = Rojo)", MainTab, function(stat
 	end
 end)
 
--- 2. ESP Items (VERSIÓN CORREGIDA - LISTA COMPLETA)
+-- 2. ESP Items (VERSIÓN CORREGIDA - SOLO NOMBRES LIMPIOS)
 CreateToggle("ESP Items (Llaves, Objetos)", MainTab, function(state)
 	Toggles.ESPItems = state
 	if state then
 		task.spawn(function()
 			while Toggles.ESPItems do
 				pcall(function()
-					-- Buscar TODOS los objetos que sean interactuables o tengan nombre de ítem
+					-- Filtrar por ClickDetectors para garantizar que sean recogibles
 					for _, v in pairs(Workspace:GetDescendants()) do
-						-- Caso 1: Es un BasePart con nombre de ítem conocido
-						if v:IsA("BasePart") and isItemName(v.Name) then
-							if not v:FindFirstChild("ProESP") then
-								addESP(v, v.Name, Color3.fromRGB(255, 215, 0))
-							end
-						-- Caso 2: Es un Model con PrimaryPart y nombre de ítem
-						elseif v:IsA("Model") and v.PrimaryPart and isItemName(v.Name) then
-							if not v.PrimaryPart:FindFirstChild("ProESP") then
-								addESP(v.PrimaryPart, v.Name, Color3.fromRGB(255, 215, 0))
-							end
-						-- Caso 3: Tiene un ClickDetector o ProximityPrompt (interactuable)
-						elseif v:IsA("BasePart") and v:FindFirstChildOfClass("ClickDetector") then
-							if not v:FindFirstChild("ProESP") and not isDoorName(v.Name) then
-								local pName = v.Name:gsub("ClickDetector", ""):gsub("ProximityPrompt", "")
-								if pName == "" then pName = "Item" end
-								addESP(v, pName, Color3.fromRGB(255, 215, 0))
-							end
-						elseif v:IsA("BasePart") and v:FindFirstChildOfClass("ProximityPrompt") then
-							if not v:FindFirstChild("ProESP") and not isDoorName(v.Name) then
-								local pName = v.Name:gsub("ClickDetector", ""):gsub("ProximityPrompt", "")
-								if pName == "" then pName = "Item" end
-								addESP(v, pName, Color3.fromRGB(255, 215, 0))
-							end
-						-- Caso 4: Model con ClickDetector o ProximityPrompt en sus hijos
-						elseif v:IsA("Model") and v.PrimaryPart then
-							local hasInteractive = v:FindFirstChildOfClass("ClickDetector") or v:FindFirstChildOfClass("ProximityPrompt")
-							if hasInteractive and not v.PrimaryPart:FindFirstChild("ProESP") and not isDoorName(v.Name) then
-								addESP(v.PrimaryPart, v.Name, Color3.fromRGB(255, 215, 0))
-							end
-						end
-					end
-					-- Buscar también en carpetas específicas de ítems (mapa por mapa)
-					for _, folder in pairs(Workspace:GetChildren()) do
-						if folder.Name:lower():find("item") or folder.Name:lower():find("pickup") or folder.Name:lower():find("interact") then
-							for _, item in pairs(folder:GetDescendants()) do
-								if item:IsA("BasePart") and not item:FindFirstChild("ProESP") then
-									local pName = item.Parent.Name
-									if pName and pName ~= "" then
-										addESP(item, pName, Color3.fromRGB(255, 215, 0))
-									end
-								end
+						if v:IsA("ClickDetector") or v:IsA("ProximityPrompt") then
+							-- Revisar el nombre del padre (ej. "Hammer", "RedKey_12345")
+							local parentName = v.Parent.Name
+							local cleanName = getCleanItemName(parentName)
+							
+							if cleanName and v.Parent:IsA("BasePart") then
+								addESP(v.Parent, cleanName, Color3.fromRGB(255, 215, 0))
 							end
 						end
 					end
 				end)
 				task.wait(2)
 			end
-			-- Limpieza de Items ESP
 			for _, v in pairs(Workspace:GetDescendants()) do
 				if v.Name == "ProESP" and v.TextLabel.TextColor3 == Color3.fromRGB(255, 215, 0) then
 					v:Destroy()
@@ -411,7 +354,6 @@ CreateToggle("Speed + Jump", MainTab, function(state)
 			end)
 			task.wait(0.5)
 		end
-		-- Devolver a la normalidad al apagar
 		pcall(function()
 			LocalPlayer.Character.Humanoid.WalkSpeed = 16
 			LocalPlayer.Character.Humanoid.JumpPower = 50
@@ -426,85 +368,75 @@ end)
 RunService.Stepped:Connect(function()
 	if Toggles.Noclip and LocalPlayer.Character then
 		for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-			if part:IsA("BasePart") then
-				part.CanCollide = false
-			end
+			if part:IsA("BasePart") then part.CanCollide = false end
 		end
 	end
 end)
 
--- 5. Auto Grab Items (MEJORADO)
+-- 5. Auto Grab Items (REPARADO Y AGRESIVO)
 CreateToggle("Auto Grab Items (Cercanos)", MainTab, function(state)
 	Toggles.AutoGrab = state
 	task.spawn(function()
 		while Toggles.AutoGrab do
 			pcall(function()
+				local char = LocalPlayer.Character
+				if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+				local pos = char.HumanoidRootPart.Position
+
 				for _, v in pairs(Workspace:GetDescendants()) do
-					if v:IsA("ClickDetector") or v:IsA("ProximityPrompt") then
-						local parentPart = v.Parent
-						if parentPart:IsA("Model") and parentPart.PrimaryPart then
-							parentPart = parentPart.PrimaryPart
+					if v:IsA("ClickDetector") then
+						local cleanName = getCleanItemName(v.Parent.Name)
+						if cleanName then
+							local dist = (pos - v.Parent.Position).Magnitude
+							if dist <= 12 then -- Distancia segura para evitar kicks del servidor
+								fireclickdetector(v)
+							end
 						end
-						if parentPart and parentPart:IsA("BasePart") and isItemName(parentPart.Name) then
-							local dist = (LocalPlayer.Character.HumanoidRootPart.Position - parentPart.Position).Magnitude
-							if dist <= 15 then
-								if v:IsA("ClickDetector") then fireclickdetector(v) end
-								if v:IsA("ProximityPrompt") then fireproximityprompt(v) end
+					elseif v:IsA("ProximityPrompt") then
+						local cleanName = getCleanItemName(v.Parent.Name)
+						if cleanName then
+							local dist = (pos - v.Parent.Position).Magnitude
+							if dist <= v.MaxActivationDistance then
+								fireproximityprompt(v)
 							end
 						end
 					end
 				end
 			end)
-			task.wait(0.5)
+			task.wait(0.2) -- Loop más rápido para recoger al instante
 		end
 	end)
 end)
 
--- 6. Auto Unlock Doors (VERSIÓN CORREGIDA - UNIVERSAL)
+-- 6. Auto Unlock Doors (REPARADO Y AGRESIVO)
 CreateToggle("Auto Unlock Doors", MainTab, function(state)
 	Toggles.AutoUnlock = state
 	task.spawn(function()
 		while Toggles.AutoUnlock do
 			pcall(function()
-				-- Método 1: ClickDetectors y ProximityPrompts en objetos con nombre de puerta
+				local char = LocalPlayer.Character
+				if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+				local pos = char.HumanoidRootPart.Position
+
 				for _, v in pairs(Workspace:GetDescendants()) do
-					if v:IsA("ClickDetector") or v:IsA("ProximityPrompt") then
-						local parentPart = v.Parent
-						if parentPart:IsA("Model") and parentPart.PrimaryPart then
-							parentPart = parentPart.PrimaryPart
-						end
-						if parentPart and parentPart:IsA("BasePart") then
-							if isDoorName(parentPart.Name) or isDoorName(v.Parent.Name) then
-								local dist = (LocalPlayer.Character.HumanoidRootPart.Position - parentPart.Position).Magnitude
-								if dist <= 18 then
-									if v:IsA("ClickDetector") then fireclickdetector(v) end
-									if v:IsA("ProximityPrompt") then fireproximityprompt(v) end
-								end
+					if v:IsA("ClickDetector") then
+						if isDoorName(v.Parent.Name) or (v.Parent.Parent and isDoorName(v.Parent.Parent.Name)) then
+							local dist = (pos - v.Parent.Position).Magnitude
+							if dist <= 12 then
+								fireclickdetector(v)
 							end
 						end
-					end
-				end
-				-- Método 2: Partes con nombre de puerta que tengan ClickDetector hijo
-				for _, v in pairs(Workspace:GetDescendants()) do
-					if v:IsA("BasePart") and isDoorName(v.Name) then
-						local detector = v:FindFirstChildOfClass("ClickDetector")
-						local prompt = v:FindFirstChildOfClass("ProximityPrompt")
-						if detector then
-							local dist = (LocalPlayer.Character.HumanoidRootPart.Position - v.Position).Magnitude
-							if dist <= 18 then
-								fireclickdetector(detector)
-							end
-						end
-						if prompt then
-							local dist = (LocalPlayer.Character.HumanoidRootPart.Position - v.Position).Magnitude
-							if dist <= 18 then
-								fireproximityprompt(prompt)
+					elseif v:IsA("ProximityPrompt") then
+						if isDoorName(v.Parent.Name) or (v.Parent.Parent and isDoorName(v.Parent.Parent.Name)) then
+							local dist = (pos - v.Parent.Position).Magnitude
+							if dist <= v.MaxActivationDistance then
+								fireproximityprompt(v)
 							end
 						end
 					end
 				end
 			end)
-			task.wait(0.5)
+			task.wait(0.2)
 		end
 	end)
 end)
@@ -515,12 +447,8 @@ CreateToggle("Infinite Stamina", MainTab, function(state)
 	task.spawn(function()
 		while Toggles.InfiniteStamina do
 			pcall(function()
-				if LocalPlayer.Character:FindFirstChild("Energy") then
-					LocalPlayer.Character.Energy.Value = 100
-				end
-				if LocalPlayer.Character:FindFirstChild("Stamina") then
-					LocalPlayer.Character.Stamina.Value = 100
-				end
+				if LocalPlayer.Character:FindFirstChild("Energy") then LocalPlayer.Character.Energy.Value = 100 end
+				if LocalPlayer.Character:FindFirstChild("Stamina") then LocalPlayer.Character.Stamina.Value = 100 end
 			end)
 			task.wait(0.1)
 		end
@@ -548,4 +476,4 @@ CreateToggle("Godmode (Invencible)", MainTab, function(state)
 	end)
 end)
 
-print("JoseAngel_Blox Piggy PRO v2.1 - All Maps Fix cargado correctamente!")
+print("JoseAngel_Blox Piggy PRO v2.2 - Cargado con Nombres Limpios y Fixes!")
