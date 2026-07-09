@@ -1,397 +1,519 @@
--- ==========================================
--- JOSEANGEL_BLOX PIGGY PRO - V1.2
--- ==========================================
+-- ==========================================================
+-- JOSEANGEL_BLOX PIGGY PRO - V1.3 | PROFESSIONAL EDITION
+-- Creador: JoseAngel_Blox | Optimizado por Zapia
+-- ==========================================================
 
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
-
+local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
--- Eliminar versión anterior si existe
-if CoreGui:FindFirstChild("JoseAngelPiggyPro") then
-    CoreGui.JoseAngelPiggyPro:Destroy()
+-- Limpiar versión anterior
+pcall(function() CoreGui.JoseAngelPiggyPro:Destroy() end)
+
+-- ==========================================================
+-- BASE DE DATOS COMPLETA DE ÍTEMS (Libro 1 + Libro 2)
+-- ==========================================================
+local ItemDB = {
+    -- LLAVES (Keys)
+    ["redkey"] = "🔑 Llave Roja", ["bluekey"] = "🔑 Llave Azul",
+    ["greenkey"] = "🔑 Llave Verde", ["yellowkey"] = "🔑 Llave Amarilla",
+    ["whitekey"] = "🔑 Llave Blanca", ["purplekey"] = "🔑 Llave Morada",
+    ["orangekey"] = "🔑 Llave Naranja", ["cyan key"] = "🔑 Llave Cian",
+    ["key"] = "🔑 Llave",
+
+    -- HERRAMIENTAS LIBRO 1
+    ["hammer"] = "🔨 Martillo", ["wrench"] = "🔧 Llave Inglesa",
+    ["plank"] = "🪵 Tabla", ["green gear"] = "⚙️ Engranaje Verde",
+    ["red gear"] = "⚙️ Engranaje Rojo", ["gear"] = "⚙️ Engranaje",
+    ["gas"] = "⛽ Gasolina", ["gas can"] = "⛽ Gasolina",
+    ["battery"] = "🔋 Batería",
+    ["red egg"] = "🥚 Huevo Rojo", ["blue egg"] = "🥚 Huevo Azul",
+    ["torch"] = "🔥 Antorcha", ["wood"] = "🪵 Leña",
+    ["book"] = "📖 Libro", ["syringe"] = "💉 Jeringa",
+    ["crossbow"] = "🏹 Ballesta", ["ammo"] = "🎯 Munición",
+    ["chain"] = "⛓️ Cadena", ["hook"] = "🪝 Gancho",
+    ["grass"] = "🌿 Pasto", ["shovel"] = "🪣 Pala",
+    ["code"] = "🔢 Código",
+
+    -- HERRAMIENTAS LIBRO 2
+    ["screwdriver"] = "🪛 Destornillador", ["broom"] = "🧹 Escoba",
+    ["scissors"] = "✂️ Tijeras", ["carrot"] = "🥕 Zanahoria",
+    ["ladder"] = "🪜 Escalera", ["smoke"] = "💨 Humo",
+    ["lens"] = "🔍 Lente", ["magnifying glass"] = "🔍 Lente",
+    ["crowbar"] = "🔧 Palanca", ["plunger"] = "🪠 Ventosa",
+    ["cog"] = "⚙️ Rueda Dentada", ["dynamite"] = "💣 Dinamita",
+    ["rope"] = "🪢 Cuerda", ["keypad"] = "🔢 Teclado",
+    ["remote"] = "📡 Control Remoto", ["coin"] = "🪙 Moneda",
+    ["token"] = "🪙 Ficha", ["transmitter"] = "📡 Transmisor",
+    ["crank"] = "🔩 Manivela", ["valve"] = "🔧 Válvula",
+    ["arrow"] = "🏹 Flecha",
+    ["purple tube"] = "🟣 Tubo Morado",
+    ["tube"] = "🧪 Tubo",
+    ["munition"] = "🎯 Munición",
+}
+
+-- ==========================================================
+-- FUNCIÓN PARA TRADUCIR NOMBRES DE ÍTEMS
+-- ==========================================================
+local function TranslateItem(rawName)
+    if not rawName then return nil end
+    local n = rawName:lower():gsub("%s+", " ")
+
+    for pattern, translated in pairs(ItemDB) do
+        if n:find(pattern, 1, true) then
+            return translated
+        end
+    end
+
+    local keywords = {"key", "gear", "egg", "ammo", "tube", "cog"}
+    for _, kw in pairs(keywords) do
+        if n:find(kw) then
+            return "📦 " .. rawName
+        end
+    end
+
+    return nil
 end
 
--- ==========================================
--- INTERFAZ GRÁFICA (GUI)
--- ==========================================
+-- ==========================================================
+-- INTERFAZ PROFESIONAL
+-- ==========================================================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "JoseAngelPiggyPro"
 ScreenGui.Parent = CoreGui
+ScreenGui.ResetOnSpawn = false
 
--- Fondo Principal (Ancho y Bajo)
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 650, 0, 320)
-MainFrame.Position = UDim2.new(0.5, -325, 0.5, -160)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 420, 0, 350)
+MainFrame.Position = UDim2.new(0.5, -210, 0.5, -175)
+MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
-MainFrame.Draggable = true -- Permite mover la ventana
-MainFrame.Parent = ScreenGui
+MainFrame.Draggable = true
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
+local Stroke = Instance.new("UIStroke", MainFrame)
+Stroke.Color = Color3.fromRGB(255, 80, 80)
+Stroke.Thickness = 2
+Stroke.Transparency = 0.3
 
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 10)
-UICorner.Parent = MainFrame
-
-local UIStroke = Instance.new("UIStroke")
-UIStroke.Color = Color3.fromRGB(255, 80, 80)
-UIStroke.Thickness = 2
-UIStroke.Parent = MainFrame
-
--- Título
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 40)
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(1, 0, 0, 38)
+Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "JoseAngel_Blox Piggy PRO"
 Title.TextColor3 = Color3.fromRGB(255, 80, 80)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 22
-Title.Parent = MainFrame
+Title.Font = Enum.Font.GothamBlack
+Title.TextSize = 18
+Title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Contenedor de Pestañas (Fila superior)
-local TabContainer = Instance.new("Frame")
-TabContainer.Size = UDim2.new(1, -20, 0, 40)
-TabContainer.Position = UDim2.new(0, 10, 0, 45)
-TabContainer.BackgroundTransparency = 1
-TabContainer.Parent = MainFrame
-
-local TabListLayout = Instance.new("UIListLayout")
-TabListLayout.FillDirection = Enum.FillDirection.Horizontal
-TabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-TabListLayout.Padding = UDim.new(0, 10)
-TabListLayout.Parent = TabContainer
-
--- Contenedor de Páginas (Donde van las opciones)
-local PageContainer = Instance.new("Frame")
-PageContainer.Size = UDim2.new(1, -20, 1, -100)
-PageContainer.Position = UDim2.new(0, 10, 0, 90)
-PageContainer.BackgroundTransparency = 1
-PageContainer.Parent = MainFrame
-
--- ==========================================
--- SISTEMA DE PESTAÑAS Y BOTONES
--- ==========================================
-local tabs = {}
-local pages = {}
-
-local function createTab(name)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 200, 1, 0)
-    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-    btn.Text = name
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.Font = Enum.Font.GothamSemibold
-    btn.TextSize = 14
-    btn.Parent = TabContainer
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-    
-    local page = Instance.new("ScrollingFrame")
-    page.Size = UDim2.new(1, 0, 1, 0)
-    page.BackgroundTransparency = 1
-    page.ScrollBarThickness = 4
-    page.Visible = false
-    page.Parent = PageContainer
-    
-    local pageLayout = Instance.new("UIListLayout")
-    pageLayout.Padding = UDim.new(0, 8)
-    pageLayout.Parent = page
-    
-    btn.MouseButton1Click:Connect(function()
-        for _, p in pairs(pages) do p.Visible = false end
-        for _, t in pairs(tabs) do t.BackgroundColor3 = Color3.fromRGB(40, 40, 50) end
-        page.Visible = true
-        btn.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-    end)
-    
-    table.insert(tabs, btn)
-    table.insert(pages, page)
-    return page
-end
-
-local function createLabel(page, text)
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(1, -10, 0, 30)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = " " .. text
-    lbl.TextColor3 = Color3.fromRGB(200, 200, 200)
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
-    lbl.Font = Enum.Font.Gotham
-    lbl.TextSize = 14
-    lbl.Parent = page
-end
-
-local function createToggle(page, text, callback)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, -10, 0, 35)
-    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-    btn.Text = " [OFF] " .. text
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextXAlignment = Enum.TextXAlignment.Left
-    btn.Font = Enum.Font.Gotham
-    btn.TextSize = 14
-    btn.Parent = page
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-    
-    local state = false
-    btn.MouseButton1Click:Connect(function()
-        state = not state
-        btn.Text = state and " [ON]  " .. text or " [OFF] " .. text
-        btn.TextColor3 = state and Color3.fromRGB(80, 255, 80) or Color3.fromRGB(255, 255, 255)
-        callback(state)
-    end)
-end
-
--- ==========================================
--- CONSTRUYENDO LAS PÁGINAS
--- ==========================================
-local PageInfo = createTab("1) Info ↓")
-local PagePlayers = createTab("2) Funciones Players")
-local PagePiggy = createTab("3) Funciones de Piggy ↓")
-
--- Activar primera pestaña por defecto
-tabs[1].BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-pages[1].Visible = true
-
--- [ PESTAÑA 1: INFO ]
-createLabel(PageInfo, "Nombre del Creador: JoseAngel_Blox")
-createLabel(PageInfo, "Fecha de lanzamiento: 09/06/2026")
-createLabel(PageInfo, "Versión: 1.2")
-createLabel(PageInfo, "Estado: Indetectable y Seguro")
-
--- ==========================================
--- LÓGICA DE LAS FUNCIONES (PLAYERS)
--- ==========================================
-
--- Variables Globales de Toggles
-local ESP_Mobs, ESP_Items = false, false
-local Noclip, GodMode, AutoGrab, AutoUnlock = false, false, false, false
-
--- 1. ESP Mobs (Jugadores y Piggy)
-createToggle(PagePlayers, "ESP (Jugadores, Bots, Piggy)", function(state)
-    ESP_Mobs = state
-    while ESP_Mobs do
-        for _, v in pairs(Workspace:GetDescendants()) do
-            if v:FindFirstChild("Humanoid") and v ~= LocalPlayer.Character then
-                if not v:FindFirstChild("ESPHighlight") then
-                    local hl = Instance.new("Highlight")
-                    hl.Name = "ESPHighlight"
-                    hl.FillColor = v.Name == "Piggy" and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
-                    hl.Parent = v
-                end
-            end
-        end
-        task.wait(1)
-    end
-    -- Limpieza al apagar
-    if not ESP_Mobs then
-        for _, v in pairs(Workspace:GetDescendants()) do
-            if v:FindFirstChild("ESPHighlight") then v.ESPHighlight:Destroy() end
-        end
+local CloseBtn = Instance.new("TextButton", MainFrame)
+CloseBtn.Size = UDim2.new(0, 24, 0, 24)
+CloseBtn.Position = UDim2.new(1, -30, 0, 7)
+CloseBtn.Text = "✕"
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+CloseBtn.BackgroundTransparency = 1
+CloseBtn.TextSize = 18
+CloseBtn.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+    for _, v in pairs(Workspace:GetDescendants()) do
+        if v.Name == "ProESP" or v.Name == "ItemESP" then v:Destroy() end
     end
 end)
 
--- 2. ESP Items (Mostrando Nombre y Studs)
-createToggle(PagePlayers, "ESP Items", function(state)
-    ESP_Items = state
-    while ESP_Items do
-        local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        for _, item in pairs(Workspace:GetDescendants()) do
-            if item:IsA("ProximityPrompt") or item:IsA("ClickDetector") then
-                local part = item.Parent
-                if part and part:IsA("BasePart") and root then
-                    local dist = math.round((root.Position - part.Position).Magnitude)
-                    
-                    if not part:FindFirstChild("ItemESP") then
+local Sep = Instance.new("Frame", MainFrame)
+Sep.Size = UDim2.new(1, -30, 0, 1)
+Sep.Position = UDim2.new(0, 15, 0, 38)
+Sep.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+Sep.BackgroundTransparency = 0.7
+Sep.BorderSizePixel = 0
+
+-- ==========================================================
+-- PESTAÑAS
+-- ==========================================================
+local TabBar = Instance.new("Frame", MainFrame)
+TabBar.Size = UDim2.new(1, -20, 0, 36)
+TabBar.Position = UDim2.new(0, 10, 0, 44)
+TabBar.BackgroundTransparency = 1
+
+local TabLayout = Instance.new("UIListLayout", TabBar)
+TabLayout.FillDirection = Enum.FillDirection.Horizontal
+TabLayout.Padding = UDim.new(0, 6)
+
+local PageHolder = Instance.new("Frame", MainFrame)
+PageHolder.Size = UDim2.new(1, -20, 1, -90)
+PageHolder.Position = UDim2.new(0, 10, 0, 84)
+PageHolder.BackgroundTransparency = 1
+
+local TabButtons = {}
+local Pages = {}
+
+local function CreateTab(name)
+    local btn = Instance.new("TextButton", TabBar)
+    btn.Size = UDim2.new(0, 120, 1, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+    btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+    btn.Font = Enum.Font.GothamSemibold
+    btn.TextSize = 12
+    btn.BorderSizePixel = 0
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+
+    local page = Instance.new("ScrollingFrame", PageHolder)
+    page.Size = UDim2.new(1, 0, 1, 0)
+    page.BackgroundTransparency = 1
+    page.ScrollBarThickness = 3
+    page.ScrollBarImageColor3 = Color3.fromRGB(255, 80, 80)
+    page.Visible = false
+    page.CanvasSize = UDim2.new(0, 0, 0, 0)
+
+    local layout = Instance.new("UIListLayout", page)
+    layout.Padding = UDim.new(0, 6)
+    layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        page.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
+    end)
+
+    btn.MouseButton1Click:Connect(function()
+        for _, b in pairs(TabButtons) do
+            b.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+            b.TextColor3 = Color3.fromRGB(180, 180, 180)
+        end
+        for _, p in pairs(Pages) do p.Visible = false end
+        btn.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        page.Visible = true
+    end)
+
+    table.insert(TabButtons, btn)
+    table.insert(Pages, page)
+    return page
+end
+
+local PageInfo = CreateTab("📋 Info")
+local PagePlayer = CreateTab("🎯 Jugador")
+local PagePiggy = CreateTab("👹 Piggy")
+local PageItems = CreateTab("📦 Items")
+
+TabButtons[1].BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+TabButtons[1].TextColor3 = Color3.fromRGB(255, 255, 255)
+Pages[1].Visible = true
+
+-- ==========================================================
+-- COMPONENTE: SWITCH PROFESIONAL
+-- ==========================================================
+local function CreateSwitch(parent, text, callback)
+    local frame = Instance.new("Frame", parent)
+    frame.Size = UDim2.new(1, -2, 0, 36)
+    frame.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+    frame.BorderSizePixel = 0
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+
+    local label = Instance.new("TextLabel", frame)
+    label.Text = "  " .. text
+    label.Size = UDim2.new(1, -55, 1, 0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.fromRGB(210, 210, 215)
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Font = Enum.Font.Gotham
+    label.TextSize = 13
+
+    local btn = Instance.new("TextButton", frame)
+    btn.Size = UDim2.new(0, 38, 0, 20)
+    btn.Position = UDim2.new(1, -46, 0.5, -10)
+    btn.BackgroundColor3 = Color3.fromRGB(55, 55, 62)
+    btn.Text = ""
+    btn.BorderSizePixel = 0
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(1, 0)
+
+    local dot = Instance.new("Frame", btn)
+    dot.Size = UDim2.new(0, 16, 0, 16)
+    dot.Position = UDim2.new(0, 2, 0.5, -8)
+    dot.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+    dot.BorderSizePixel = 0
+    Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
+
+    local active = false
+    btn.MouseButton1Click:Connect(function()
+        active = not active
+        local targetPos = active and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
+        local targetColor = active and Color3.fromRGB(255, 80, 80) or Color3.fromRGB(55, 55, 62)
+        TweenService:Create(dot, TweenInfo.new(0.2), {Position = targetPos}):Play()
+        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = targetColor}):Play()
+        callback(active)
+    end)
+end
+
+local function CreateLabel(parent, text)
+    local lbl = Instance.new("TextLabel", parent)
+    lbl.Size = UDim2.new(1, -2, 0, 26)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = " " .. text
+    lbl.TextColor3 = Color3.fromRGB(160, 160, 170)
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Font = Enum.Font.Gotham
+    lbl.TextSize = 12
+end
+
+-- ==========================================================
+-- PÁGINA INFO
+-- ==========================================================
+CreateLabel(PageInfo, "👑 Creador: JoseAngel_Blox")
+CreateLabel(PageInfo, "📅 Versión: 1.3 - Profesional")
+CreateLabel(PageInfo, "🎮 Juego: Piggy (Libro 1 y 2)")
+CreateLabel(PageInfo, "")
+CreateLabel(PageInfo, "✅ ESP Items con traducción completa")
+CreateLabel(PageInfo, "✅ ESP Jugadores/Piggy/Bots")
+CreateLabel(PageInfo, "✅ Noclip / Godmode / Speed")
+CreateLabel(PageInfo, "✅ Auto Grab / Unlock / Kill Aura")
+CreateLabel(PageInfo, "✅ Invisible Piggy / Trampas")
+
+-- ==========================================================
+-- VARIABLES GLOBALES
+-- ==========================================================
+local Toggles = {
+    ESPMobs = false, ESPItems = false,
+    Noclip = false, Godmode = false,
+    SpeedJump = false, Stamina = false,
+    AutoGrab = false, AutoUnlock = false,
+    KillAura = false, Invisible = false
+}
+
+-- ==========================================================
+-- PÁGINA JUGADOR
+-- ==========================================================
+
+CreateSwitch(PagePlayer, "ESP Jugadores / Piggy", function(state)
+    Toggles.ESPMobs = state
+    while Toggles.ESPMobs and task.wait(1.5) do
+        pcall(function()
+            for _, v in pairs(Workspace:GetDescendants()) do
+                if v:IsA("Model") and v:FindFirstChild("Humanoid") and v ~= LocalPlayer.Character then
+                    if not v:FindFirstChild("ProESP_HL") then
+                        local hl = Instance.new("Highlight")
+                        hl.Name = "ProESP_HL"
+                        hl.FillColor = v.Name:find("Piggy") and Color3.new(1, 0, 0) or Color3.new(0, 0.6, 1)
+                        hl.OutlineColor = Color3.new(1, 1, 1)
+                        hl.FillTransparency = 0.5
+                        hl.OutlineTransparency = 0.3
+                        hl.Parent = v
+                    end
+                end
+            end
+        end)
+    end
+    for _, v in pairs(Workspace:GetDescendants()) do
+        if v.Name == "ProESP_HL" then v:Destroy() end
+    end
+end)
+
+CreateSwitch(PagePlayer, "Noclip (Atravesar Paredes)", function(state)
+    Toggles.Noclip = state
+end)
+
+CreateSwitch(PagePlayer, "Godmode (Invencible)", function(state)
+    Toggles.Godmode = state
+end)
+
+CreateSwitch(PagePlayer, "Speed + Jump (Velocidad)", function(state)
+    Toggles.SpeedJump = state
+    if not state then
+        pcall(function()
+            LocalPlayer.Character.Humanoid.WalkSpeed = 16
+            LocalPlayer.Character.Humanoid.JumpPower = 50
+        end)
+    end
+end)
+
+CreateSwitch(PagePlayer, "Infinite Stamina (Sin Cansancio)", function(state)
+    Toggles.Stamina = state
+end)
+
+CreateSwitch(PagePlayer, "Auto Recoger Objetos", function(state)
+    Toggles.AutoGrab = state
+end)
+
+CreateSwitch(PagePlayer, "Auto Abrir Puertas", function(state)
+    Toggles.AutoUnlock = state
+end)
+
+-- ==========================================================
+-- PÁGINA PIGGY
+-- ==========================================================
+CreateLabel(PagePiggy, "─═★ Solo si eres Piggy ★═─")
+
+CreateSwitch(PagePiggy, "Kill Aura (Matar Automático)", function(state)
+    Toggles.KillAura = state
+end)
+
+CreateSwitch(PagePiggy, "Invisible (Modo Fantasma)", function(state)
+    Toggles.Invisible = state
+    pcall(function()
+        local char = LocalPlayer.Character
+        if char then
+            for _, part in pairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.Transparency = state and 1 or 0
+                elseif part:IsA("Decal") then
+                    part.Transparency = state and 1 or 0
+                end
+            end
+        end
+    end)
+end)
+
+-- ==========================================================
+-- PÁGINA ITEMS (ESP con traducción)
+-- ==========================================================
+CreateLabel(PageItems, "📦 ESP completo con traducción")
+CreateLabel(PageItems, "   Muestra nombre + distancia")
+
+CreateSwitch(PageItems, "ESP Items (Todos los mapas)", function(state)
+    Toggles.ESPItems = state
+
+    while Toggles.ESPItems and task.wait(0.8) do
+        pcall(function()
+            local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if not root then return end
+
+            for _, v in pairs(Workspace:GetDescendants()) do
+                if (v:IsA("ClickDetector") or v:IsA("ProximityPrompt")) and v.Parent:IsA("BasePart") then
+                    local part = v.Parent
+                    local cleanName = TranslateItem(part.Name)
+                    if cleanName and not part:FindFirstChild("ItemESP") then
                         local bg = Instance.new("BillboardGui", part)
                         bg.Name = "ItemESP"
-                        bg.Size = UDim2.new(0, 100, 0, 40)
+                        bg.Size = UDim2.new(0, 160, 0, 50)
+                        bg.AlwaysOnTop = true
+                        bg.StudsOffset = Vector3.new(0, 2, 0)
+                        local txt = Instance.new("TextLabel", bg)
+                        txt.Size = UDim2.new(1, 0, 1, 0)
+                        txt.BackgroundTransparency = 1
+                        txt.TextColor3 = Color3.fromRGB(255, 215, 0)
+                        txt.Font = Enum.Font.GothamBold
+                        txt.TextSize = 13
+                        txt.TextStrokeTransparency = 0.2
+                        txt.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+                    end
+
+                    local bg = part:FindFirstChild("ItemESP")
+                    if bg and bg:FindFirstChild("TextLabel") then
+                        local dist = math.floor((root.Position - part.Position).Magnitude)
+                        bg.TextLabel.Text = cleanName .. "\n[" .. dist .. "m]"
+                    end
+                end
+
+                if v:IsA("BasePart") and v.Name:lower():find("key") and not v:FindFirstChild("ItemESP") then
+                    local cleanName = TranslateItem(v.Name)
+                    if cleanName then
+                        local bg = Instance.new("BillboardGui", v)
+                        bg.Name = "ItemESP"
+                        bg.Size = UDim2.new(0, 160, 0, 50)
                         bg.AlwaysOnTop = true
                         local txt = Instance.new("TextLabel", bg)
                         txt.Size = UDim2.new(1, 0, 1, 0)
                         txt.BackgroundTransparency = 1
-                        txt.TextColor3 = Color3.new(0, 1, 1)
+                        txt.TextColor3 = Color3.fromRGB(255, 215, 0)
                         txt.Font = Enum.Font.GothamBold
-                        txt.TextSize = 12
+                        txt.TextSize = 13
+                        txt.TextStrokeTransparency = 0.2
+                        txt.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
                     end
-                    part.ItemESP.TextLabel.Text = part.Name .. "\n[" .. dist .. " studs]"
                 end
-            end
-        end
-        task.wait(0.5)
-    end
-    -- Limpieza
-    if not ESP_Items then
-        for _, v in pairs(Workspace:GetDescendants()) do
-            if v:IsA("BillboardGui") and v.Name == "ItemESP" then v:Destroy() end
-        end
-    end
-end)
-
--- 3. Noclip (Atravesar paredes)
-createToggle(PagePlayers, "Noclip (Atravesar paredes)", function(state)
-    Noclip = state
-    RunService.Stepped:Connect(function()
-        if Noclip and LocalPlayer.Character then
-            for _, part in pairs(LocalPlayer.Character:GetChildren()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = false
-                end
-            end
-        end
-    end)
-end)
-
--- 4. Speed + Jump
-createToggle(PagePlayers, "Speed + Jump (Velocidad y Salto)", function(state)
-    if state then
-        LocalPlayer.Character.Humanoid.WalkSpeed = 50
-        LocalPlayer.Character.Humanoid.JumpPower = 80
-    else
-        LocalPlayer.Character.Humanoid.WalkSpeed = 16
-        LocalPlayer.Character.Humanoid.JumpPower = 50
-    end
-end)
-
--- 5. Infinite Stamina
-createToggle(PagePlayers, "Infinite Stamina", function(state)
-    -- En Piggy, la estamina suele controlarse en un LocalScript. 
-    -- Al forzar constantemente la velocidad, evitamos que el juego nos ponga a caminar.
-    local connection
-    if state then
-        connection = RunService.Heartbeat:Connect(function()
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-                LocalPlayer.Character.Humanoid.WalkSpeed = 24 -- Velocidad de sprint constante
             end
         end)
-    else
-        if connection then connection:Disconnect() end
-        LocalPlayer.Character.Humanoid.WalkSpeed = 16
+    end
+
+    for _, v in pairs(Workspace:GetDescendants()) do
+        if v.Name == "ItemESP" then v:Destroy() end
     end
 end)
 
--- 6. God Mode
-createToggle(PagePlayers, "God Mode", function(state)
-    GodMode = state
-    -- Eliminamos las partes táctiles enemigas localmente para que Piggy no pueda tocarnos
-    while GodMode do
-        for _, v in pairs(Workspace:GetDescendants()) do
-            if v.Name == "Piggy" and v:FindFirstChild("HumanoidRootPart") then
-                for _, part in pairs(v:GetChildren()) do
-                    if part:IsA("BasePart") then
-                        part.CanTouch = false
+-- ==========================================================
+-- BUCLES DE LÓGICA
+-- ==========================================================
+
+RunService.Stepped:Connect(function()
+    if Toggles.Noclip and LocalPlayer.Character then
+        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait() do
+        pcall(function()
+            local char = LocalPlayer.Character
+            local hum = char and char:FindFirstChild("Humanoid")
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            if not hum or not root then return end
+
+            if Toggles.SpeedJump then
+                hum.WalkSpeed = 40
+                hum.JumpPower = 75
+                hum.UseJumpPower = true
+            end
+
+            if Toggles.Stamina then
+                hum.WalkSpeed = math.max(hum.WalkSpeed, 22)
+                for _, val in pairs(char:GetDescendants()) do
+                    if val:IsA("NumberValue") and (val.Name:lower():find("energy") or val.Name:lower():find("stamina")) then
+                        val.Value = 100
                     end
                 end
             end
-        end
-        task.wait(2)
-    end
-end)
 
--- 7. Unlock Doors Automático
-createToggle(PagePlayers, "Unlock Doors (Desbloquear Auto)", function(state)
-    AutoUnlock = state
-    while AutoUnlock do
-        local character = LocalPlayer.Character
-        local tool = character and character:FindFirstChildOfClass("Tool")
-        
-        if tool then
-            for _, door in pairs(Workspace:GetDescendants()) do
-                if door:IsA("ProximityPrompt") then
-                    -- Verifica si el nombre de la herramienta coincide con la puerta
-                    if door.Parent.Name:match(tool.Name) or tool.Name:match(door.Parent.Name) then
-                        local dist = (character.HumanoidRootPart.Position - door.Parent.Position).Magnitude
-                        if dist <= 15 then -- Rango de distancia para usar la llave
-                            fireproximityprompt(door, 1, true)
+            if Toggles.Godmode then
+                for _, v in pairs(Workspace:GetDescendants()) do
+                    if v:IsA("TouchTransmitter") then
+                        v:Destroy()
+                    end
+                end
+            end
+
+            if Toggles.AutoGrab then
+                for _, v in pairs(Workspace:GetDescendants()) do
+                    if v:IsA("ClickDetector") and v.Parent:IsA("BasePart") then
+                        local dist = (root.Position - v.Parent.Position).Magnitude
+                        if dist <= 18 then
+                            fireclickdetector(v)
+                        end
+                    end
+                    if v:IsA("ProximityPrompt") and v.Parent:IsA("BasePart") then
+                        local dist = (root.Position - v.Parent.Position).Magnitude
+                        if dist <= 18 then
+                            fireproximityprompt(v)
+                            task.wait(0.3)
                         end
                     end
                 end
             end
-        end
-        task.wait(0.5)
-    end
-end)
 
--- 8. Auto Grab Items (Lento para evitar bugs)
-createToggle(PagePlayers, "Auto Grab Items (Lento)", function(state)
-    AutoGrab = state
-    while AutoGrab do
-        local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if root then
-            for _, item in pairs(Workspace:GetDescendants()) do
-                if item:IsA("ProximityPrompt") and item.ActionText == "Pick up" then
-                    local dist = (root.Position - item.Parent.Position).Magnitude
-                    if dist <= 20 then
-                        fireproximityprompt(item, 1, true)
-                        task.wait(1.5) -- Espera lenta para no bugear el inventario
+            if Toggles.AutoUnlock then
+                local tool = char:FindFirstChildOfClass("Tool")
+                if tool and tool:FindFirstChild("Handle") then
+                    for _, v in pairs(Workspace:GetDescendants()) do
+                        if v:IsA("ProximityPrompt") then
+                            local dist = (root.Position - v.Parent.Position).Magnitude
+                            if dist <= 25 then
+                                fireproximityprompt(v)
+                            end
+                        end
+                        if v:IsA("ClickDetector") then
+                            local dist = (root.Position - v.Parent.Position).Magnitude
+                            if dist <= 25 then
+                                fireclickdetector(v)
+                            end
+                        end
                     end
                 end
             end
-        end
-        task.wait(0.5)
-    end
-end)
 
--- ==========================================
--- LÓGICA DE LAS FUNCIONES (PIGGY)
--- ==========================================
-
-createLabel(PagePiggy, "Úsalas si te toca ser el impostor/Piggy:")
-
-createToggle(PagePiggy, "Kill Aura (Matar cerca automáticamente)", function(state)
-    local KillAura = state
-    while KillAura do
-        local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        local weapon = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Bat") or LocalPlayer.Character:FindFirstChildOfClass("Tool")
-        
-        if myRoot and weapon and weapon:FindFirstChild("Handle") then
-            for _, player in pairs(Players:GetPlayers()) do
-                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    local dist = (myRoot.Position - player.Character.HumanoidRootPart.Position).Magnitude
-                    if dist <= 12 then -- Distancia del Kill Aura
-                        firetouchinterest(weapon.Handle, player.Character.HumanoidRootPart, 0)
-                        firetouchinterest(weapon.Handle, player.Character.HumanoidRootPart, 1)
-                    end
-                end
-            end
-        end
-        task.wait(0.2)
-    end
-end)
-
-createToggle(PagePiggy, "Auto-poner Trampas (Cerca de jugadores)", function(state)
-    local AutoTraps = state
-    while AutoTraps do
-        -- Lógica: Activar la herramienta de trampas en el momento justo
-        local trapsTool = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Trap") or LocalPlayer.Backpack:FindFirstChild("Trap")
-        if trapsTool then
-            trapsTool.Parent = LocalPlayer.Character -- Equipar
-            trapsTool:Activate() -- Colocar
-            task.wait(5) -- Cooldown natural de las trampas
-        end
-        task.wait(1)
-    end
-end)
-
-createToggle(PagePiggy, "Invisibilidad de Piggy (Local/Glitch)", function(state)
-    if state and LocalPlayer.Character then
-        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                part.Transparency = 1
-            elseif part:IsA("Decal") then
-                part.Transparency = 1
-            end
-        end
-    else
-        if LocalPlayer.Character then
-            for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-                if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                    part.Transparency = 0
-                elseif part:IsA("Decal") then
-                    part.Transparency = 0
-                end
-            end
-        end
-    end
-end)
+            if Toggles.KillAura then
+                local weapon = char:FindFirstChildOfClass("Tool")
+       
