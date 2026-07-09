@@ -1,6 +1,6 @@
 -- ==========================================================
 -- 👑 JOSEANGEL_BLOX PIGGY PRO 👑
--- Versión: 1.2 | Fecha: 09/06/2026
+-- Versión: 1.4 | Fecha: 09/06/2026
 -- ==========================================================
 
 local CoreGui = game:GetService("CoreGui")
@@ -76,7 +76,7 @@ local ContentCorner = Instance.new("UICorner")
 ContentCorner.CornerRadius = UDim.new(0, 10)
 ContentCorner.Parent = ContentContainer
 
--- ==================== SISTEMA DE TABS Y TOGGLES (ESTILO PROFESIONAL) ====================
+-- ==================== FUNCIONES DE UI ====================
 local tabs = {}
 local function CreateTab(name, color)
     local TabBtn = Instance.new("TextButton")
@@ -132,11 +132,10 @@ local function CreateProfessionalToggle(parent, text, callback)
     Label.TextXAlignment = Enum.TextXAlignment.Left
     Label.Parent = ToggleContainer
 
-    -- Fondo del interruptor
     local SwitchBg = Instance.new("TextButton")
     SwitchBg.Size = UDim2.new(0, 44, 0, 24)
     SwitchBg.Position = UDim2.new(1, -55, 0.5, -12)
-    SwitchBg.BackgroundColor3 = Color3.fromRGB(100, 100, 110) -- Gris (Apagado)
+    SwitchBg.BackgroundColor3 = Color3.fromRGB(100, 100, 110)
     SwitchBg.Text = ""
     SwitchBg.Parent = ToggleContainer
 
@@ -144,7 +143,6 @@ local function CreateProfessionalToggle(parent, text, callback)
     SwitchCorner.CornerRadius = UDim.new(1, 0)
     SwitchCorner.Parent = SwitchBg
 
-    -- Círculo deslizante
     local Circle = Instance.new("Frame")
     Circle.Size = UDim2.new(0, 20, 0, 20)
     Circle.Position = UDim2.new(0, 2, 0.5, -10)
@@ -159,10 +157,10 @@ local function CreateProfessionalToggle(parent, text, callback)
     SwitchBg.MouseButton1Click:Connect(function()
         toggled = not toggled
         if toggled then
-            TweenService:Create(SwitchBg, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 215, 75)}):Play() -- Verde
+            TweenService:Create(SwitchBg, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 215, 75)}):Play()
             TweenService:Create(Circle, TweenInfo.new(0.2), {Position = UDim2.new(1, -22, 0.5, -10)}):Play()
         else
-            TweenService:Create(SwitchBg, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(100, 100, 110)}):Play() -- Gris
+            TweenService:Create(SwitchBg, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(100, 100, 110)}):Play()
             TweenService:Create(Circle, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -10)}):Play()
         end
         callback(toggled)
@@ -179,6 +177,35 @@ local function CreateLabel(parent, text, color)
     Lbl.TextSize = 15
     Lbl.TextXAlignment = Enum.TextXAlignment.Left
     Lbl.Parent = parent
+end
+
+-- ==================== FILTRO INTELIGENTE DE ÍTEMS ====================
+local itemKeywords = {
+    "key", "llave", "hammer", "martillo", "wrench", "inglesa", "plank", "tabla", "gear", "engranaje",
+    "gas", "battery", "bateria", "egg", "huevo", "torch", "antorcha", "wood", "leña", "book", "libro",
+    "syringe", "jeringa", "crossbow", "ballesta", "ammo", "municion", "chain", "cadena", "hook", "gancho",
+    "grass", "pasto", "shovel", "pala", "code", "codigo", "tube", "tubo", "screwdriver", "destornillador",
+    "broom", "escoba", "scissors", "tijeras", "carrot", "zanahoria", "ladder", "escalera", "smoke", "humo",
+    "lens", "lente", "crowbar", "palanca", "item"
+}
+
+local invalidKeywords = {
+    "door", "puerta", "lock", "candado", "safe", "caja", "escape", "exit"
+}
+
+local function isRealItem(obj)
+    if not obj or not obj.Parent then return false end
+    local name = string.lower(obj.Name)
+    local parentName = string.lower(obj.Parent.Name)
+    
+    for _, invalid in ipairs(invalidKeywords) do
+        if string.find(name, invalid) or string.find(parentName, invalid) then return false end
+    end
+    
+    for _, valid in ipairs(itemKeywords) do
+        if string.find(name, valid) or string.find(parentName, valid) then return true end
+    end
+    return false
 end
 
 -- ==================== ESTRUCTURA DE PESTAÑAS ====================
@@ -201,28 +228,89 @@ PageInfo.Visible = true
 -- ==================== 1) INFO ====================
 CreateLabel(PageInfo, "Nombre del Creador: JoseAngel_Blox", Color3.fromRGB(255, 255, 255))
 CreateLabel(PageInfo, "Fecha de actualización: 09/06/2026", Color3.fromRGB(200, 200, 200))
-CreateLabel(PageInfo, "Versión: 1.2", Color3.fromRGB(200, 200, 200))
+CreateLabel(PageInfo, "Versión: 1.4", Color3.fromRGB(200, 200, 200))
 CreateLabel(PageInfo, "\n ¡Disfruta del mejor Script de Piggy!", Color3.fromRGB(0, 255, 255))
 
 -- ==================== 2) MAIN ====================
+
 CreateProfessionalToggle(PageMain, "Esp (Jugadores, Bots y Piggy)", function(state)
     if state then
         _G.ESP = RunService.RenderStepped:Connect(function()
             for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("Model") and v:FindFirstChild("Humanoid") and v ~= LocalPlayer.Character then
+                if v:IsA("Model") and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v ~= LocalPlayer.Character then
+                    
+                    local player = Players:GetPlayerFromCharacter(v)
+                    local isBot = (player == nil)
+                    
+                    local espColor = Color3.fromRGB(255, 255, 255)
+                    local espText = "Desconocido"
+                    
+                    if isBot then
+                        -- Es un Bot (IA)
+                        espColor = Color3.fromRGB(255, 0, 0) -- Rojo
+                        espText = "Bot"
+                    else
+                        -- Es un Jugador, verificamos si es Piggy
+                        local isPlayerPiggy = false
+                        for _, obj in pairs(v:GetChildren()) do
+                            if obj:IsA("Tool") and (string.find(string.lower(obj.Name), "bat") or string.find(string.lower(obj.Name), "weapon")) then
+                                isPlayerPiggy = true
+                            end
+                        end
+                        if v.Name == "Piggy" then isPlayerPiggy = true end
+                        
+                        if isPlayerPiggy then
+                            espColor = Color3.fromRGB(255, 0, 0) -- Rojo
+                            espText = "Player Piggy"
+                        else
+                            espColor = Color3.fromRGB(0, 150, 255) -- Azul
+                            espText = player.Name
+                        end
+                    end
+                    
+                    -- Aplicar Colores al Resaltado
                     if not v:FindFirstChild("Highlight_ESP") then
                         local h = Instance.new("Highlight")
                         h.Name = "Highlight_ESP"
-                        h.FillColor = Color3.fromRGB(255, 0, 0) -- Rojo para enemigos/jugadores
                         h.Parent = v
                     end
+                    v.Highlight_ESP.FillColor = espColor
+                    v.Highlight_ESP.OutlineColor = espColor
+                    
+                    -- Crear Texto Encima de la Cabeza
+                    if not v.HumanoidRootPart:FindFirstChild("ESP_Text") then
+                        local bgui = Instance.new("BillboardGui")
+                        bgui.Name = "ESP_Text"
+                        bgui.Size = UDim2.new(0, 150, 0, 30)
+                        bgui.StudsOffset = Vector3.new(0, 3.5, 0) -- Un poco más alto que la cabeza
+                        bgui.AlwaysOnTop = true
+                        
+                        local label = Instance.new("TextLabel")
+                        label.Name = "NameLabel"
+                        label.Size = UDim2.new(1, 0, 1, 0)
+                        label.BackgroundTransparency = 1
+                        label.Font = Enum.Font.GothamBold
+                        label.TextSize = 14
+                        label.Parent = bgui
+                        
+                        bgui.Parent = v.HumanoidRootPart
+                    end
+                    
+                    -- Actualizar Texto y Color Dinámicamente
+                    local textLabel = v.HumanoidRootPart.ESP_Text.NameLabel
+                    textLabel.Text = espText
+                    textLabel.TextColor3 = espColor
                 end
             end
         end)
     else
+        -- Limpieza al apagar el ESP
         if _G.ESP then _G.ESP:Disconnect() end
         for _, v in pairs(workspace:GetDescendants()) do
             if v:FindFirstChild("Highlight_ESP") then v.Highlight_ESP:Destroy() end
+            if v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart:FindFirstChild("ESP_Text") then
+                v.HumanoidRootPart.ESP_Text:Destroy()
+            end
         end
     end
 end)
@@ -231,13 +319,13 @@ CreateProfessionalToggle(PageMain, "Esp Items", function(state)
     if state then
         _G.ESPItems = RunService.RenderStepped:Connect(function()
             for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("ClickDetector") or v:IsA("ProximityPrompt") then
+                if (v:IsA("ClickDetector") or v:IsA("ProximityPrompt")) and isRealItem(v.Parent) then
                     local item = v.Parent
                     if item:IsA("BasePart") or item:IsA("Model") then
                         if not item:FindFirstChild("Item_ESP") then
                             local h = Instance.new("Highlight")
                             h.Name = "Item_ESP"
-                            h.FillColor = Color3.fromRGB(0, 255, 255) -- Cian para ítems
+                            h.FillColor = Color3.fromRGB(0, 255, 255)
                             h.OutlineColor = Color3.fromRGB(255, 255, 255)
                             h.Parent = item
                         end
@@ -257,11 +345,15 @@ CreateProfessionalToggle(PageMain, "Auto Grab Items", function(state)
     if state then
         _G.AutoGrab = RunService.Heartbeat:Connect(function()
             pcall(function()
-                for _, v in pairs(workspace:GetDescendants()) do
-                    if v:IsA("ClickDetector") and (LocalPlayer.Character.HumanoidRootPart.Position - v.Parent.Position).Magnitude < 15 then
-                        fireclickdetector(v)
-                    elseif v:IsA("ProximityPrompt") and (LocalPlayer.Character.HumanoidRootPart.Position - v.Parent.Position).Magnitude < 15 then
-                        fireproximityprompt(v)
+                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    for _, v in pairs(workspace:GetDescendants()) do
+                        if (v:IsA("ClickDetector") or v:IsA("ProximityPrompt")) and isRealItem(v.Parent) then
+                            local distance = (LocalPlayer.Character.HumanoidRootPart.Position - v.Parent.Position).Magnitude
+                            if distance < 12 then
+                                if v:IsA("ClickDetector") then fireclickdetector(v) end
+                                if v:IsA("ProximityPrompt") then fireproximityprompt(v) end
+                            end
+                        end
                     end
                 end
             end)
@@ -288,17 +380,34 @@ end)
 CreateProfessionalToggle(PageMain, "God Mode (Invencible)", function(state)
     if state then
         _G.GodMode = RunService.Heartbeat:Connect(function()
-            -- Elimina la capacidad de los enemigos de matarte al tocarte
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                LocalPlayer.Character.Humanoid.Name = "GodMode_Hum"
+            end
+            
             for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("TouchTransmitter") and v.Parent.Name ~= "HumanoidRootPart" then
-                    if v.Parent.Parent and v.Parent.Parent.Name == "Piggy" or v.Parent.Name == "Bat" or v.Parent.Name == "Weapon" then
-                        v:Destroy()
+                if v:IsA("Model") and v:FindFirstChild("Humanoid") and v ~= LocalPlayer.Character then
+                    for _, part in pairs(v:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanTouch = false 
+                        end
                     end
                 end
             end
         end)
     else
         if _G.GodMode then _G.GodMode:Disconnect() end
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("GodMode_Hum") then
+            LocalPlayer.Character.GodMode_Hum.Name = "Humanoid"
+        end
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("Model") and v ~= LocalPlayer.Character then
+                for _, part in pairs(v:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanTouch = true
+                    end
+                end
+            end
+        end
     end
 end)
 
@@ -320,28 +429,8 @@ CreateProfessionalToggle(PageMain, "Speed + Jump", function(state)
     end
 end)
 
-CreateProfessionalToggle(PageMain, "Infinite Stamina", function(state)
-    -- Activa la estamina infinita
-end)
-
-CreateProfessionalToggle(PageMain, "Auto Unlock Doors", function(state)
-    -- Código para abrir puertas
-end)
-
-CreateProfessionalToggle(PageMain, "Kill Aura (Sobreviviente)", function(state)
-    -- Matar Piggy/Bots
-end)
-
 -- ==================== 3) PIGGY ====================
 CreateLabel(PagePiggy, "Opciones exclusivas para Piggy", Color3.fromRGB(255, 85, 85))
-
-CreateProfessionalToggle(PagePiggy, "Esp (Solo Jugadores)", function(state)
-    -- ESP específico
-end)
-
-CreateProfessionalToggle(PagePiggy, "Kill Aura Players", function(state)
-    -- Matar jugadores cercanos
-end)
 
 CreateProfessionalToggle(PagePiggy, "Hit Box (Expandir para matar)", function(state)
     if state then
@@ -359,22 +448,4 @@ CreateProfessionalToggle(PagePiggy, "Hit Box (Expandir para matar)", function(st
     end
 end)
 
-CreateProfessionalToggle(PagePiggy, "Speed + Jump (Piggy)", function(state)
-    if state then
-        _G.SpeedJumpPiggy = RunService.Heartbeat:Connect(function()
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-                LocalPlayer.Character.Humanoid.WalkSpeed = 60
-                LocalPlayer.Character.Humanoid.UseJumpPower = true
-                LocalPlayer.Character.Humanoid.JumpPower = 120
-            end
-        end)
-    else
-        if _G.SpeedJumpPiggy then _G.SpeedJumpPiggy:Disconnect() end
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid.WalkSpeed = 16
-            LocalPlayer.Character.Humanoid.JumpPower = 50
-        end
-    end
-end)
-
-print("¡Script JoseAngel_Blox Piggy PRO v1.2 cargado sin errores!")
+print("¡Script JoseAngel_Blox Piggy PRO v1.4 cargado con etiquetas de texto!")
