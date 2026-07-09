@@ -1,43 +1,23 @@
 -- ==========================================================
--- JoseAngel_Blox Piggy PRO v4.2 - COMPATIBLE CON DELTA
--- Arreglo: Errores nil, funciones seguras, carga desde inicio
+-- Nombre del Creador: JoseAngel_Blox
+-- Versión: 5.0 - (Motores de Fuerza Bruta / Anti-Muerte)
+-- Juego: Piggy (Libro 1 & Libro 2)
 -- ==========================================================
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
-local TweenService = game:GetService("TweenService")
-local StarterGui = game:GetService("StarterGui")
 local LocalPlayer = Players.LocalPlayer
 
--- Variables de personaje con espera segura
-local Character = LocalPlayer.Character
-if not Character then Character = LocalPlayer.CharacterAdded:Wait() end
-local Humanoid = Character:WaitForChild("Humanoid", 10)
-local HRP = Character:WaitForChild("HumanoidRootPart", 10)
-
--- Actualizar personaje al revivir
-LocalPlayer.CharacterAdded:Connect(function(nuevoChar)
-    Character = nuevoChar
-    Humanoid = nuevoChar:WaitForChild("Humanoid", 10)
-    HRP = nuevoChar:WaitForChild("HumanoidRootPart", 10)
-end)
-
 -- ==========================================================
--- INTERFAZ SEGURA
+-- INTERFAZ DE USUARIO (GUI) - DISEÑO PREMIUM
 -- ==========================================================
 local PiggyHub = Instance.new("ScreenGui")
-PiggyHub.Name = "JoseAngel_Piggy_PRO"
-PiggyHub.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+PiggyHub.Name = "JoseAngel_Blox_Piggy_PRO_V5"
 
--- Colocación segura
-local ok, err = pcall(function() PiggyHub.Parent = CoreGui end)
-if not ok then
-    ok, err = pcall(function() PiggyHub.Parent = LocalPlayer:WaitForChild("PlayerGui", 10) end)
-end
-if not ok then warn("No se pudo crear la interfaz") return end
+local success, err = pcall(function() PiggyHub.Parent = CoreGui end)
+if not success then PiggyHub.Parent = LocalPlayer:WaitForChild("PlayerGui") end
 
--- Resto de la interfaz (igual que antes, segura)
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = PiggyHub
@@ -66,7 +46,7 @@ TitleLabel.Parent = HeaderFrame
 TitleLabel.BackgroundTransparency = 1
 TitleLabel.Size = UDim2.new(1, 0, 1, 0)
 TitleLabel.Font = Enum.Font.GothamBold
-TitleLabel.Text = "JoseAngel_Blox Piggy PRO v4.2"
+TitleLabel.Text = "JoseAngel_Blox Piggy PRO v5.0"
 TitleLabel.TextColor3 = Color3.fromRGB(255, 65, 65)
 TitleLabel.TextSize = 16
 
@@ -135,7 +115,7 @@ InfoText.Size = UDim2.new(0.9, 0, 0, 180)
 InfoText.Font = Enum.Font.Gotham
 InfoText.TextColor3 = Color3.fromRGB(200, 200, 200)
 InfoText.TextSize = 14
-InfoText.Text = "✅ Versión: 4.2\n✅ Compatible con Delta\n✅ Sin errores de consola\n✅ Funciona desde inicio\n✅ Arreglado caída debajo del mapa"
+InfoText.Text = "Creador: JoseAngel_Blox\nVersión: 5.0 (Fuerza Bruta)\n\n✨ ESP Universal (Detecta todo).\n⚡ Auto Unlock Anti-Muerte.\n🚀 Noclip Fase 11 (No te caes del mapa)."
 InfoText.TextYAlignment = Enum.TextYAlignment.Center
 
 local function CreateToggle(name, parent, callback)
@@ -171,90 +151,52 @@ local function CreateToggle(name, parent, callback)
 	Button.MouseButton1Click:Connect(function()
 		toggled = not toggled
 		if toggled then
-			TweenService:Create(Indicator, TweenInfo.new(0.15), {Position = UDim2.new(1, -19, 0, 3), BackgroundColor3 = Color3.fromRGB(70, 240, 70)}):Play()
+			Indicator:TweenPosition(UDim2.new(1, -19, 0, 3), "Out", "Quad", 0.15, true)
+			Indicator.BackgroundColor3 = Color3.fromRGB(70, 240, 70)
 		else
-			TweenService:Create(Indicator, TweenInfo.new(0.15), {Position = UDim2.new(0, 3, 0, 3), BackgroundColor3 = Color3.fromRGB(240, 70, 70)}):Play()
+			Indicator:TweenPosition(UDim2.new(0, 3, 0, 3), "Out", "Quad", 0.15, true)
+			Indicator.BackgroundColor3 = Color3.fromRGB(240, 70, 70)
 		end
 		callback(toggled)
 	end)
 end
 
--- ==========================================================
--- SISTEMA DE DETECCIÓN DE OBJETOS
--- ==========================================================
 local Toggles = {}
 
-local function getCleanItemName(rawName)
-	if not rawName then return nil end
-	local n = rawName:lower()
-	if n:find("red") and n:find("key") then return "Llave Roja" end
-	if n:find("blue") and n:find("key") then return "Llave Azul" end
-	if n:find("green") and n:find("key") then return "Llave Verde" end
-	if n:find("yellow") and n:find("key") then return "Llave Amarilla" end
-	if n:find("white") and n:find("key") then return "Llave Blanca" end
-	if n:find("purple") and n:find("key") then return "Llave Morada" end
-	if n:find("orange") and n:find("key") then return "Llave Naranja" end
-	if n:find("cyan") and n:find("key") then return "Llave Cian" end
-	if n:find("key") then return "Llave" end
-	
-	local items = {
-		["hammer"] = "Martillo", ["wrench"] = "Llave Inglesa", ["plank"] = "Tabla", ["board"] = "Tabla",
-		["greengear"] = "Engranaje Verde", ["redgear"] = "Engranaje Rojo", ["gear"] = "Engranaje",
-		["gas"] = "Gasolina", ["battery"] = "Batería", ["redegg"] = "Huevo Rojo", ["blueegg"] = "Huevo Azul",
-		["torch"] = "Antorcha", ["wood"] = "Leña", ["book"] = "Libro", ["syringe"] = "Jeringa",
-		["crossbow"] = "Ballesta", ["ammo"] = "Munición", ["chain"] = "Cadena", ["hook"] = "Gancho",
-		["shovel"] = "Pala", ["ladder"] = "Escalera", ["crowbar"] = "Palanca"
-	}
-	for k, v in pairs(items) do if n:find(k) then return v end end
-	return nil
-end
-
-local function identifyItem(obj)
-	local current = obj
-	for _ = 1, 4 do
-		if not current then break end
-		local name = getCleanItemName(current.Name)
-		if name then return name, current end
-		current = current.Parent
-	end
-	return nil, nil
-end
-
-local function addESP(part, text, color)
-	if not part or not part:IsA("BasePart") or part:FindFirstChild("ProESP") then return end
-	local bg = Instance.new("BillboardGui")
+-- Motor de ESP de Fuerza Bruta
+local function addESP(part, nameText, color)
+	if part:FindFirstChild("ProESP") then return end
+	local bg = Instance.new("BillboardGui", part)
 	bg.Name = "ProESP"
 	bg.AlwaysOnTop = true
-	bg.Size = UDim2.new(0, 160, 0, 40)
-	bg.ExtentsOffset = Vector3.new(0, 2.5, 0)
-	bg.Parent = part
-
-	local label = Instance.new("TextLabel", bg)
-	label.BackgroundTransparency = 1
-	label.Size = UDim2.new(1, 0, 1, 0)
-	label.Font = Enum.Font.GothamBold
-	label.Text = text
-	label.TextColor3 = color
-	label.TextSize = 12
-	label.TextStrokeTransparency = 0.3
-
+	bg.Size = UDim2.new(0, 200, 0, 50)
+	bg.ExtentsOffset = Vector3.new(0, 1.5, 0)
+	local tl = Instance.new("TextLabel", bg)
+	tl.BackgroundTransparency = 1
+	tl.Size = UDim2.new(1, 0, 1, 0)
+	tl.Font = Enum.Font.GothamBold
+	tl.Text = nameText
+	tl.TextColor3 = color
+	tl.TextSize = 13
+	tl.TextStrokeTransparency = 0.2
+	
 	task.spawn(function()
-		while bg and bg.Parent and Toggles.ESPItems do
+		while bg.Parent and (Toggles.ESP or Toggles.ESPItems or Toggles.PiggyESP) do
 			pcall(function()
-				local dist = math.floor((HRP.Position - part.Position).Magnitude)
-				label.Text = text .. " [" .. dist .. "m]"
+				local playerPos = LocalPlayer.Character.HumanoidRootPart.Position
+				local dist = math.floor((playerPos - part.Position).Magnitude)
+				tl.Text = nameText .. " [" .. dist .. "]"
 			end)
-			task.wait(0.2)
+			task.wait(0.1)
 		end
-		bg:Destroy()
 	end)
 end
 
 -- ==========================================================
--- FUNCIONES SEGURAS (SIN ERRORES NIL)
+-- FUNCIONES: MAIN
 -- ==========================================================
 
--- ESP Items
+-- 1. ESP Items (Fuerza Bruta)
 CreateToggle("ESP Items (Objetos/Llaves)", MainTab, function(state)
 	Toggles.ESPItems = state
 	if state then
@@ -262,64 +204,46 @@ CreateToggle("ESP Items (Objetos/Llaves)", MainTab, function(state)
 			while Toggles.ESPItems do
 				pcall(function()
 					for _, v in pairs(Workspace:GetDescendants()) do
-						if v:IsA("ClickDetector") or v:IsA("ProximityPrompt") then
-							local name, part = identifyItem(v.Parent)
-							if name and part and part:IsA("BasePart") then
-								addESP(part, name, Color3.fromRGB(255, 215, 0))
+						-- Si tiene un ClickDetector, es un objeto interactuable seguro.
+						if v:IsA("ClickDetector") then
+							local itemName = v.Parent.Name
+							-- Evitamos etiquetar puertas a lo tonto
+							if not itemName:lower():find("door") and not itemName:lower():find("player") then
+								if v.Parent:IsA("BasePart") then
+									addESP(v.Parent, "Item: " .. itemName, Color3.fromRGB(255, 215, 0))
+								end
 							end
 						end
 					end
 				end)
-				task.wait(1.5)
+				task.wait(1)
 			end
-			for _, v in pairs(Workspace:GetDescendants()) do if v.Name == "ProESP" then v:Destroy() end end
+			-- Limpieza al apagar
+			for _, v in pairs(Workspace:GetDescendants()) do
+				if v.Name == "ProESP" and v.TextLabel.TextColor3 == Color3.fromRGB(255, 215, 0) then v:Destroy() end
+			end
 		end)
 	end
 end)
 
--- Auto Grab (versión segura para Delta)
-CreateToggle("Auto Grab Items (Delay 2s)", MainTab, function(state)
+-- 2. Auto Grab (Rango Corto Anti-Muerte)
+CreateToggle("Auto Grab Items (Cerca - Anti Muerte)", MainTab, function(state)
 	Toggles.AutoGrab = state
 	task.spawn(function()
-		while Toggles.AutoGrab and Character and HRP do
+		while Toggles.AutoGrab do
 			pcall(function()
-				local pos = HRP.Position
+				local char = LocalPlayer.Character
+				if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+				local pos = char.HumanoidRootPart.Position
+				
 				for _, v in pairs(Workspace:GetDescendants()) do
-					if (v:IsA("ClickDetector") or v:IsA("ProximityPrompt")) and v.Parent then
-						local name, part = identifyItem(v.Parent)
-						if name and part and (pos - part.Position).Magnitude <= 12 then
-							-- Llamadas seguras que no dan error
-							if v:IsA("ClickDetector") and fireclickdetector then
+					if v:IsA("ClickDetector") then
+						local targetPart = v.Parent
+						if targetPart:IsA("BasePart") and not targetPart.Name:lower():find("door") then
+							-- Solo agarra objetos a menos de 12 studs. Más lejos de eso, Piggy te detecta como hacker y te mata.
+							if (pos - targetPart.Position).Magnitude <= 12 then 
 								fireclickdetector(v)
-							elseif v:IsA("ProximityPrompt") and fireproximityprompt then
-								fireproximityprompt(v)
-							end
-						end
-					end
-				end
-			end)
-			task.wait(2)
-		end
-	end)
-end)
-
--- Auto Unlock (seguro)
-CreateToggle("Auto Unlock Doors", MainTab, function(state)
-	Toggles.AutoUnlock = state
-	task.spawn(function()
-		while Toggles.AutoUnlock and Character do
-			pcall(function()
-				local tool = Character:FindFirstChildOfClass("Tool")
-				if not tool or not tool:FindFirstChild("Handle") then return end
-				for _, v in pairs(Workspace:GetDescendants()) do
-					if v:IsA("ClickDetector") or v:IsA("ProximityPrompt") then
-						local pName = v.Parent.Name:lower()
-						if (pName:find("lock") or pName:find("door")) and not identifyItem(v.Parent) then
-							local part = v.Parent
-							if part:IsA("BasePart") and firetouchinterest then
-								firetouchinterest(tool.Handle, part, 0)
-								task.wait(0.02)
-								firetouchinterest(tool.Handle, part, 1)
+								task.wait(0.5) -- Pausa pequeña para no saturar
 							end
 						end
 					end
@@ -330,57 +254,194 @@ CreateToggle("Auto Unlock Doors", MainTab, function(state)
 	end)
 end)
 
--- Speed + Jump
+-- 3. Auto Unlock Doors (Filtro Estricto de Candados)
+CreateToggle("Auto Unlock Doors (Cualquier Distancia)", MainTab, function(state)
+	Toggles.AutoUnlock = state
+	task.spawn(function()
+		while Toggles.AutoUnlock do
+			pcall(function()
+				local char = LocalPlayer.Character
+				local tool = char and char:FindFirstChildOfClass("Tool")
+				
+				if tool and tool:FindFirstChild("Handle") then
+					for _, v in pairs(Workspace:GetDescendants()) do
+						if v:IsA("BasePart") then
+							local name = v.Name:lower()
+							-- SOLUCIÓN: Tocar SOLO piezas que literalmente se llamen "lock" (candado). 
+							-- Si tocamos "doors" enteras, tocamos láseres y mueres.
+							if name:find("lock") or name:find("padlock") then
+								firetouchinterest(tool.Handle, v, 0)
+								task.wait(0.01)
+								firetouchinterest(tool.Handle, v, 1)
+							end
+						end
+					end
+				end
+			end)
+			task.wait(0.5)
+		end
+	end)
+end)
+
+-- 4. Speed + Jump
 CreateToggle("Speed + Jump", MainTab, function(state)
 	Toggles.SpeedJump = state
 	task.spawn(function()
-		while Toggles.SpeedJump and Humanoid do
+		while Toggles.SpeedJump do
 			pcall(function()
-				Humanoid.WalkSpeed = 38
-				Humanoid.JumpPower = 70
-				Humanoid.UseJumpPower = true
+				local human = LocalPlayer.Character.Humanoid
+				human.WalkSpeed = 35; human.JumpPower = 65; human.UseJumpPower = true
 			end)
 			task.wait(0.5)
-		end)
-		pcall(function() if Humanoid then Humanoid.WalkSpeed = 16; Humanoid.JumpPower = 50 end end)
+		end
+		pcall(function() LocalPlayer.Character.Humanoid.WalkSpeed = 16; LocalPlayer.Character.Humanoid.JumpPower = 50 end)
 	end)
 end)
 
--- NOCLIP ARREGLADO ✅
-CreateToggle("Noclip (Sin caída)", MainTab, function(state)
+-- 5. NOCLIP DEFINITIVO (State 11)
+CreateToggle("Noclip (Atravesar Objetos)", MainTab, function(state)
 	Toggles.Noclip = state
-	if not state and Character then
-		pcall(function()
-			for _, p in pairs(Character:GetDescendants()) do
-				if p:IsA("BasePart") then p.CanCollide = true end
-			end
-		end)
-	end
 end)
-
 RunService.Stepped:Connect(function()
-	if Toggles.Noclip and Character and Humanoid and Humanoid.Health > 0 then
+	if Toggles.Noclip then
 		pcall(function()
-			for _, p in pairs(Character:GetDescendants()) do
-				if p:IsA("BasePart") then p.CanCollide = false end
+			local char = LocalPlayer.Character
+			if char and char:FindFirstChild("Humanoid") then
+				-- El estado 11 ignora las paredes pero mantiene los pies en el piso. Imposible caerse.
+				char.Humanoid:ChangeState(11)
 			end
-			HRP.Velocity = Vector3.new(0, -10, 0) -- Mantiene gravedad, evita caer
 		end)
 	end
 end)
 
--- Infinite Stamina
+-- 6. Infinite Stamina
 CreateToggle("Infinite Stamina", MainTab, function(state)
-	Toggles.Stamina = state
+	Toggles.InfiniteStamina = state
 	task.spawn(function()
-		while Toggles.Stamina and Character do
+		while Toggles.InfiniteStamina do
 			pcall(function()
-				if Character:FindFirstChild("Energy") then Character.Energy.Value = 100 end
-				if Character:FindFirstChild("Stamina") then Character.Stamina.Value = 100 end
+				if LocalPlayer.Character:FindFirstChild("Energy") then LocalPlayer.Character.Energy.Value = 100 end
+				if LocalPlayer.Character:FindFirstChild("Stamina") then LocalPlayer.Character.Stamina.Value = 100 end
 			end)
 			task.wait(0.1)
 		end
 	end)
 end)
 
-print("✅ JoseAngel_Blox Piggy PRO v4.2 - CARGADO SIN ERRORES")
+-- 7. ESP Jugadores y Bots
+CreateToggle("ESP (Jugadores = Azul, Bots = Rojo)", MainTab, function(state)
+	Toggles.ESP = state
+	if state then
+		task.spawn(function()
+			while Toggles.ESP do
+				pcall(function()
+					for _, v in pairs(Workspace:GetDescendants()) do
+						if v:IsA("Model") and v:FindFirstChild("HumanoidRootPart") and v.Name ~= LocalPlayer.Name then
+							local isPlayer = Players:GetPlayerFromCharacter(v)
+							local color = isPlayer and Color3.fromRGB(50, 150, 255) or Color3.fromRGB(255, 50, 50)
+							addESP(v.HumanoidRootPart, isPlayer and v.Name or "BOT / PIGGY", color)
+						end
+					end
+				end)
+				task.wait(1)
+			end
+			for _, v in pairs(Workspace:GetDescendants()) do
+				if v.Name == "ProESP" and (v.TextLabel.TextColor3 == Color3.fromRGB(50,150,255) or v.TextLabel.TextColor3 == Color3.fromRGB(255,50,50)) then v:Destroy() end
+			end
+		end)
+	end
+end)
+
+-- 8. Godmode (Eliminador de TouchTransmitters)
+CreateToggle("Godmode (Invencible)", MainTab, function(state)
+	Toggles.Godmode = state
+	task.spawn(function()
+		while Toggles.Godmode do
+			pcall(function()
+				for _, bot in pairs(Workspace:GetDescendants()) do
+					if bot:IsA("Model") and bot.Name ~= LocalPlayer.Name and (bot:FindFirstChild("HumanoidRootPart") or bot.Name:lower():find("piggy") or bot.Name:lower():find("bot")) then
+						for _, weapon in pairs(bot:GetDescendants()) do
+							if weapon:IsA("TouchTransmitter") then weapon:Destroy() end
+						end
+					end
+				end
+			end)
+			task.wait(0.5)
+		end
+	end)
+end)
+
+-- ==========================================================
+-- FUNCIONES: PRO (PIGGY)
+-- ==========================================================
+CreateToggle("ESP Jugadores (Solo Supervivientes)", ProTab, function(state)
+	Toggles.PiggyESP = state
+	if state then
+		task.spawn(function()
+			while Toggles.PiggyESP do
+				pcall(function()
+					for _, player in pairs(Players:GetPlayers()) do
+						if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+							if not player.Character:FindFirstChild("Bat") and not player.Character:FindFirstChild("Weapon") then
+								addESP(player.Character.HumanoidRootPart, player.Name, Color3.fromRGB(50, 255, 100))
+							end
+						end
+					end
+				end)
+				task.wait(1)
+			end
+			for _, v in pairs(Workspace:GetDescendants()) do
+				if v.Name == "ProESP" and v.TextLabel.TextColor3 == Color3.fromRGB(50, 255, 100) then v:Destroy() end
+			end
+		end)
+	end
+end)
+
+CreateToggle("Kill Aura (Auto Atacar Jugadores)", ProTab, function(state)
+	Toggles.KillAura = state
+	task.spawn(function()
+		while Toggles.KillAura do
+			pcall(function()
+				local tool = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Tool")
+				if tool and tool:FindFirstChild("Handle") then
+					local pos = LocalPlayer.Character.HumanoidRootPart.Position
+					for _, target in pairs(Players:GetPlayers()) do
+						if target ~= LocalPlayer and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+							local tPart = target.Character.HumanoidRootPart
+							if (pos - tPart.Position).Magnitude <= 18 then
+								firetouchinterest(tool.Handle, tPart, 0); task.wait(0.01); firetouchinterest(tool.Handle, tPart, 1)
+							end
+						end
+					end
+				end
+			end)
+			task.wait(0.1)
+		end
+	end)
+end)
+
+CreateToggle("Expandir Hitboxes (Golpear fácil)", ProTab, function(state)
+	Toggles.Hitbox = state
+	task.spawn(function()
+		while Toggles.Hitbox do
+			pcall(function()
+				for _, player in pairs(Players:GetPlayers()) do
+					if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+						local hrp = player.Character.HumanoidRootPart
+						hrp.Size = Vector3.new(15, 15, 15); hrp.Transparency = 0.6; hrp.BrickColor = BrickColor.new("Bright red"); hrp.CanCollide = false
+					end
+				end
+			end)
+			task.wait(1)
+		end
+		pcall(function()
+			for _, player in pairs(Players:GetPlayers()) do
+				if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+					player.Character.HumanoidRootPart.Size = Vector3.new(2, 2, 1); player.Character.HumanoidRootPart.Transparency = 1
+				end
+			end
+		end)
+	end)
+end)
+
+print("✅ JoseAngel_Blox Piggy PRO v5.0 Cargado - Fuerza Bruta")
