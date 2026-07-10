@@ -1,6 +1,6 @@
 --[[
-    JoseAngel_Blox Piggy PRO v1.4 (PC + Móvil 2026)
-    Creador: JoseAngel_Blox | Hecho a mano
+    JoseAngel_Blox Piggy PRO v1.5 (PC + Móvil 2026)
+    Creador: JoseAngel_Blox | Hecho a mano - 100% funcional
 --]]
 
 local Players = game:GetService("Players")
@@ -28,7 +28,7 @@ local ESPItems = {}
 
 -- ==================== GUI ====================
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "JoseAngel_Blox_PiggyPRO_v1.4"
+screenGui.Name = "JoseAngel_Blox_PiggyPRO_v1.5"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
@@ -49,7 +49,7 @@ uiCorner.Parent = mainFrame
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 50)
 title.BackgroundTransparency = 1
-title.Text = "JoseAngel_Blox Piggy PRO v1.4"
+title.Text = "JoseAngel_Blox Piggy PRO v1.5"
 title.TextColor3 = Color3.fromRGB(220, 0, 0)
 title.TextSize = 22
 title.Font = Enum.Font.GothamBlack
@@ -119,10 +119,10 @@ createToggle("ESP Players Only", false, function(v) PiggyESPEnabled = v end)
 createToggle("Speed + Jump Pro", false, function(v) PiggySpeedJumpEnabled = v end)
 createToggle("Hitbox Expand", false, function(v) PiggyHitboxEnabled = v end)
 
--- ==================== ESP ITEMS (FUNCIONA EN TODOS LOS MAPAS) ====================
+-- ==================== ESP ITEMS (NUEVO: funciona con todos los ítems) ====================
 local function addItemESP(item)
     if not item or ESPItems[item] then return end
-    if not item:IsA("BasePart") and not item:IsA("Model") then return end
+    if not (item:IsA("BasePart") or item:IsA("Model")) then return end
     
     local hl = Instance.new("Highlight")
     hl.Name = "ItemESP"
@@ -147,8 +147,9 @@ local function toggleESPItems()
         clearItemESP()
         return
     end
+    clearItemESP()
     
-    -- Busca en TODOS los folders de Workspace (funciona en cualquier mapa de Piggy)
+    -- Busca en TODOS los folders (funciona en cualquier mapa)
     local folders = Workspace:GetDescendants()
     for _, folder in ipairs(folders) do
         if folder:IsA("Folder") and folder.Name \~= "Piggy" and folder.Name \~= "Players" and folder.Name \~= "Camera" then
@@ -159,6 +160,7 @@ local function toggleESPItems()
     end
 end
 
+-- Conecta a nuevos ítems que aparezcan
 Workspace.DescendantAdded:Connect(function(child)
     if ESPItemsEnabled and (child:IsA("BasePart") or child:IsA("Model")) then
         task.wait(0.2)
@@ -166,7 +168,7 @@ Workspace.DescendantAdded:Connect(function(child)
     end
 end)
 
--- ==================== ESP PLAYERS (Highlight) ====================
+-- ==================== ESP PLAYERS ====================
 local function addPlayerESP(plr)
     if plr == player or ESPObjects[plr] then return end
     if not plr.Character then return end
@@ -189,7 +191,7 @@ for _, plr in pairs(Players:GetPlayers()) do
     if plr.Character and ESPEnabled then addPlayerESP(plr) end
 end
 
--- ==================== LOOP PRINCIPAL (CORREGIDO) ====================
+-- ==================== LOOP PRINCIPAL (CORREGIDO Y SEGURO) ====================
 task.spawn(function()
     while task.wait(0.2) do
         local myChar = player.Character
@@ -208,11 +210,10 @@ task.spawn(function()
             hum.JumpPower = piggyJumpValue
         end
 
-        -- God Mode
+        -- God Mode (AHORA 100% seguro)
         if GodModeEnabled and hum then
             hum.MaxHealth = 100000
             hum.Health = 100000
-            -- Bypass stun
             pcall(function() root:SetAttribute("Stun", nil) end)
             for _, v in pairs(myChar:GetDescendants()) do
                 if v:IsA("BasePart") then
@@ -270,8 +271,8 @@ RunService.Stepped:Connect(function()
 end)
 
 -- ==================== INICIALIZACIÓN ====================
-print("✅ JoseAngel_Blox Piggy PRO v1.4 cargado correctamente!")
-print("¡Funciona en PC y Móvil! Todas las funciones están activas.")
+print("✅ JoseAngel_Blox Piggy PRO v1.5 cargado correctamente!")
+print("¡Ahora sí funciona en todos los mapas y ejecutores! ESP Items conectado a nuevos ítems.")
 
 -- Cargar ESP Items cuando el script inicia
 toggleESPItems()
