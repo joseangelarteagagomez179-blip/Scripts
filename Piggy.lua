@@ -1,403 +1,262 @@
--- =============================================
--- JOSEANGEL_BLOX PIGGY PRO
--- Versión: 1.2 | Actualización: 10/07/2026
--- =============================================
+-- Limpieza para evitar clones al ejecutar de nuevo
+if game.CoreGui:FindFirstChild("JoseAngelPiggyPro") then
+    game.CoreGui:FindFirstChild("JoseAngelPiggyPro"):Destroy()
+end
 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local LocalPlayer = Players.LocalPlayer
+-- 1. CONTENEDOR PRINCIPAL
+local Pantalla = Instance.new("ScreenGui")
+Pantalla.Name = "JoseAngelPiggyPro"
+pcall(function() Pantalla.Parent = game:GetService("CoreGui") end)
+if not Pantalla.Parent then
+    Pantalla.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+end
 
-local Camera = workspace.CurrentCamera
-local Mouse = LocalPlayer:GetMouse()
+-- 2. VENTANA PRINCIPAL (Esquinas Redondeadas y Rojo Bonito)
+local Ventana = Instance.new("Frame")
+Ventana.Name = "Ventana"
+Ventana.Size = UDim2.new(0, 360, 0, 340)
+Ventana.Position = UDim2.new(0.3, 0, 0.25, 0)
+Ventana.BackgroundColor3 = Color3.fromRGB(150, 15, 20)
+Ventana.Active = true
+Ventana.Draggable = true
+Ventana.Parent = Pantalla
 
-local Config = {
-    AutoFarmCoins = false,
-    Noclip = false,
-    FlyEnabled = false,
-    FlySpeed = 100,
-    ESPEnabled = false,
-    GodMode = false,
-    InfiniteStamina = false,
-    AutoGrabItems = false,
-    SpeedBoost = false,
-    AutoJump = false,
-    KillOnTransform = false,
-}
+local CornerVentana = Instance.new("UICorner")
+CornerVentana.CornerRadius = UDim.new(0, 14)
+CornerVentana.Parent = Ventana
 
-local PlayersList = {}
-local ItemsFolder = workspace:WaitForChild("Items") -- ¡AJUSTA EL NOMBRE! (muchos mapas usan "ItemFolder1" o "GearFolder")
-local ESPObjects = {}
-local FlyConnection = nil
-local SpeedConnection = nil
-local JumpConnection = nil
+-- 3. TÍTULO EN LETRAS ROJAS
+local Titulo = Instance.new("TextLabel")
+Titulo.Size = UDim2.new(1, 0, 0, 45)
+Titulo.BackgroundColor3 = Color3.fromRGB(90, 8, 10)
+Titulo.Text = "JoseAngel_Blox Piggy Pro"
+Titulo.TextColor3 = Color3.fromRGB(255, 40, 40)
+Titulo.TextSize = 18
+Titulo.Font = Enum.Font.SourceSansBold
+Titulo.Parent = Ventana
 
-local Plr = LocalPlayer
-local Character = Plr.Character or Plr.CharacterAdded:Wait()
-local Humanoid = Character:WaitForChild("Humanoid")
+local CornerTitulo = Instance.new("UICorner")
+CornerTitulo.CornerRadius = UDim.new(0, 14)
+CornerTitulo.Parent = Titulo
 
--- ==================== GUI ====================
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "JoseAngel_BloxPiggyPro"
-ScreenGui.Parent = game:GetService("CoreGui")
-ScreenGui.ResetOnSpawn = false
+-- 4. BARRA DE NAVEGACIÓN (Pestañas)
+local BarraPestanas = Instance.new("Frame")
+BarraPestanas.Size = UDim2.new(1, 0, 0, 35)
+BarraPestanas.Position = UDim2.new(0, 0, 0, 45)
+BarraPestanas.BackgroundColor3 = Color3.fromRGB(115, 10, 15)
+BarraPestanas.BorderSizePixel = 0
+BarraPestanas.Parent = Ventana
 
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 520, 0, 620)
-MainFrame.Position = UDim2.new(0.5, -260, 0.5, -310)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.Parent = ScreenGui
+local BtnInfo = Instance.new("TextButton")
+BtnInfo.Size = UDim2.new(0.33, 0, 1, 0)
+BtnInfo.Position = UDim2.new(0, 0, 0, 0)
+BtnInfo.BackgroundTransparency = 1
+BtnInfo.Text = "Info ↓"
+BtnInfo.TextColor3 = Color3.fromRGB(255, 255, 255)
+BtnInfo.Font = Enum.Font.SourceSansBold
+BtnInfo.TextSize = 14
+BtnInfo.Parent = BarraPestanas
 
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim2.new(0, 12)
-MainCorner.Parent = MainFrame
+local BtnMain = Instance.new("TextButton")
+BtnMain.Size = UDim2.new(0.33, 0, 1, 0)
+BtnMain.Position = UDim2.new(0.33, 0, 0, 0)
+BtnMain.BackgroundTransparency = 1
+BtnMain.Text = "Main ↓"
+BtnMain.TextColor3 = Color3.fromRGB(200, 200, 200)
+BtnMain.Font = Enum.Font.SourceSansBold
+BtnMain.TextSize = 14
+BtnMain.Parent = BarraPestanas
 
--- Título
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 60)
-Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-Title.Text = "JOSEANGEL_BLOX PIGGY PRO"
-Title.TextColor3 = Color3.fromRGB(255, 50, 50)
-Title.TextScaled = true
-Title.Font = Enum.Font.GothamBold
-Title.Parent = MainFrame
-local TitleCorner = Instance.new("UICorner")
-TitleCorner.CornerRadius = UDim2.new(0, 12)
-TitleCorner.Parent = Title
+local BtnRol = Instance.new("TextButton")
+BtnRol.Size = UDim2.new(0.34, 0, 1, 0)
+BtnRol.Position = UDim2.new(0.66, 0, 0, 0)
+BtnRol.BackgroundTransparency = 1
+BtnRol.Text = "Rol Piggy ↓"
+BtnRol.TextColor3 = Color3.fromRGB(200, 200, 200)
+BtnRol.Font = Enum.Font.SourceSansBold
+BtnRol.TextSize = 14
+BtnRol.Parent = BarraPestanas
 
--- Menú horizontal
-local MenuBar = Instance.new("Frame")
-MenuBar.Size = UDim2.new(1, 0, 0, 50)
-MenuBar.Position = UDim2.new(0, 0, 0, 60)
-MenuBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-MenuBar.Parent = MainFrame
+-- 5. CONTENEDORES DE CADA PESTAÑA (ScrollingFrames para deslizar con el dedo)
+local ContenedorInfo = Instance.new("Frame")
+ContenedorInfo.Size = UDim2.new(1, -20, 1, -95)
+ContenedorInfo.Position = UDim2.new(0, 10, 0, 85)
+ContenedorInfo.BackgroundTransparency = 1
+ContenedorInfo.Visible = true
+ContenedorInfo.Parent = Ventana
 
-local MenuLayout = Instance.new("UIListLayout")
-MenuLayout.FillDirection = Enum.FillDirection.Horizontal
-MenuLayout.SortOrder = Enum.SortOrder.LayoutOrder
-MenuLayout.Padding = UDim.new(0, 4)
-MenuLayout.Parent = MenuBar
+local ContenedorMain = Instance.new("ScrollingFrame")
+ContenedorMain.Size = UDim2.new(1, -10, 1, -95)
+ContenedorMain.Position = UDim2.new(0, 5, 0, 85)
+ContenedorMain.BackgroundTransparency = 1
+ContenedorMain.CanvasSize = UDim2.new(0, 0, 0, 560) -- Altura extendida para los botones
+ContenedorMain.ScrollBarThickness = 6
+ContenedorMain.Visible = false
+ContenedorMain.Parent = Ventana
 
-local function CreateMenuButton(text, order)
+local ContenedorRol = Instance.new("Frame")
+ContenedorRol.Size = UDim2.new(1, -20, 1, -95)
+ContenedorRol.Position = UDim2.new(0, 10, 0, 85)
+ContenedorRol.BackgroundTransparency = 1
+ContenedorRol.Visible = false
+ContenedorRol.Parent = Ventana
+
+-- Lógica para cambiar de pestañas
+BtnInfo.MouseButton1Click:Connect(function()
+    ContenedorInfo.Visible = true; ContenedorMain.Visible = false; ContenedorRol.Visible = false
+    BtnInfo.TextColor3 = Color3.fromRGB(255,255,255); BtnMain.TextColor3 = Color3.fromRGB(200,200,200); BtnRol.TextColor3 = Color3.fromRGB(200,200,200)
+end)
+BtnMain.MouseButton1Click:Connect(function()
+    ContenedorInfo.Visible = false; ContenedorMain.Visible = true; ContenedorRol.Visible = false
+    BtnInfo.TextColor3 = Color3.fromRGB(200,200,200); BtnMain.TextColor3 = Color3.fromRGB(255,255,255); BtnRol.TextColor3 = Color3.fromRGB(200,200,200)
+end)
+BtnRol.MouseButton1Click:Connect(function()
+    ContenedorInfo.Visible = false; ContenedorMain.Visible = false; ContenedorRol.Visible = true
+    BtnInfo.TextColor3 = Color3.fromRGB(200,200,200); BtnMain.TextColor3 = Color3.fromRGB(200,200,200); BtnRol.TextColor3 = Color3.fromRGB(255,255,255)
+end)
+
+-- ==========================================
+-- SECCIÓN 1: INFO
+-- ==========================================
+local function CrearTextoInfo(texto, yPos)
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, 0, 0, 30)
+    lbl.Position = UDim2.new(0, 0, 0, yPos)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = texto
+    lbl.TextColor3 = Color3.fromRGB(255, 230, 230)
+    lbl.TextSize = 16
+    lbl.Font = Enum.Font.SourceSansBold
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = ContenedorInfo
+end
+CrearTextoInfo("• Nombre del Creador: JoseAngel_Blox", 20)
+CrearTextoInfo("• Fecha de actualización: 09/07/2026", 60)
+CrearTextoInfo("• Versión: 1.2", 100)
+
+-- Función ayudante para crear botones en las listas
+local function CrearBotonMenu(nombre, yPos, parent, callback)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.23, 0, 1, 0)
-    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    btn.Text = text
-    btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.TextScaled = true
-    btn.Font = Enum.Font.GothamBold
-    btn.LayoutOrder = order
-    btn.Parent = MenuBar
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim2.new(0, 8)
-    corner.Parent = btn
-    return btn
-end
+    btn.Size = UDim2.new(0.9, 0, 0, 38)
+    btn.Position = UDim2.new(0.05, 0, 0, yPos)
+    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    btn.Text = nombre
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.SourceSansBold
+    btn.TextSize = 14
+    btn.Parent = parent
+    
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, 6)
+    c.Parent = btn
 
-local BtnInfo = CreateMenuButton("INFO", 1)
-local BtnMain = CreateMenuButton("MAIN", 2)
-local BtnPiggy = CreateMenuButton("ROL PIGGY", 3)
-
--- ==================== PANELES ====================
-local InfoPanel = Instance.new("Frame")
-InfoPanel.Size = UDim2.new(1, -20, 1, -140)
-InfoPanel.Position = UDim2.new(0, 10, 0, 120)
-InfoPanel.BackgroundTransparency = 1
-InfoPanel.Visible = true
-InfoPanel.Parent = MainFrame
-
-local InfoLabel = Instance.new("TextLabel")
-InfoLabel.Size = UDim2.new(1, 0, 1, 0)
-InfoLabel.BackgroundTransparency = 1
-InfoLabel.Text = "Nombre del Creador: JoseAngel_Blox\nFecha de actualización: 10/07/2026\nVersión: 1.2"
-InfoLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
-InfoLabel.TextScaled = true
-InfoLabel.Font = Enum.Font.Gotham
-InfoLabel.TextWrapped = true
-InfoLabel.Parent = InfoPanel
-
-local MainPanel = Instance.new("ScrollingFrame")
-MainPanel.Size = UDim2.new(1, -20, 1, -140)
-MainPanel.Position = UDim2.new(0, 10, 0, 120)
-MainPanel.BackgroundTransparency = 1
-MainPanel.Visible = false
-MainPanel.ScrollBarThickness = 6
-MainPanel.Parent = MainFrame
-local MainLayout = Instance.new("UIListLayout")
-MainLayout.SortOrder = Enum.SortOrder.LayoutOrder
-MainLayout.Padding = UDim.new(0, 8)
-MainLayout.Parent = MainPanel
-
-local PiggyPanel = Instance.new("Frame")
-PiggyPanel.Size = UDim2.new(1, -20, 1, -140)
-PiggyPanel.Position = UDim2.new(0, 10, 0, 120)
-PiggyPanel.BackgroundTransparency = 1
-PiggyPanel.Visible = false
-PiggyPanel.Parent = MainFrame
-
--- ==================== TOGGLE SYSTEM ====================
-local function CreateToggle(parent, text, default, callback)
-    local toggleFrame = Instance.new("Frame")
-    toggleFrame.Size = UDim2.new(1, 0, 0, 50)
-    toggleFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    toggleFrame.Parent = parent
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim2.new(0, 10)
-    corner.Parent = toggleFrame
-
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(0.7, 0, 1, 0)
-    label.BackgroundTransparency = 1
-    label.Text = text
-    label.TextColor3 = Color3.new(1, 1, 1)
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Font = Enum.Font.GothamSemibold
-    label.TextScaled = true
-    label.Parent = toggleFrame
-
-    local switch = Instance.new("Frame")
-    switch.Size = UDim2.new(0, 45, 0, 25)
-    switch.Position = UDim2.new(1, -60, 0.5, -12)
-    switch.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    switch.Parent = toggleFrame
-    local sCorner = Instance.new("UICorner")
-    sCorner.CornerRadius = UDim2.new(1, 0)
-    sCorner.Parent = switch
-
-    local knob = Instance.new("Frame")
-    knob.Size = UDim2.new(0, 21, 0, 21)
-    knob.Position = UDim2.new(0, 2, 0.5, -10)
-    knob.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-    knob.Parent = switch
-    local kCorner = Instance.new("UICorner")
-    kCorner.CornerRadius = UDim2.new(1, 0)
-    kCorner.Parent = knob
-
-    local state = default
-    local function update()
-        if state then
-            TweenService:Create(knob, TweenInfo.new(0.2), {Position = UDim2.new(1, -23, 0.5, -10)}):Play()
-            TweenService:Create(switch, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 50, 50)}):Play()
+    local toggle = false
+    btn.MouseButton1Click:Connect(function()
+        toggle = not toggle
+        if toggle then
+            btn.BackgroundColor3 = Color3.fromRGB(30, 140, 40)
         else
-            TweenService:Create(knob, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -10)}):Play()
-            TweenService:Create(switch, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 50, 50)}):Play()
+            btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
         end
-    end
-    update()
-
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(1, 0, 1, 0)
-    button.BackgroundTransparency = 1
-    button.Text = ""
-    button.Parent = toggleFrame
-
-    button.MouseButton1Click:Connect(function()
-        state = not state
-        callback(state)
-        update()
+        callback(toggle, btn)
     end)
-    return toggleFrame
 end
 
--- ==================== ESP ====================
-local function CreateESP()
-    if Config.ESPEnabled then
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr \~= LocalPlayer and plr.Character and not ESPObjects[plr] then
-                local box = Drawing.new("Square")
-                box.Thickness = 2
-                box.Color = Color3.fromRGB(255, 50, 50)
-                box.Filled = false
-                box.Transparency = 1
-                ESPObjects[plr] = {Box = box}
+-- ==========================================
+-- SECCIÓN 2: MAIN (SOBREVIVIENTTE)
+-- ==========================================
+local Plrs = game:GetService("Players")
+local LP = Plrs.LocalPlayer
+
+CrearBotonMenu("Auto Collect Items", 10, ContenedorMain, function(act)
+    _G.AutoCollect = act
+    while _G.AutoCollect and task.wait(0.5) do
+        pcall(function()
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("ClickDetector") and v.Parent and (v.Parent:IsA("BasePart") or v.Parent:FindFirstChildOfClass("BasePart")) then
+                    local part = v.Parent:IsA("BasePart") and v.Parent or v.Parent:FindFirstChildOfClass("BasePart")
+                    if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
+                        if (LP.Character.HumanoidRootPart.Position - part.Position).Magnitude < 25 then
+                            fireclickdetector(v)
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+CrearBotonMenu("Auto Use Items 👟", 55, ContenedorMain, function(act)
+    -- Simulación guiada: Interactúa con cerraduras de proximidad en Piggy
+    _G.AutoUse = act
+    while _G.AutoUse and task.wait(0.5) do
+        pcall(function()
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("ProximityPrompt") or v:IsA("TouchTransmitter") then
+                    -- Simula uso de herramientas equipadas en la puerta correcta
+                    if v:IsA("ProximityPrompt") then fireproximityprompt(v) end
+                end
+            end
+        end)
+    end
+end)
+
+CrearBotonMenu("God Mode (Inmunidad Bot)", 100, ContenedorMain, function(act)
+    if act and LP.Character and LP.Character:FindFirstChild("Humanoid") then
+        LP.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+    else
+        if LP.Character and LP.Character:FindFirstChild("Humanoid") then
+            LP.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+        end
+    end
+end)
+
+CrearBotonMenu("WalkSpeed Changer (Velocidad)", 145, ContenedorMain, function(act)
+    if LP.Character and LP.Character:FindFirstChild("Humanoid") then
+        LP.Character.Humanoid.WalkSpeed = act and 65 or 16
+    end
+end)
+
+CrearBotonMenu("Infinite Jump", 190, ContenedorMain, function(act)
+    _G.InfJump = act
+end)
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if _G.InfJump and LP.Character and LP.Character:FindFirstChildOfClass("Humanoid") then
+        LP.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+    end
+end)
+
+CrearBotonMenu("No Clip (Atravesar Paredes)", 235, ContenedorMain, function(act)
+    _G.NoClip = act
+    game:GetService("RunService").Stepped:Connect(function()
+        if _G.NoClip and LP.Character then
+            for _, part in pairs(LP.Character:GetChildren()) do
+                if part:IsA("BasePart") then part.CanCollide = false end
+            end
+        end
+    end)
+end)
+
+-- ESP de Jugadores y Piggy alternable
+local esp_highlights = {}
+CrearBotonMenu("ESP (Ver Asesino/Jugadores)", 280, ContenedorMain, function(act)
+    if act then
+        for _, p in pairs(Plrs:GetPlayers()) do
+            if p ~= LP and p.Character then
+                local h = Instance.new("Highlight")
+                h.Parent = p.Character
+                h.FillColor = p.Name:lower():find("piggy") and Color3.fromRGB(255,0,0) or Color3.fromRGB(0,255,0)
+                esp_highlights[p] = h
             end
         end
     else
-        for _, data in pairs(ESPObjects) do
-            data.Box:Remove()
-        end
-        ESPObjects = {}
-    end
-end
-
-RunService.RenderStepped:Connect(function()
-    if not Config.ESPEnabled then return end
-    CreateESP()
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr \~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local data = ESPObjects[plr]
-            if data then
-                local root = plr.Character.HumanoidRootPart
-                local size = root.Size * Vector3.new(1.8, 2.5, 1)
-                data.Box.Size = Vector2.new(size.X, size.Z)
-                data.Box.Position = Vector2.new(Camera.WorldToViewportPoint(root.Position).X, Camera.WorldToViewportPoint(root.Position).Y)
-                data.Box.Visible = true
-            end
-        end
+        for _, h in pairs(esp_highlights) do pcall(function() h:Destroy() end) end
+        table.clear(esp_highlights)
     end
 end)
 
--- ==================== FLY + SPEED ====================
-local function StartFly()
-    Config.FlyEnabled = true
-    local bv = Instance.new("BodyVelocity")
-    bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-    bv.Velocity = Vector3.new(0,0,0)
-    bv.Parent = Character.HumanoidRootPart
-    local bg = Instance.new("BodyGyro")
-    bg.MaxTorque = Vector3.new(1e5, 1e5, 1e5)
-    bg.P = 1e4
-    bg.Parent = Character.HumanoidRootPart
-    FlyConnection = RunService.RenderStepped:Connect(function()
-        if not Config.FlyEnabled then return end
-        local camCF = Camera.CFrame
-        local move = Vector3.new()
-        if UserInputService:IsKeyDown(Enum.KeyCode.W) then move = move + camCF.LookVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.S) then move = move - camCF.LookVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.A) then move = move - camCF.RightVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.D) then move = move + camCF.RightVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then move = move + Vector3.new(0,1,0) end
-        if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then move = move - Vector3.new(0,1,0) end
-        bv.Velocity = move.Unit * Config.FlySpeed
-        bg.CFrame = camCF
-    end)
-end
-
-local function StopFly()
-    Config.FlyEnabled = false
-    if FlyConnection then FlyConnection:Disconnect() end
-    if Character and Character:FindFirstChild("HumanoidRootPart") then
-        Character.HumanoidRootPart:FindFirstChild("BodyVelocity") and Character.HumanoidRootPart.BodyVelocity:Destroy()
-        Character.HumanoidRootPart:FindFirstChild("BodyGyro") and Character.HumanoidRootPart.BodyGyro:Destroy()
-    end
-end
-
--- ==================== GOD MODE ====================
-local function SetupGodMode()
-    if Config.GodMode then
-        Humanoid.MaxHealth = 9e9
-        Humanoid.Health = 9e9
-    else
-        Humanoid.MaxHealth = 100
-        Humanoid.Health = 100
-    end
-end
-
-Humanoid.HealthChanged:Connect(function()
-    if Config.GodMode and Humanoid.Health < 100 then Humanoid.Health = 100 end
-end)
-
--- ==================== AUTO GRAB ====================
-local function StartAutoGrab()
-    Config.AutoGrabItems = true
-    spawn(function()
-        while Config.AutoGrabItems do
-            for _, item in ipairs(ItemsFolder:GetChildren()) do
-                if item:FindFirstChild("Handle") then
-                    local root = Character:FindFirstChild("HumanoidRootPart")
-                    if root then item.Handle.CFrame = root.CFrame * CFrame.new(0, 3, 0) end
-                end
-            end
-            task.wait(0.1)
-        end
-    end)
-end
-
--- ==================== SPEED + JUMP ====================
-local function StartSpeedBoost()
-    Config.SpeedBoost = true
-    SpeedConnection = RunService.Heartbeat:Connect(function()
-        if Config.SpeedBoost and Humanoid then Humanoid.WalkSpeed = Config.FlySpeed + 50 end
-    end)
-end
-
-local function StartAutoJump()
-    Config.AutoJump = true
-    JumpConnection = RunService.Heartbeat:Connect(function()
-        if Config.AutoJump and Humanoid and Humanoid:GetState() == Enum.HumanoidStateType.Running then Humanoid.Jump = true end
-    end)
-end
-
--- ==================== INFINITE STAMINA ====================
-local function InfiniteStamina()
-    Config.InfiniteStamina = true
-    spawn(function()
-        while Config.InfiniteStamina do
-            if Humanoid then Humanoid:ChangeState(Enum.HumanoidStateType.Running) end
-            task.wait(0.05)
-        end
-    end)
-end
-
--- ==================== KILL ON TRANSFORM ====================
-local function KillOnTransform()
-    Config.KillOnTransform = true
-    spawn(function()
-        while Config.KillOnTransform do
-            for _, plr in ipairs(Players:GetPlayers()) do
-                if plr \~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Humanoid") and plr.Character.Humanoid.Health <= 0 then
-                    -- Matar automáticamente (ajusta según el juego)
-                end
-            end
-            task.wait(2)
-        end
-    end)
-end
-
--- ==================== NOCOOP ====================
-RunService.Stepped:Connect(function()
-    if Config.Noclip then
-        for _, part in ipairs(Character:GetDescendants()) do
-            if part:IsA("BasePart") then part.CanCollide = false end
-        end
-    end
-end)
-
--- ==================== BOTONES ====================
-local function OpenSection(panel)
-    InfoPanel.Visible = false
-    MainPanel.Visible = false
-    PiggyPanel.Visible = false
-    panel.Visible = true
-end
-
-BtnInfo.MouseButton1Click:Connect(function() OpenSection(InfoPanel) end)
-BtnMain.MouseButton1Click:Connect(function() OpenSection(MainPanel) end)
-BtnPiggy.MouseButton1Click:Connect(function() OpenSection(PiggyPanel) end)
-
--- ==================== TOGGLES ====================
-CreateToggle(MainPanel, "Auto Farm de monedas/tokens", false, function(v) Config.AutoFarmCoins = v end)
-CreateToggle(MainPanel, "Noclip (atravesar paredes)", false, function(v) Config.Noclip = v end)
-CreateToggle(MainPanel, "Fly + WalkSpeed", false, function(v)
-    if v then StartFly() StartSpeedBoost() else StopFly() Config.SpeedBoost = false end
-end)
-CreateToggle(MainPanel, "ESP (ver Piggy, jugadores e ítems)", false, function(v)
-    Config.ESPEnabled = v
-    CreateESP()
-end)
-CreateToggle(MainPanel, "God Mode (invencible)", false, function(v) Config.GodMode = v SetupGodMode() end)
-CreateToggle(MainPanel, "Infinite Stamina", false, function(v) Config.InfiniteStamina = v InfiniteStamina() end)
-CreateToggle(MainPanel, "Auto Grab Items", false, function(v) if v then StartAutoGrab() else Config.AutoGrabItems = false end end)
-CreateToggle(MainPanel, "Speed + Jump", false, function(v)
-    if v then Config.SpeedBoost = true Config.AutoJump = true StartSpeedBoost() StartAutoJump() else Config.SpeedBoost = false Config.AutoJump = false end
-end)
-
-CreateToggle(PiggyPanel, "Matar a jugadores automáticamente (cuando te conviertas en Piggy)", false, function(v) Config.KillOnTransform = v KillOnTransform() end)
-
--- ==================== STATUS ====================
-local Status = Instance.new("TextLabel")
-Status.Size = UDim2.new(1, -20, 0, 30)
-Status.Position = UDim2.new(0, 10, 1, -40)
-Status.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-Status.Text = "Status: Undetected | Last Update: Today"
-Status.TextColor3 = Color3.fromRGB(100, 255, 100)
-Status.TextScaled = true
-Status.Font = Enum.Font.GothamBold
-Status.Parent = MainFrame
-
-print("✅ JoseAngel_Blox Piggy Pro cargado correctamente! ¡Ejecuta en Piggy!")
+local item_esp_boxes = {}
+CrearBotonMenu("Item ESP (Resaltar Objetos)", 325, ContenedorMain, function(act)
+    if act then
+        for _, v in pairs(workspace:GetDescendants()) do
+                
