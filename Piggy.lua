@@ -12,7 +12,6 @@ local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 local Mouse = LocalPlayer:GetMouse()
 
--- ==================== CONFIGURACIÓN ====================
 local Config = {
     AutoFarmCoins = false,
     Noclip = false,
@@ -23,13 +22,12 @@ local Config = {
     InfiniteStamina = false,
     AutoGrabItems = false,
     SpeedBoost = false,
-    KillOnTransform = false,
-    AutoSpeed = false,
     AutoJump = false,
+    KillOnTransform = false,
 }
 
 local PlayersList = {}
-local ItemsFolder = workspace:WaitForChild("Items") -- Ajusta si tu juego tiene otro nombre
+local ItemsFolder = workspace:WaitForChild("Items") -- ¡AJUSTA EL NOMBRE! (muchos mapas usan "ItemFolder1" o "GearFolder")
 local ESPObjects = {}
 local FlyConnection = nil
 local SpeedConnection = nil
@@ -39,7 +37,7 @@ local Plr = LocalPlayer
 local Character = Plr.Character or Plr.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 
--- ==================== CREAR GUI ====================
+-- ==================== GUI ====================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "JoseAngel_BloxPiggyPro"
 ScreenGui.Parent = game:GetService("CoreGui")
@@ -59,7 +57,7 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim2.new(0, 12)
 MainCorner.Parent = MainFrame
 
--- Título principal
+-- Título
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 60)
 Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
@@ -68,23 +66,22 @@ Title.TextColor3 = Color3.fromRGB(255, 50, 50)
 Title.TextScaled = true
 Title.Font = Enum.Font.GothamBold
 Title.Parent = MainFrame
-
 local TitleCorner = Instance.new("UICorner")
 TitleCorner.CornerRadius = UDim2.new(0, 12)
 TitleCorner.Parent = Title
 
--- ==================== BARRA DE MENÚ ====================
+-- Menú horizontal
 local MenuBar = Instance.new("Frame")
 MenuBar.Size = UDim2.new(1, 0, 0, 50)
 MenuBar.Position = UDim2.new(0, 0, 0, 60)
 MenuBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 MenuBar.Parent = MainFrame
 
-local MenuList = Instance.new("UIListLayout")
-MenuList.FillDirection = Enum.FillDirection.Horizontal
-MenuList.SortOrder = Enum.SortOrder.LayoutOrder
-MenuList.Padding = UDim.new(0, 4)
-MenuList.Parent = MenuBar
+local MenuLayout = Instance.new("UIListLayout")
+MenuLayout.FillDirection = Enum.FillDirection.Horizontal
+MenuLayout.SortOrder = Enum.SortOrder.LayoutOrder
+MenuLayout.Padding = UDim.new(0, 4)
+MenuLayout.Parent = MenuBar
 
 local function CreateMenuButton(text, order)
     local btn = Instance.new("TextButton")
@@ -96,24 +93,17 @@ local function CreateMenuButton(text, order)
     btn.Font = Enum.Font.GothamBold
     btn.LayoutOrder = order
     btn.Parent = MenuBar
-    
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim2.new(0, 8)
     corner.Parent = btn
-    
-    btn.MouseButton1Click:Connect(function()
-        -- Aquí iría el toggle de cada sección (lo implementamos abajo)
-    end)
     return btn
 end
 
--- Botones del menú (se abrirán por secciones)
 local BtnInfo = CreateMenuButton("INFO", 1)
 local BtnMain = CreateMenuButton("MAIN", 2)
 local BtnPiggy = CreateMenuButton("ROL PIGGY", 3)
-local BtnSettings = CreateMenuButton("SETTINGS", 4)
 
--- ==================== PANEL INFORMACIÓN ====================
+-- ==================== PANELES ====================
 local InfoPanel = Instance.new("Frame")
 InfoPanel.Size = UDim2.new(1, -20, 1, -140)
 InfoPanel.Position = UDim2.new(0, 10, 0, 120)
@@ -131,7 +121,6 @@ InfoLabel.Font = Enum.Font.Gotham
 InfoLabel.TextWrapped = true
 InfoLabel.Parent = InfoPanel
 
--- ==================== PANEL MAIN ====================
 local MainPanel = Instance.new("ScrollingFrame")
 MainPanel.Size = UDim2.new(1, -20, 1, -140)
 MainPanel.Position = UDim2.new(0, 10, 0, 120)
@@ -139,13 +128,11 @@ MainPanel.BackgroundTransparency = 1
 MainPanel.Visible = false
 MainPanel.ScrollBarThickness = 6
 MainPanel.Parent = MainFrame
-
 local MainLayout = Instance.new("UIListLayout")
 MainLayout.SortOrder = Enum.SortOrder.LayoutOrder
 MainLayout.Padding = UDim.new(0, 8)
 MainLayout.Parent = MainPanel
 
--- ==================== PANEL ROL PIGGY ====================
 local PiggyPanel = Instance.new("Frame")
 PiggyPanel.Size = UDim2.new(1, -20, 1, -140)
 PiggyPanel.Position = UDim2.new(0, 10, 0, 120)
@@ -159,11 +146,10 @@ local function CreateToggle(parent, text, default, callback)
     toggleFrame.Size = UDim2.new(1, 0, 0, 50)
     toggleFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     toggleFrame.Parent = parent
-    
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim2.new(0, 10)
     corner.Parent = toggleFrame
-    
+
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(0.7, 0, 1, 0)
     label.BackgroundTransparency = 1
@@ -173,7 +159,7 @@ local function CreateToggle(parent, text, default, callback)
     label.Font = Enum.Font.GothamSemibold
     label.TextScaled = true
     label.Parent = toggleFrame
-    
+
     local switch = Instance.new("Frame")
     switch.Size = UDim2.new(0, 45, 0, 25)
     switch.Position = UDim2.new(1, -60, 0.5, -12)
@@ -182,7 +168,7 @@ local function CreateToggle(parent, text, default, callback)
     local sCorner = Instance.new("UICorner")
     sCorner.CornerRadius = UDim2.new(1, 0)
     sCorner.Parent = switch
-    
+
     local knob = Instance.new("Frame")
     knob.Size = UDim2.new(0, 21, 0, 21)
     knob.Position = UDim2.new(0, 2, 0.5, -10)
@@ -191,7 +177,7 @@ local function CreateToggle(parent, text, default, callback)
     local kCorner = Instance.new("UICorner")
     kCorner.CornerRadius = UDim2.new(1, 0)
     kCorner.Parent = knob
-    
+
     local state = default
     local function update()
         if state then
@@ -203,19 +189,18 @@ local function CreateToggle(parent, text, default, callback)
         end
     end
     update()
-    
+
     local button = Instance.new("TextButton")
     button.Size = UDim2.new(1, 0, 1, 0)
     button.BackgroundTransparency = 1
     button.Text = ""
     button.Parent = toggleFrame
-    
+
     button.MouseButton1Click:Connect(function()
         state = not state
         callback(state)
         update()
     end)
-    
     return toggleFrame
 end
 
@@ -257,31 +242,27 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- ==================== FLY ====================
+-- ==================== FLY + SPEED ====================
 local function StartFly()
     Config.FlyEnabled = true
     local bv = Instance.new("BodyVelocity")
     bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
     bv.Velocity = Vector3.new(0,0,0)
     bv.Parent = Character.HumanoidRootPart
-    
     local bg = Instance.new("BodyGyro")
     bg.MaxTorque = Vector3.new(1e5, 1e5, 1e5)
     bg.P = 1e4
     bg.Parent = Character.HumanoidRootPart
-    
     FlyConnection = RunService.RenderStepped:Connect(function()
         if not Config.FlyEnabled then return end
         local camCF = Camera.CFrame
         local move = Vector3.new()
-        
         if UserInputService:IsKeyDown(Enum.KeyCode.W) then move = move + camCF.LookVector end
         if UserInputService:IsKeyDown(Enum.KeyCode.S) then move = move - camCF.LookVector end
         if UserInputService:IsKeyDown(Enum.KeyCode.A) then move = move - camCF.RightVector end
         if UserInputService:IsKeyDown(Enum.KeyCode.D) then move = move + camCF.RightVector end
         if UserInputService:IsKeyDown(Enum.KeyCode.Space) then move = move + Vector3.new(0,1,0) end
         if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then move = move - Vector3.new(0,1,0) end
-        
         bv.Velocity = move.Unit * Config.FlySpeed
         bg.CFrame = camCF
     end)
@@ -296,7 +277,7 @@ local function StopFly()
     end
 end
 
--- ==================== GODMODE ====================
+-- ==================== GOD MODE ====================
 local function SetupGodMode()
     if Config.GodMode then
         Humanoid.MaxHealth = 9e9
@@ -308,12 +289,10 @@ local function SetupGodMode()
 end
 
 Humanoid.HealthChanged:Connect(function()
-    if Config.GodMode and Humanoid.Health < 100 then
-        Humanoid.Health = 100
-    end
+    if Config.GodMode and Humanoid.Health < 100 then Humanoid.Health = 100 end
 end)
 
--- ==================== AUTO GRAB ITEMS ====================
+-- ==================== AUTO GRAB ====================
 local function StartAutoGrab()
     Config.AutoGrabItems = true
     spawn(function()
@@ -321,9 +300,7 @@ local function StartAutoGrab()
             for _, item in ipairs(ItemsFolder:GetChildren()) do
                 if item:FindFirstChild("Handle") then
                     local root = Character:FindFirstChild("HumanoidRootPart")
-                    if root then
-                        item.Handle.CFrame = root.CFrame * CFrame.new(0, 3, 0)
-                    end
+                    if root then item.Handle.CFrame = root.CFrame * CFrame.new(0, 3, 0) end
                 end
             end
             task.wait(0.1)
@@ -335,20 +312,14 @@ end
 local function StartSpeedBoost()
     Config.SpeedBoost = true
     SpeedConnection = RunService.Heartbeat:Connect(function()
-        if Config.SpeedBoost and Humanoid then
-            Humanoid.WalkSpeed = Config.FlySpeed + 50
-        end
+        if Config.SpeedBoost and Humanoid then Humanoid.WalkSpeed = Config.FlySpeed + 50 end
     end)
 end
 
 local function StartAutoJump()
     Config.AutoJump = true
     JumpConnection = RunService.Heartbeat:Connect(function()
-        if Config.AutoJump and Humanoid then
-            if Humanoid:GetState() == Enum.HumanoidStateType.Running then
-                Humanoid.Jump = true
-            end
-        end
+        if Config.AutoJump and Humanoid and Humanoid:GetState() == Enum.HumanoidStateType.Running then Humanoid.Jump = true end
     end)
 end
 
@@ -357,9 +328,7 @@ local function InfiniteStamina()
     Config.InfiniteStamina = true
     spawn(function()
         while Config.InfiniteStamina do
-            if Humanoid then
-                Humanoid:ChangeState(Enum.HumanoidStateType.Running)
-            end
+            if Humanoid then Humanoid:ChangeState(Enum.HumanoidStateType.Running) end
             task.wait(0.05)
         end
     end)
@@ -371,12 +340,8 @@ local function KillOnTransform()
     spawn(function()
         while Config.KillOnTransform do
             for _, plr in ipairs(Players:GetPlayers()) do
-                if plr \~= LocalPlayer and plr.Character then
-                    if plr.Character:FindFirstChild("Humanoid") and plr.Character.Humanoid.Health <= 0 then
-                        if Config.KillOnTransform then
-                            -- Matar automáticamente (ajusta según tu Piggy)
-                        end
-                    end
+                if plr \~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Humanoid") and plr.Character.Humanoid.Health <= 0 then
+                    -- Matar automáticamente (ajusta según el juego)
                 end
             end
             task.wait(2)
@@ -384,14 +349,16 @@ local function KillOnTransform()
     end)
 end
 
--- ==================== CONEXIONES ====================
-Plr.CharacterAdded:Connect(function(char)
-    Character = char
-    Humanoid = char:WaitForChild("Humanoid")
-    SetupGodMode()
+-- ==================== NOCOOP ====================
+RunService.Stepped:Connect(function()
+    if Config.Noclip then
+        for _, part in ipairs(Character:GetDescendants()) do
+            if part:IsA("BasePart") then part.CanCollide = false end
+        end
+    end
 end)
 
--- ==================== BOTONES QUE ABREN SECCIONES ====================
+-- ==================== BOTONES ====================
 local function OpenSection(panel)
     InfoPanel.Visible = false
     MainPanel.Visible = false
@@ -403,8 +370,7 @@ BtnInfo.MouseButton1Click:Connect(function() OpenSection(InfoPanel) end)
 BtnMain.MouseButton1Click:Connect(function() OpenSection(MainPanel) end)
 BtnPiggy.MouseButton1Click:Connect(function() OpenSection(PiggyPanel) end)
 
--- ==================== AÑADIR TOGGLES ====================
--- MAIN TOGGLES
+-- ==================== TOGGLES ====================
 CreateToggle(MainPanel, "Auto Farm de monedas/tokens", false, function(v) Config.AutoFarmCoins = v end)
 CreateToggle(MainPanel, "Noclip (atravesar paredes)", false, function(v) Config.Noclip = v end)
 CreateToggle(MainPanel, "Fly + WalkSpeed", false, function(v)
@@ -418,30 +384,10 @@ CreateToggle(MainPanel, "God Mode (invencible)", false, function(v) Config.GodMo
 CreateToggle(MainPanel, "Infinite Stamina", false, function(v) Config.InfiniteStamina = v InfiniteStamina() end)
 CreateToggle(MainPanel, "Auto Grab Items", false, function(v) if v then StartAutoGrab() else Config.AutoGrabItems = false end end)
 CreateToggle(MainPanel, "Speed + Jump", false, function(v)
-    if v then
-        Config.SpeedBoost = true
-        Config.AutoJump = true
-        StartSpeedBoost()
-        StartAutoJump()
-    else
-        Config.SpeedBoost = false
-        Config.AutoJump = false
-    end
+    if v then Config.SpeedBoost = true Config.AutoJump = true StartSpeedBoost() StartAutoJump() else Config.SpeedBoost = false Config.AutoJump = false end
 end)
 
--- ROL PIGGY TOGGLES
 CreateToggle(PiggyPanel, "Matar a jugadores automáticamente (cuando te conviertas en Piggy)", false, function(v) Config.KillOnTransform = v KillOnTransform() end)
-
--- ==================== NOCOOP ====================
-RunService.Stepped:Connect(function()
-    if Config.Noclip then
-        for _, part in ipairs(Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
-            end
-        end
-    end
-end)
 
 -- ==================== STATUS ====================
 local Status = Instance.new("TextLabel")
@@ -454,17 +400,4 @@ Status.TextScaled = true
 Status.Font = Enum.Font.GothamBold
 Status.Parent = MainFrame
 
--- ==================== EXPLOSIONES DE FONDO (estilo Trav) ====================
-for i = 1, 15 do
-    local exp = Instance.new("Frame")
-    exp.Size = UDim2.new(0, 120, 0, 120)
-    exp.Position = UDim2.new(math.random(0,1), math.random(0,1), math.random(0,1), math.random(0,1))
-    exp.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    exp.Transparency = 0.7
-    exp.Parent = MainFrame
-    exp.Rotation = math.random(0,360)
-    TweenService:Create(exp, TweenInfo.new(2 + math.random()), {Position = UDim2.new(1,0,1,0), Transparency = 1}):Play()
-    task.delay(3, function() exp:Destroy() end)
-end
-
-print("✅ JoseAngel_Blox Piggy Pro cargado correctamente!")
+print("✅ JoseAngel_Blox Piggy Pro cargado correctamente! ¡Ejecuta en Piggy!")
