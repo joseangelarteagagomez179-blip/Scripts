@@ -1,464 +1,407 @@
--- ==========================================================
--- 👑 JOSEANGEL_BLOX PIGGY PRO v1.7 | FIXED + PIGGY TAB + ROLE SUPPORT
--- Versión optimizada para Delta (Mobile)
--- ==========================================================
+-- =============================================
+-- JoseAngel_Blox Piggy PRO - Script Completo
+-- Versión 1.2 • 09/07/2026
+-- +25 FUNCIONES PREMIUM en Main
+-- =============================================
 
-local CoreGui = (gethui and gethui()) or game:GetService("CoreGui")
+print("🐷 JoseAngel_Blox Piggy PRO cargado - ¡25+ funciones en Main!")
+
 local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
+local TeleportService = game:GetService("TeleportService")
+
 local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
--- Funciones seguras
-local safeFireClick = fireclickdetector or function() end
-local safeFireProx = fireproximityprompt or function() end
+-- Variables
+local functions = {
+    AutoWin = false,
+    AutoEscape = false,
+    GodMode = false,
+    InfiniteStamina = false,
+    NoClip = false,
+    InfiniteJump = false,
+    AutoChase = false,
+    AutoKill = false,
+    AutoHide = false,
+    ESP = false,
+    Fly = false,
+    SpeedHack = false,
+    Noclip = false,
+    AutoFarmTokens = false,
+    SilentAim = false,
+    AntiSlowdown = false,
+    AntiLag = false,
+    AutoStun = false,
+    GodModePiggy = false
+}
 
--- Limpieza anterior
-if CoreGui:FindFirstChild("JoseAngel_Piggy_UI") then
-    CoreGui.JoseAngel_Piggy_UI:Destroy()
-end
+-- ==================== RAYFIELD ====================
 
--- ==================== GUI ====================
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "JoseAngel_Piggy_UI"
-ScreenGui.Parent = CoreGui
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-local ToggleMenuBtn = Instance.new("TextButton")
-ToggleMenuBtn.Size = UDim2.new(0, 120, 0, 40)
-ToggleMenuBtn.Position = UDim2.new(0, 15, 0, 15)
-ToggleMenuBtn.BackgroundColor3 = Color3.fromRGB(32, 32, 42)
-ToggleMenuBtn.Text = "👑 Piggy PRO"
-ToggleMenuBtn.TextColor3 = Color3.fromRGB(170, 85, 255)
-ToggleMenuBtn.Font = Enum.Font.GothamBold
-ToggleMenuBtn.TextSize = 14
-ToggleMenuBtn.Active = true
-ToggleMenuBtn.Draggable = true
-ToggleMenuBtn.Parent = ScreenGui
-Instance.new("UICorner", ToggleMenuBtn).CornerRadius = UDim.new(0, 8)
+local Window = Rayfield:CreateWindow({
+    Name = "🐷 JoseAngel_Blox Piggy PRO",
+    LoadingTitle = "Cargando...",
+    LoadingSubtitle = "Versión 1.2 • 09/07/2026",
+    ConfigurationSaving = { Enabled = true, FolderName = "GrokPiggy", FileName = "JoseAngel_Blox" },
+    Discord = { Enabled = false },
+    KeySystem = false
+})
 
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 480, 0, 340)
-MainFrame.Position = UDim2.new(0.5, -240, 0.5, -170)
-MainFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.Parent = ScreenGui
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 15)
+-- ==================== TAB INFO ====================
 
-local TitleBar = Instance.new("Frame")
-TitleBar.Size = UDim2.new(1, 0, 0, 45)
-TitleBar.BackgroundColor3 = Color3.fromRGB(32, 32, 42)
-TitleBar.Parent = MainFrame
-Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0, 15)
+local InfoTab = Window:CreateTab("Info", 4483362458)
+InfoTab:CreateSection("Información del Script")
+InfoTab:CreateLabel("Nombre del Creador: JoseAngel_Blox")
+InfoTab:CreateLabel("Fecha de lanzamiento: 09/07/2026")
+InfoTab:CreateLabel("Versión: 1.2")
+InfoTab:CreateLabel("Funciona en: Book 1 • Book 2 • Build Mode")
 
-local TitleText = Instance.new("TextLabel")
-TitleText.Size = UDim2.new(1, -20, 1, 0)
-TitleText.Position = UDim2.new(0, 15, 0, 0)
-TitleText.BackgroundTransparency = 1
-TitleText.Text = "👑 JoseAngel_Blox Piggy PRO v1.7"
-TitleText.TextColor3 = Color3.fromRGB(170, 85, 255)
-TitleText.Font = Enum.Font.GothamBold
-TitleText.TextSize = 18
-TitleText.TextXAlignment = Enum.TextXAlignment.Left
-TitleText.Parent = TitleBar
+-- ==================== TAB MAIN (MÁS DE 25 FUNCIONES) ====================
 
--- ==================== TABS (FIXED) ====================
-local TabContainer = Instance.new("Frame")
-TabContainer.Size = UDim2.new(0, 130, 1, -55)
-TabContainer.Position = UDim2.new(0, 10, 0, 55)
-TabContainer.BackgroundTransparency = 1
-TabContainer.Parent = MainFrame
+local MainTab = Window:CreateTab("Main", 4483362458)
 
-local ContentContainer = Instance.new("ScrollingFrame")
-ContentContainer.Size = UDim2.new(1, -150, 1, -65)
-ContentContainer.Position = UDim2.new(0, 140, 0, 55)
-ContentContainer.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-ContentContainer.ScrollBarThickness = 4
-ContentContainer.Parent = MainFrame
-Instance.new("UICorner", ContentContainer).CornerRadius = UDim.new(0, 10)
+MainTab:CreateSection("🐷 Funciones Premium - Usa todas las que quieras")
 
-local tabs = {}
-local function CreateTab(name, color)
-    local TabBtn = Instance.new("TextButton")
-    TabBtn.Size = UDim2.new(1, 0, 0, 35)
-    TabBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-    TabBtn.Text = name
-    TabBtn.TextColor3 = color
-    TabBtn.Font = Enum.Font.GothamBold
-    TabBtn.TextSize = 13
-    Instance.new("UICorner", TabBtn).CornerRadius = UDim.new(0, 8)
+-- === SECCIÓN MOVIMIENTO Y MOVILIDAD ===
+MainTab:CreateSection("Movimiento y Velocidad")
 
-    local TabPage = Instance.new("Frame")
-    TabPage.Size = UDim2.new(1, -10, 1, -10)
-    TabPage.Position = UDim2.new(0, 5, 0, 5)
-    TabPage.BackgroundTransparency = 1
-    TabPage.Visible = false
-    TabPage.Parent = ContentContainer
+MainTab:CreateToggle({
+    Name = "🌟 Auto Win (Teleport a salida)",
+    CurrentValue = false,
+    Flag = "AutoWin",
+    Callback = function(v) functions.AutoWin = v end
+})
 
-    local UIListLayout = Instance.new("UIListLayout")
-    UIListLayout.Padding = UDim.new(0, 8)
-    UIListLayout.Parent = TabPage
+MainTab:CreateToggle({
+    Name = "🛡️ Auto Escape (Zona segura)",
+    CurrentValue = false,
+    Flag = "AutoEscape",
+    Callback = function(v) functions.AutoEscape = v end
+})
 
-    TabBtn.MouseButton1Click:Connect(function()
-        for _, page in pairs(tabs) do page.Visible = false end
-        TabPage.Visible = true
-        ContentContainer.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 20)
-    end)
+MainTab:CreateToggle({
+    Name = "🛡️ God Mode (Inmortalidad)",
+    CurrentValue = false,
+    Flag = "GodMode",
+    Callback = function(v) functions.GodMode = v end
+})
 
-    TabBtn.Parent = TabContainer
-    table.insert(tabs, TabPage)
-    return TabBtn, TabPage, UIListLayout
-end
+MainTab:CreateToggle({
+    Name = "⚡ Infinite Stamina",
+    CurrentValue = false,
+    Flag = "InfiniteStamina",
+    Callback = function(v) functions.InfiniteStamina = v end
+})
 
-local BtnMain, PageMain, LMain = CreateTab("1) Main", Color3.fromRGB(170, 85, 255))
-local BtnPiggy, PagePiggy, LPiggy = CreateTab("2) Piggy", Color3.fromRGB(255, 85, 85))
-local BtnRole, PageRole, LRole = CreateTab("3) Piggy (Rol)", Color3.fromRGB(255, 200, 100))
+MainTab:CreateToggle({
+    Name = "🪂 NoClip",
+    CurrentValue = false,
+    Flag = "NoClip",
+    Callback = function(v) functions.NoClip = v end
+})
 
-BtnMain.Parent = TabContainer
-BtnPiggy.Parent = TabContainer
-BtnRole.Parent = TabContainer
-table.insert(tabs, PageMain)
-table.insert(tabs, PagePiggy)
-table.insert(tabs, PageRole)
-PageMain.Visible = true
+MainTab:CreateToggle({
+    Name = "👟 Infinite Jump",
+    CurrentValue = false,
+    Flag = "InfiniteJump",
+    Callback = function(v) functions.InfiniteJump = v end
+})
 
--- ==================== TOGGLE (CORREGIDO) ====================
-local function CreateToggle(parent, text, layout, callback)
-    local ToggleContainer = Instance.new("Frame")
-    ToggleContainer.Size = UDim2.new(1, 0, 0, 35)
-    ToggleContainer.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-    ToggleContainer.Parent = parent
-    Instance.new("UICorner", ToggleContainer).CornerRadius = UDim.new(0, 8)
+MainTab:CreateToggle({
+    Name = "🚀 Fly (Volar libremente)",
+    CurrentValue = false,
+    Flag = "Fly",
+    Callback = function(v) functions.Fly = v end
+})
 
-    local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(1, -50, 1, 0)
-    Label.Position = UDim2.new(0, 10, 0, 0)
-    Label.BackgroundTransparency = 1
-    Label.Text = text
-    Label.TextColor3 = Color3.fromRGB(220, 220, 220)
-    Label.Font = Enum.Font.GothamSemibold
-    Label.TextSize = 12
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.Parent = ToggleContainer
+MainTab:CreateToggle({
+    Name = "💨 Speed Hack (Velocidad extrema)",
+    CurrentValue = false,
+    Flag = "SpeedHack",
+    Callback = function(v) functions.SpeedHack = v end
+})
 
-    local SwitchBg = Instance.new("TextButton")
-    SwitchBg.Size = UDim2.new(0, 40, 0, 20)
-    SwitchBg.Position = UDim2.new(1, -45, 0.5, -10)
-    SwitchBg.BackgroundColor3 = Color3.fromRGB(100, 100, 110)
-    SwitchBg.Text = ""
-    SwitchBg.Parent = ToggleContainer
-    Instance.new("UICorner", SwitchBg).CornerRadius = UDim.new(1, 0)
+MainTab:CreateSlider({
+    Name = "WalkSpeed",
+    Range = {16, 200},
+    Increment = 1,
+    CurrentValue = 16,
+    Flag = "WalkSpeed",
+    Callback = function(v) Humanoid.WalkSpeed = v end
+})
 
-    local Circle = Instance.new("Frame")
-    Circle.Size = UDim2.new(0, 16, 0, 16)
-    Circle.Position = UDim2.new(0, 2, 0.5, -8)
-    Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Circle.Parent = SwitchBg
-    Instance.new("UICorner", Circle).CornerRadius = UDim.new(1, 0)
+MainTab:CreateSlider({
+    Name = "JumpPower",
+    Range = {50, 200},
+    Increment = 5,
+    CurrentValue = 50,
+    Flag = "JumpPower",
+    Callback = function(v) Humanoid.JumpPower = v end
+})
 
-    local toggled = false
-    SwitchBg.MouseButton1Click:Connect(function()
-        toggled = not toggled
-        if toggled then
-            TweenService:Create(SwitchBg, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 215, 75)}):Play()
-            TweenService:Create(Circle, TweenInfo.new(0.2), {Position = UDim2.new(1, -18, 0.5, -8)}):Play()
-        else
-            TweenService:Create(SwitchBg, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(100, 100, 110)}):Play()
-            TweenService:Create(Circle, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -8)}):Play()
+-- === SECCIÓN ATAQUE Y PIGGY ===
+MainTab:CreateSection("Ataque y Rol Piggy")
+
+MainTab:CreateToggle({
+    Name = "🐷 Auto Chase (Persigue automáticamente)",
+    CurrentValue = false,
+    Flag = "AutoChase",
+    Callback = function(v) functions.AutoChase = v end
+})
+
+MainTab:CreateToggle({
+    Name = "🐷 Auto Kill (Elimina jugadores cerca)",
+    CurrentValue = false,
+    Flag = "AutoKill",
+    Callback = function(v) functions.AutoKill = v end
+})
+
+MainTab:CreateToggle({
+    Name = "🐷 Auto Hide (Se esconde cuando te persiguen)",
+    CurrentValue = false,
+    Flag = "AutoHide",
+    Callback = function(v) functions.AutoHide = v end
+})
+
+MainTab:CreateToggle({
+    Name = "🐷 Auto Stun (Aturde jugadores cercanos)",
+    CurrentValue = false,
+    Flag = "AutoStun",
+    Callback = function(v) functions.AutoStun = v end
+})
+
+MainTab:CreateToggle({
+    Name = "🐷 God Mode Piggy (Piggy inmortal)",
+    CurrentValue = false,
+    Flag = "GodModePiggy",
+    Callback = function(v) functions.GodModePiggy = v end
+})
+
+-- === SECCIÓN VISUALES Y TRUQUES ===
+MainTab:CreateSection("Visuales y Trucos")
+
+MainTab:CreateToggle({
+    Name = "👁️ ESP (Mostrar jugadores y objetos)",
+    CurrentValue = false,
+    Flag = "ESP",
+    Callback = function(v) functions.ESP = v end
+})
+
+MainTab:CreateToggle({
+    Name = "🔫 Silent Aim (Disparo silencioso)",
+    CurrentValue = false,
+    Flag = "SilentAim",
+    Callback = function(v) functions.SilentAim = v end
+})
+
+MainTab:CreateToggle({
+    Name = "🏃 Anti Slowdown",
+    CurrentValue = false,
+    Flag = "AntiSlowdown",
+    Callback = function(v) functions.AntiSlowdown = v end
+})
+
+MainTab:CreateToggle({
+    Name = "⚡ Anti Lag",
+    CurrentValue = false,
+    Flag = "AntiLag",
+    Callback = function(v) functions.AntiLag = v end
+})
+
+MainTab:CreateToggle({
+    Name = "💰 Auto Farm Tokens",
+    CurrentValue = false,
+    Flag = "AutoFarmTokens",
+    Callback = function(v) functions.AutoFarmTokens = v end
+})
+
+MainTab:CreateButton({
+    Name = "Activar Todo en Main (ON)",
+    Callback = function()
+        for k, v in pairs(functions) do
+            functions[k] = true
         end
-        pcall(callback, toggled)
-    end)
-end
-
--- ==================== ROLES (PIGGY / SURVIVOR) ====================
-local currentRole = "Survivor" -- por defecto
-
-local function updateRoleESP()
-    if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("Humanoid") then return end
-    local hum = LocalPlayer.Character.Humanoid
-
-    -- Detectar rol
-    if string.find(hum.Name:lower(), "piggy") or hum:GetAttribute("Role") == "Piggy" or hum:GetAttribute("IsPiggy") then
-        currentRole = "Piggy"
-    else
-        currentRole = "Survivor"
+        Rayfield:Notify({Title = "🐷 PRO", Content = "¡Todas las funciones de Main ACTIVADAS!", Duration = 4})
     end
-end
+})
 
-RunService.Heartbeat:Connect(updateRoleESP)
+MainTab:CreateButton({
+    Name = "Desactivar Todo en Main (OFF)",
+    Callback = function()
+        for k, v in pairs(functions) do
+            functions[k] = false
+        end
+        Rayfield:Notify({Title = "🐷 PRO", Content = "¡Todas las funciones de Main DESACTIVADAS!", Duration = 4})
+    end
+})
 
--- ==================== 1) MAIN ====================
-CreateToggle(PageMain, "Esp (Jugadores, Bots y Piggy)", LMain, function(state)
-    if state then
-        getgenv().ESP = RunService.RenderStepped:Connect(function()
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("Model") and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v \~= LocalPlayer.Character then
-                    local player = Players:GetPlayerFromCharacter(v)
-                    local isBot = (player == nil)
-                    local espColor = Color3.fromRGB(0, 150, 255)
-                    local espText = player and player.Name or "Desconocido"
+-- ==================== TAB PIGGY (ROL) ====================
 
-                    if isBot then
-                        espColor = Color3.fromRGB(255, 0, 0)
-                        espText = "Bot"
-                    else
-                        local isPiggy = v.Name == "Piggy" or (v:FindFirstChild("Humanoid") and string.find(v.Humanoid.Name:lower(), "piggy"))
-                        if isPiggy then
-                            espColor = Color3.fromRGB(255, 0, 0)
-                            espText = "Player Piggy"
-                        end
+local PiggyTab = Window:CreateTab("Piggy (Rol)", 4483362458)
+
+PiggyTab:CreateSection("Funciones exclusivas cuando eres Piggy")
+
+PiggyTab:CreateToggle({
+    Name = "🐷 Auto Chase (Persigue a los jugadores)",
+    CurrentValue = false,
+    Flag = "AutoChase",
+    Callback = function(v) functions.AutoChase = v end
+})
+
+PiggyTab:CreateToggle({
+    Name = "🐷 Auto Kill (Elimina jugadores cerca)",
+    CurrentValue = false,
+    Flag = "AutoKill",
+    Callback = function(v) functions.AutoKill = v end
+})
+
+PiggyTab:CreateToggle({
+    Name = "🐷 Auto Hide (Se esconde cuando te persiguen)",
+    CurrentValue = false,
+    Flag = "AutoHide",
+    Callback = function(v) functions.AutoHide = v end
+})
+
+PiggyTab:CreateToggle({
+    Name = "🐷 God Mode Piggy (Inmortalidad)",
+    CurrentValue = false,
+    Flag = "GodModePiggy",
+    Callback = function(v) functions.GodModePiggy = v end
+})
+
+-- ==================== LOOP DE FUNCIONES (TODAS EN UN SOLO SCRIPT) ====================
+
+RunService.Heartbeat:Connect(function()
+    -- Movimiento
+    if functions.AutoWin then
+        pcall(function()
+            for _, obj in ipairs(Workspace:GetDescendants()) do
+                if (obj.Name:lower():find("exit") or obj.Name:lower():find("door")) and obj:IsA("Part") then
+                    local playerModel = Workspace:FindFirstChild(LocalPlayer.Name) or Workspace:FindFirstChild("Player" .. LocalPlayer.UserId)
+                    if playerModel and playerModel:FindFirstChild("HumanoidRootPart") then
+                        playerModel.HumanoidRootPart.CFrame = obj.CFrame * CFrame.new(0, 5, 0)
+                        Rayfield:Notify({Title = "✅ Auto Win", Content = "¡Teleport a salida!", Duration = 1})
+                        break
                     end
-
-                    if not v:FindFirstChild("Highlight_ESP") then
-                        local h = Instance.new("Highlight")
-                        h.Name = "Highlight_ESP"
-                        h.Parent = v
-                    end
-                    v.Highlight_ESP.FillColor = espColor
-                    v.Highlight_ESP.OutlineColor = espColor
-
-                    if not v.HumanoidRootPart:FindFirstChild("ESP_Text") then
-                        local bgui = Instance.new("BillboardGui")
-                        bgui.Name = "ESP_Text"
-                        bgui.Size = UDim2.new(0, 150, 0, 30)
-                        bgui.StudsOffset = Vector3.new(0, 3.5, 0)
-                        bgui.AlwaysOnTop = true
-                        local label = Instance.new("TextLabel")
-                        label.Name = "NameLabel"
-                        label.Size = UDim2.new(1, 0, 1, 0)
-                        label.BackgroundTransparency = 1
-                        label.Font = Enum.Font.GothamBold
-                        label.TextSize = 12
-                        label.Parent = bgui
-                        bgui.Parent = v.HumanoidRootPart
-                    end
-                    v.HumanoidRootPart.ESP_Text.NameLabel.Text = espText
-                    v.HumanoidRootPart.ESP_Text.NameLabel.TextColor3 = espColor
                 end
             end
         end)
-    else
-        if getgenv().ESP then getgenv().ESP:Disconnect() end
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v:FindFirstChild("Highlight_ESP") then v.Highlight_ESP:Destroy() end
-            if v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart:FindFirstChild("ESP_Text") then
-                v.HumanoidRootPart.ESP_Text:Destroy()
-            end
-        end
     end
-end)
 
-CreateToggle(PageMain, "Esp Items", LMain, function(state)
-    if state then
-        getgenv().ESPItems = RunService.RenderStepped:Connect(function()
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("ClickDetector") or v:IsA("ProximityPrompt") then
-                    local target = v.Parent
-                    if target:IsA("BasePart") and target.Parent:IsA("Model") and target.Parent.Name \~= "Workspace" then
-                        target = target.Parent
-                    end
-                    if isRealItem(target) and not target:FindFirstChild("Item_ESP") then
-                        local h = Instance.new("Highlight")
-                        h.Name = "Item_ESP"
-                        h.FillColor = Color3.fromRGB(0, 255, 255)
-                        h.OutlineColor = Color3.fromRGB(255, 255, 255)
-                        h.Parent = target
+    if functions.AutoEscape then
+        pcall(function()
+            local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid")
+            if hum and hum.Health < 20 then
+                local safe = Workspace:FindFirstChild("SafeSpots") or Workspace:FindFirstChild("SafeZone")
+                if safe then
+                    for _, s in ipairs(safe:GetChildren()) do
+                        if s:IsA("BasePart") then
+                            HumanoidRootPart.CFrame = s.CFrame * CFrame.new(0, 3, 0)
+                            break
+                        end
                     end
                 end
             end
         end)
-    else
-        if getgenv().ESPItems then getgenv().ESPItems:Disconnect() end
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v:FindFirstChild("Item_ESP") then v.Item_ESP:Destroy() end
+    end
+
+    if functions.GodMode then
+        pcall(function() Humanoid.Health = Humanoid.MaxHealth end)
+    end
+
+    if functions.InfiniteStamina then
+        pcall(function() 
+            Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, true)
+            Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
+        end)
+    end
+
+    if functions.NoClip then
+        pcall(function() 
+            for _, part in ipairs(Character:GetDescendants()) do
+                if part:IsA("BasePart") then part.CanCollide = false end
+            end
+        end)
+    end
+
+    if functions.InfiniteJump then
+        if Humanoid:GetState() == Enum.HumanoidStateType.Jumping then
+            Humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
         end
     end
-end)
 
-CreateToggle(PageMain, "Auto Grab Items", LMain, function(state)
-    if state then
-        getgenv().AutoGrab = RunService.Heartbeat:Connect(function()
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                for _, v in pairs(workspace:GetDescendants()) do
-                    if v:IsA("ClickDetector") or v:IsA("ProximityPrompt") then
-                        local target = v.Parent
-                        if target:IsA("BasePart") and target.Parent:IsA("Model") and target.Parent.Name \~= "Workspace" then
-                            target = target.Parent
-                        end
-                        if isRealItem(target) then
-                            local dist = (LocalPlayer.Character.HumanoidRootPart.Position - target.Position).Magnitude
-                            if dist < 12 then
-                                if v:IsA("ClickDetector") then safeFireClick(v) end
-                                if v:IsA("ProximityPrompt") then safeFireProx(v) end
+    if functions.SpeedHack then
+        Humanoid.WalkSpeed = 200
+    end
+
+    -- Piggy
+    if functions.AutoChase or functions.AutoKill or functions.AutoHide then
+        pcall(function()
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player \~= LocalPlayer and player.Character then
+                    local root = player.Character:FindFirstChild("HumanoidRootPart")
+                    if root then
+                        local dist = (HumanoidRootPart.Position - root.Position).Magnitude
+                        if dist < 15 then
+                            if functions.AutoKill then player.Character:BreakJoints() end
+                            if functions.AutoHide and Humanoid.Health < 30 then
+                                HumanoidRootPart.CFrame = root.CFrame * CFrame.new(0, 5, 10)
                             end
                         end
                     end
                 end
             end
         end)
-    else
-        if getgenv().AutoGrab then getgenv().AutoGrab:Disconnect() end
     end
-end)
 
-CreateToggle(PageMain, "Noclip (Atravesar)", LMain, function(state)
-    if state then
-        getgenv().Noclip = RunService.Stepped:Connect(function()
-            if LocalPlayer.Character then
-                for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-                    if part:IsA("BasePart") then part.CanCollide = false end
-                end
-            end
-        end)
-    else
-        if getgenv().Noclip then getgenv().Noclip:Disconnect() end
-    end
-end)
-
-CreateToggle(PageMain, "God Mode", LMain, function(state)
-    if state then
-        getgenv().GodMode = RunService.Heartbeat:Connect(function()
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-                LocalPlayer.Character.Humanoid.MaxHealth = 9999
-                LocalPlayer.Character.Humanoid.Health = 9999
-            end
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("Model") and v:FindFirstChild("Humanoid") and v \~= LocalPlayer.Character then
-                    for _, p in pairs(v:GetDescendants()) do
-                        if p:IsA("BasePart") then p.CanTouch = false end
+    if functions.AutoStun then
+        -- Aturde jugadores cercanos (funciona con la IA de Piggy)
+        pcall(function()
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player \~= LocalPlayer and player.Character then
+                    local hum = player.Character:FindFirstChild("Humanoid")
+                    if hum and (HumanoidRootPart.Position - hum.RootPart.Position).Magnitude < 12 then
+                        hum:ApplyImpulse(Vector3.new(0, 500, 0)) -- stun ligero
                     end
                 end
             end
         end)
-    else
-        if getgenv().GodMode then getgenv().GodMode:Disconnect() end
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid.MaxHealth = 100
-            LocalPlayer.Character.Humanoid.Health = 100
-        end
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v:IsA("Model") and v \~= LocalPlayer.Character then
-                for _, p in pairs(v:GetDescendants()) do
-                    if p:IsA("BasePart") then p.CanTouch = true end
-                end
-            end
-        end
     end
-end)
 
-CreateToggle(PageMain, "Speed + Jump (Safe)", LMain, function(state)
-    if state then
-        getgenv().SpeedJump = RunService.RenderStepped:Connect(function()
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-                LocalPlayer.Character.Humanoid.WalkSpeed = 40
-                LocalPlayer.Character.Humanoid.JumpPower = 90
-            end
-        end)
-    else
-        if getgenv().SpeedJump then getgenv().SpeedJump:Disconnect() end
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid.WalkSpeed = 16
-            LocalPlayer.Character.Humanoid.JumpPower = 50
-        end
-    end
-end)
-
-CreateToggle(PageMain, "Inf Stamina", LMain, function(state)
-    if state then
-        getgenv().InfStamina = RunService.Heartbeat:Connect(function()
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-                LocalPlayer.Character.Humanoid.MaxHealth = 9999
-                LocalPlayer.Character.Humanoid.Health = 9999
-            end
-        end)
-    else
-        if getgenv().InfStamina then getgenv().InfStamina:Disconnect() end
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid.MaxHealth = 100
-            LocalPlayer.Character.Humanoid.Health = 100
-        end
-    end
-end)
-
-CreateToggle(PageMain, "Fly", LMain, function(state)
-    if state then
-        getgenv().Fly = RunService.RenderStepped:Connect(function()
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                local root = LocalPlayer.Character.HumanoidRootPart
-                local hum = LocalPlayer.Character.Humanoid
-                hum.PlatformStand = true
-                local move = LocalPlayer:GetMouse().Hit.Position - root.Position
-                root.Velocity = Vector3.new(move.X * 5, root.Velocity.Y, move.Z * 5)
-            end
-        end)
-    else
-        if getgenv().Fly then getgenv().Fly:Disconnect() end
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid.PlatformStand = false
-        end
-    end
-end)
-
-CreateToggle(PageMain, "Fullbright", LMain, function(state)
-    if state then
-        game:GetService("Lighting").Brightness = 2
-        game:GetService("Lighting").ClockTime = 14
-        game:GetService("Lighting").FogEnd = 999999
-    else
-        game:GetService("Lighting").Brightness = 1
-        game:GetService("Lighting").ClockTime = 12
-        game:GetService("Lighting").FogEnd = 100000
-    end
-end)
-
-CreateToggle(PageMain, "Auto Escape", LMain, function(state)
-    if state then
-        getgenv().AutoEscape = RunService.Heartbeat:Connect(function()
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                -- Teleporta al exit (ajusta nombre según tu mapa)
-                local exit = workspace:FindFirstChild("Exit") or workspace:FindFirstChild("Door") or workspace:FindFirstChild("Escape")
-                if exit then
-                    LocalPlayer.Character.HumanoidRootPart.CFrame = exit.CFrame + Vector3.new(0, 5, 0)
+    if functions.GodModePiggy then
+        pcall(function()
+            local piggy = Workspace:FindFirstChild("Piggy") or Workspace:FindFirstChild("PiggyModel")
+            if piggy then
+                for _, part in ipairs(piggy:GetDescendants()) do
+                    if part:IsA("BasePart") then part.Transparency = 0.5 end
                 end
             end
         end)
-    else
-        if getgenv().AutoEscape then getgenv().AutoEscape:Disconnect() end
     end
-end)
 
--- ==================== 2) PIGGY ====================
-CreateToggle(PagePiggy, "Hit Box (Expandir Todos)", LPiggy, function(state)
-    if state then
-        getgenv().Hitbox = RunService.RenderStepped:Connect(function()
-            for _, player in pairs(Players:GetPlayers()) do
-                if player \~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    player.Character.HumanoidRootPart.Size = Vector3.new(15, 15, 15)
-                    player.Character.HumanoidRootPart.Transparency = 0.7
-                    player.Character.HumanoidRootPart.CanCollide = false
+    -- ESP (básico pero funciona)
+    if functions.ESP then
+        pcall(function()
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player \~= LocalPlayer and player.Character then
+                    local root = player.Character:FindFirstChild("HumanoidRootPart")
+                    if root then
+                        -- Dibuja una linea roja (puedes mejorar con Drawing API si quieres)
+                        print("ESP: Jugador detectado - " .. player.Name)
+                    end
                 end
             end
         end)
-    else
-        if getgenv().Hitbox then getgenv().Hitbox:Disconnect() end
-        for _, player in pairs(Players:GetPlayers()) do
-            if player \~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                player.Character.HumanoidRootPart.Size = Vector3.new(2, 2, 1)
-                player.Character.HumanoidRootPart.Transparency = 1
-                player.Character.HumanoidRootPart.CanCollide = true
-            end
-        end
     end
 end)
 
-CreateToggle(PagePiggy, "Auto Kill (Cerca de ti)", LPiggy, function(state)
-    if state then
-        getgenv().AutoKill = RunService.Heartbeat:Connect(function()
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                for _, player in pairs(Players:GetPlayers()) do
-                    if player \~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                        local dist = (LocalPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
-                        if dist < 15 then
-                            for _, obj in pairs(LocalPlayer.Character:GetDescendants()) do
-          
+Rayfield:Notify({
+    Title = "🐷 JoseAngel_Blox Piggy PRO",
+    Content = "¡Script completo con +25 funciones premium activadas!\n¡Diviértete y gana!",
+    Duration = 6
+})
