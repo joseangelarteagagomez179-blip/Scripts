@@ -1,7 +1,6 @@
 -- =========================================================
--- SCRIPT: JoseAngel_Blox Piggy Pro V1.4
--- CREADO PARA: Piggy (Fix Ítems, Godmode y Menú Ocultable)
--- FECHA DE ACTUALIZACIÓN: 10/07/2026
+-- SCRIPT: JoseAngel_Blox Piggy Pro V1.5
+-- CREADO PARA: Piggy (Fix Noclip, ESP Instantáneo y Godmode Aura)
 -- =========================================================
 
 local CoreGui = game:GetService("CoreGui")
@@ -11,17 +10,15 @@ local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
--- Eliminar versión anterior si existe
 if CoreGui:FindFirstChild("JoseAngel_BloxPiggyPro") then
     CoreGui.JoseAngel_BloxPiggyPro:Destroy()
 end
 
--- ==================== CREACIÓN DE LA INTERFAZ ====================
+-- ==================== INTERFAZ ====================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "JoseAngel_BloxPiggyPro"
 ScreenGui.Parent = CoreGui
 
--- Botón para Ocultar/Mostrar Menú
 local ToggleMenuBtn = Instance.new("TextButton")
 ToggleMenuBtn.Size = UDim2.new(0, 150, 0, 40)
 ToggleMenuBtn.Position = UDim2.new(0, 10, 0, 10)
@@ -36,7 +33,6 @@ local BtnCorner = Instance.new("UICorner")
 BtnCorner.CornerRadius = UDim.new(0, 8)
 BtnCorner.Parent = ToggleMenuBtn
 
--- Marco Principal (MainFrame)
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 450, 0, 350) 
 MainFrame.Position = UDim2.new(0.5, -225, 0.5, -175)
@@ -50,7 +46,6 @@ local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 10)
 UICorner.Parent = MainFrame
 
--- Funcionalidad del botón ocultar
 ToggleMenuBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
 end)
@@ -58,7 +53,7 @@ end)
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.BackgroundTransparency = 1
-Title.Text = "JoseAngel_Blox Piggy Pro V1.4"
+Title.Text = "JoseAngel_Blox Piggy Pro V1.5"
 Title.TextColor3 = Color3.fromRGB(0, 255, 255)
 Title.TextSize = 20
 Title.Font = Enum.Font.GothamBold
@@ -83,7 +78,7 @@ UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIListLayout.Parent = OptionsFrame
 
--- ==================== LÓGICA DE LAS FUNCIONES ====================
+-- ==================== LÓGICA DE FUNCIONES ====================
 local toggles = {
     ESP_Items = false,
     ESP_Players = false,
@@ -99,7 +94,6 @@ local toggles = {
 local ESPFolder = Instance.new("Folder", CoreGui)
 ESPFolder.Name = "JoseAngel_ESP"
 
--- Diccionario de ítems extraído de tu lista (Libro 1 y Libro 2)
 local validItems = {
     "key", "llave", "hammer", "martillo", "wrench", "inglesa", 
     "plank", "tabla", "gear", "engranaje", "gas", "battery", 
@@ -110,7 +104,7 @@ local validItems = {
     "tube", "tubo", "screwdriver", "destornillador", "broom", 
     "escoba", "scissors", "tijeras", "carrot", "zanahoria", 
     "ladder", "escalera", "smoke", "humo", "lens", "lente", 
-    "crowbar", "palanca", "elevator", "ascensor"
+    "crowbar", "palanca", "elevator", "ascensor", "keycard"
 }
 
 local function UpdateESP()
@@ -118,92 +112,100 @@ local function UpdateESP()
         child:Destroy()
     end
 
-    -- ESP Ítems Corregido (Usando diccionario exacto)
     if toggles.ESP_Items then
         for _, clickDetect in pairs(workspace:GetDescendants()) do
-            if clickDetect:IsA("ClickDetector") and clickDetect.Parent then
-                local objName = string.lower(clickDetect.Parent.Name)
-                local isRealItem = false
-                
-                -- Verificar si el nombre coincide con algún ítem de la lista
-                for _, itemName in pairs(validItems) do
-                    if string.find(objName, itemName) then
-                        isRealItem = true
-                        break
+            -- pcall a nivel individual para evitar que un ítem roto crashee el ESP entero
+            pcall(function()
+                if clickDetect:IsA("ClickDetector") and clickDetect.Parent then
+                    local objName = string.lower(clickDetect.Parent.Name)
+                    local isRealItem = false
+                    
+                    for _, itemName in pairs(validItems) do
+                        if string.find(objName, itemName) then
+                            isRealItem = true
+                            break
+                        end
+                    end
+                    
+                    if isRealItem then
+                        local Billboard = Instance.new("BillboardGui", ESPFolder)
+                        Billboard.Adornee = clickDetect.Parent
+                        Billboard.Size = UDim2.new(0, 100, 0, 25)
+                        Billboard.AlwaysOnTop = true
+                        
+                        local Text = Instance.new("TextLabel", Billboard)
+                        Text.Size = UDim2.new(1, 0, 1, 0)
+                        Text.BackgroundTransparency = 1
+                        Text.Text = clickDetect.Parent.Name
+                        Text.TextColor3 = Color3.fromRGB(255, 255, 0)
+                        Text.TextScaled = true
+                        Text.Font = Enum.Font.GothamBold
                     end
                 end
-                
-                if isRealItem then
+            end)
+        end
+    end
+
+    if toggles.ESP_Players then
+        -- Jugadores
+        for _, player in pairs(Players:GetPlayers()) do
+            pcall(function()
+                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                     local Billboard = Instance.new("BillboardGui", ESPFolder)
-                    Billboard.Adornee = clickDetect.Parent
+                    Billboard.Adornee = player.Character:FindFirstChild("Head") or player.Character.PrimaryPart
                     Billboard.Size = UDim2.new(0, 100, 0, 25)
                     Billboard.AlwaysOnTop = true
                     
                     local Text = Instance.new("TextLabel", Billboard)
                     Text.Size = UDim2.new(1, 0, 1, 0)
                     Text.BackgroundTransparency = 1
-                    Text.Text = clickDetect.Parent.Name
-                    Text.TextColor3 = Color3.fromRGB(255, 255, 0) -- Amarillo
+                    Text.Text = player.Name
+                    Text.TextColor3 = Color3.fromRGB(0, 255, 0)
                     Text.TextScaled = true
                     Text.Font = Enum.Font.GothamBold
                 end
-            end
-        end
-    end
-
-    -- ESP Jugadores y Piggy Corregido
-    if toggles.ESP_Players then
-        -- Buscar Jugadores
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                local Billboard = Instance.new("BillboardGui", ESPFolder)
-                Billboard.Adornee = player.Character:FindFirstChild("Head") or player.Character.PrimaryPart
-                Billboard.Size = UDim2.new(0, 100, 0, 25)
-                Billboard.AlwaysOnTop = true
-                
-                local Text = Instance.new("TextLabel", Billboard)
-                Text.Size = UDim2.new(1, 0, 1, 0)
-                Text.BackgroundTransparency = 1
-                Text.Text = player.Name
-                Text.TextColor3 = Color3.fromRGB(0, 255, 0) -- Verde
-                Text.TextScaled = true
-                Text.Font = Enum.Font.GothamBold
-            end
+            end)
         end
         
-        -- Buscar Bots (NPCs)
+        -- Bots
         for _, model in pairs(workspace:GetDescendants()) do
-            if model:IsA("Model") and model:FindFirstChild("Humanoid") and model ~= LocalPlayer.Character then
-                if not Players:GetPlayerFromCharacter(model) then -- Si no es un jugador, es el Bot Asesino
-                    local Billboard = Instance.new("BillboardGui", ESPFolder)
-                    Billboard.Adornee = model:FindFirstChild("Head") or model.PrimaryPart
-                    Billboard.Size = UDim2.new(0, 120, 0, 30)
-                    Billboard.AlwaysOnTop = true
-                    
-                    local Text = Instance.new("TextLabel", Billboard)
-                    Text.Size = UDim2.new(1, 0, 1, 0)
-                    Text.BackgroundTransparency = 1
-                    Text.Text = "🚨 PIGGY BOT 🚨"
-                    Text.TextColor3 = Color3.fromRGB(255, 0, 0) -- Rojo
-                    Text.TextScaled = true
-                    Text.Font = Enum.Font.GothamBlack
+            pcall(function()
+                if model:IsA("Model") and model:FindFirstChild("Humanoid") and model ~= LocalPlayer.Character then
+                    if not Players:GetPlayerFromCharacter(model) then
+                        local Billboard = Instance.new("BillboardGui", ESPFolder)
+                        Billboard.Adornee = model:FindFirstChild("Head") or model.PrimaryPart
+                        Billboard.Size = UDim2.new(0, 120, 0, 30)
+                        Billboard.AlwaysOnTop = true
+                        
+                        local Text = Instance.new("TextLabel", Billboard)
+                        Text.Size = UDim2.new(1, 0, 1, 0)
+                        Text.BackgroundTransparency = 1
+                        Text.Text = "🚨 PIGGY BOT 🚨"
+                        Text.TextColor3 = Color3.fromRGB(255, 0, 0)
+                        Text.TextScaled = true
+                        Text.Font = Enum.Font.GothamBlack
+                    end
                 end
-            end
+            end)
         end
     end
 end
 
--- Funciones Continuas Rápidas (Godmode y más)
 RunService.Stepped:Connect(function()
-    -- Noclip
+    -- Noclip Corregido (Anti-Caídas al agacharse)
     if toggles.Noclip and LocalPlayer.Character then
-        for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-            if part:IsA("BasePart") then part.CanCollide = false end
+        for _, part in pairs(LocalPlayer.Character:GetChildren()) do
+            -- Protegemos el HumanoidRootPart para que el suelo no te trague
+            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then 
+                part.CanCollide = false 
+            end
         end
     end
 
-    -- Godmode Total: Bloquea toques y destruye armas enemigas
-    if toggles.Godmode and LocalPlayer.Character then
+    -- Godmode V2: Aura Repulsora (Empuja a bots y jugadores enemigos)
+    if toggles.Godmode and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local myRoot = LocalPlayer.Character.HumanoidRootPart
+        
         for _, enemy in pairs(workspace:GetDescendants()) do
             if enemy:IsA("Model") and enemy:FindFirstChild("Humanoid") and enemy ~= LocalPlayer.Character then
                 local isPlayer = Players:GetPlayerFromCharacter(enemy)
@@ -211,13 +213,18 @@ RunService.Stepped:Connect(function()
                 local isPiggyPlayer = enemy:FindFirstChild("Bat") or enemy:FindFirstChild("Weapon")
                 
                 if isEnemyBot or isPiggyPlayer then
-                    for _, part in pairs(enemy:GetDescendants()) do
-                        -- Deshabilita CanTouch para que su script de daño no funcione
-                        if part:IsA("BasePart") then
-                            part.CanTouch = false 
+                    local enemyRoot = enemy:FindFirstChild("HumanoidRootPart")
+                    if enemyRoot then
+                        -- Si se acerca a menos de 6 studs, lo teletransporta lejos de ti
+                        local distance = (myRoot.Position - enemyRoot.Position).Magnitude
+                        if distance < 6 then
+                            enemyRoot.CFrame = enemyRoot.CFrame * CFrame.new(0, 0, 15) -- Lo empuja hacia atrás 15 pasos
                         end
-                        -- Destruye cualquier herramienta que tenga
-                        if part:IsA("Tool") or part.Name == "Bat" or part.Name == "Weapon" then
+                    end
+                    
+                    -- Adicionalmente borra sus hitboxes por seguridad
+                    for _, part in pairs(enemy:GetChildren()) do
+                        if part.Name == "Hitbox" or part:IsA("Tool") or part.Name == "Bat" then
                             part:Destroy()
                         end
                     end
@@ -226,7 +233,6 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    -- Auto Matar (Piggy)
     if toggles.PiggyAutoKill and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         for _, v in pairs(Players:GetPlayers()) do
             if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
@@ -257,7 +263,7 @@ end)
 
 task.spawn(function()
     while task.wait(1.5) do
-        pcall(UpdateESP)
+        UpdateESP()
     end
 end)
 
@@ -345,9 +351,10 @@ local function CreateModernToggle(name, flagName)
         TweenService:Create(SwitchBack, TweenInfo.new(0.2), {BackgroundColor3 = goalColor}):Play()
         TweenService:Create(Knob, TweenInfo.new(0.2), {Position = goalPos}):Play()
 
-        pcall(UpdateESP)
-
-        if not state then
+        if state then
+            if flagName == "ESP_Items" or flagName == "ESP_Players" then UpdateESP() end
+        else
+            if flagName == "ESP_Items" or flagName == "ESP_Players" then UpdateESP() end
             if flagName == "Speed" or flagName == "PiggySpeed" then
                 if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
                     LocalPlayer.Character.Humanoid.WalkSpeed = 16
@@ -360,16 +367,16 @@ local function CreateModernToggle(name, flagName)
     end)
 end
 
--- ==================== CONSTRUCCIÓN DEL MENÚ ====================
+-- ==================== MENÚ ====================
 
 CreateHeader("1) Info ↓")
 CreateInfoText("Nombre del Creador: JoseAngel_Blox")
 CreateInfoText("Fecha de actualización: 10/07/2026")
-CreateInfoText("Versión: 1.4")
+CreateInfoText("Versión: 1.5")
 CreateInfoText("") 
 
 CreateHeader("2) Main")
-CreateModernToggle("🛡️ Godmode (Inmortalidad Total)", "Godmode")
+CreateModernToggle("🛡️ Godmode (Aura Repulsora Anti-Touch)", "Godmode")
 CreateModernToggle("👻 Noclip (Atravesar Paredes)", "Noclip")
 CreateModernToggle("🚀 Salto Infinito", "InfJump")
 CreateModernToggle("⚡ Correr Rápido (Superviviente)", "Speed")
