@@ -1,414 +1,309 @@
--- =========================================================
--- SCRIPT: JoseAngel_Blox Piggy Pro V1.6 - MÓDULOS SEPARADOS
--- =========================================================
+--[[
+    🐷 JoseAngel_Blox Piggy PRO
+    ✅ Versión: 1.2 | Fecha: 11/07/2026
+    ✅ Compatible: Delta / PC / Celular
+    ✅ Juego: Piggy (ID: 4623386862)
+]]
 
--- SERVICIOS GENERALES
-local CoreGui = game:GetService("CoreGui")
-local RunService = game:GetService("RunService")
+-- Esperar carga completa
+if not game:IsLoaded() then game.Loaded:Wait() end
+
+-- Servicios necesarios
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
-local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+local Debris = game:GetService("Debris")
+
+-- Variables del jugador
 local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local RootPart = Character:WaitForChild("HumanoidRootPart")
 
--- LIMPIEZA PREVIA
-if CoreGui:FindFirstChild("JoseAngel_BloxPiggyPro") then
-    CoreGui.JoseAngel_BloxPiggyPro:Destroy()
-end
-if CoreGui:FindFirstChild("JoseAngel_ESP") then
-    CoreGui.JoseAngel_ESP:Destroy()
-end
+-- Variables globales de funciones
+_G.ESP_Jugadores = false
+_G.ESP_Items = false
+_G.NoClip = false
+_G.GodMode = false
+_G.SpeedJump = false
+_G.InfiniteStamina = false
+_G.KillAura = false
+_G.PiggySpeedJump = false
+_G.ESP_PiggyRol = false
 
--- VARIABLES PRINCIPALES
-local toggles = {
-    ESP_Items = false,
-    ESP_Players = false,
-    ESP_Bots = false,
-    FullBright = false,
-    Speed = false,
-    Noclip = false,
-    Godmode = false,
-    InfJump = false,
-    PiggyAutoKill = false,
-    PiggySpeed = false
-}
+-- ==================================
+-- 🎨 CREACIÓN DEL MENÚ
+-- ==================================
 
-local ESPFolder = Instance.new("Folder", CoreGui)
-ESPFolder.Name = "JoseAngel_ESP"
-
--- =========================================================
--- 📦 MÓDULO 1: ESP ÍTEMS
--- =========================================================
-local function UpdateESP_Items()
-    -- Borrar solo etiquetas de ítems
-    for _, child in ipairs(ESPFolder:GetChildren()) do
-        if child.Name == "ESP_Item" then
-            child:Destroy()
-        end
-    end
-
-    if not toggles.ESP_Items then return end
-
-    pcall(function()
-        for _, obj in ipairs(workspace:GetDescendants()) do
-            if obj:IsA("ClickDetector") or (obj:IsA("BasePart") and not obj.Parent:FindFirstChild("Humanoid")) then
-                local target = obj:IsA("ClickDetector") and obj.Parent or obj
-                local nombre = target.Name
-
-                if not tonumber(nombre) and #nombre > 2 and not target:FindFirstChild("Humanoid") then
-                    local gui = Instance.new("BillboardGui")
-                    gui.Name = "ESP_Item"
-                    gui.Adornee = target:IsA("Model") and target:FindFirstChild("PrimaryPart") or target
-                    gui.Size = UDim2.new(0, 120, 0, 30)
-                    gui.AlwaysOnTop = true
-                    gui.Parent = ESPFolder
-
-                    local txt = Instance.new("TextLabel")
-                    txt.Size = UDim2.new(1, 0, 1, 0)
-                    txt.BackgroundTransparency = 1
-                    txt.Text = "📦 " .. nombre
-                    txt.TextColor3 = Color3.new(1, 1, 0)
-                    txt.Font = Enum.Font.GothamBold
-                    txt.TextScaled = true
-                    txt.Parent = gui
-                end
-            end
-        end
-    end)
-end
-
--- =========================================================
--- 👥 MÓDULO 2: ESP JUGADORES
--- =========================================================
-local function UpdateESP_Players()
-    -- Borrar solo etiquetas de jugadores
-    for _, child in ipairs(ESPFolder:GetChildren()) do
-        if child.Name == "ESP_Player" then
-            child:Destroy()
-        end
-    end
-
-    if not toggles.ESP_Players then return end
-
-    pcall(function()
-        for _, jugador in ipairs(Players:GetPlayers()) do
-            if jugador ~= LocalPlayer then
-                local char = jugador.Character or jugador.CharacterAdded:Wait()
-                local cabeza = char:FindFirstChild("Head") or char:FindFirstChild("HumanoidRootPart")
-                if cabeza then
-                    local gui = Instance.new("BillboardGui")
-                    gui.Name = "ESP_Player"
-                    gui.Adornee = cabeza
-                    gui.Size = UDim2.new(0, 130, 0, 35)
-                    gui.AlwaysOnTop = true
-                    gui.Parent = ESPFolder
-
-                    local txt = Instance.new("TextLabel")
-                    txt.Size = UDim2.new(1, 0, 1, 0)
-                    txt.BackgroundTransparency = 1
-                    txt.Text = "👤 " .. jugador.Name
-                    txt.TextColor3 = Color3.new(0, 1, 0)
-                    txt.Font = Enum.Font.GothamBold
-                    txt.TextScaled = true
-                    txt.Parent = gui
-                end
-            end
-        end
-    end)
-end
-
--- =========================================================
--- 🐷 MÓDULO 3: ESP BOTS / PIGGY
--- =========================================================
-local function UpdateESP_Bots()
-    -- Borrar solo etiquetas de bots
-    for _, child in ipairs(ESPFolder:GetChildren()) do
-        if child.Name == "ESP_Bot" then
-            child:Destroy()
-        end
-    end
-
-    if not toggles.ESP_Bots then return end
-
-    pcall(function()
-        for _, modelo in ipairs(workspace:GetChildren()) do
-            if modelo:IsA("Model") and modelo ~= LocalPlayer.Character then
-                local hum = modelo:FindFirstChild("Humanoid")
-                if hum and not Players:GetPlayerFromCharacter(modelo) then
-                    local cabeza = modelo:FindFirstChild("Head") or modelo:FindFirstChild("HumanoidRootPart")
-                    if cabeza then
-                        local gui = Instance.new("BillboardGui")
-                        gui.Name = "ESP_Bot"
-                        gui.Adornee = cabeza
-                        gui.Size = UDim2.new(0, 140, 0, 40)
-                        gui.AlwaysOnTop = true
-                        gui.Parent = ESPFolder
-
-                        local txt = Instance.new("TextLabel")
-                        txt.Size = UDim2.new(1, 0, 1, 0)
-                        txt.BackgroundTransparency = 1
-                        txt.Text = "🚨 PIGGY 🚨"
-                        txt.TextColor3 = Color3.new(1, 0, 0)
-                        txt.Font = Enum.Font.GothamBlack
-                        txt.TextScaled = true
-                        txt.Parent = gui
-                    end
-                end
-            end
-        end
-    end)
-end
-
--- =========================================================
--- 👻 MÓDULO 4: NOCLIP
--- =========================================================
-local function UpdateNoclip()
-    local char = LocalPlayer.Character
-    if not char then return end
-
-    pcall(function()
-        for _, parte in ipairs(char:GetDescendants()) do
-            if parte:IsA("BasePart") then
-                parte.CanCollide = not toggles.Noclip
-            end
-        end
-    end)
-end
-
--- =========================================================
--- 🛡️ MÓDULO 5: GODMODE
--- =========================================================
-local function UpdateGodmode()
-    local char = LocalPlayer.Character
-    if not char then return end
-    local hum = char:FindFirstChild("Humanoid")
-    if not hum then return end
-
-    pcall(function()
-        if toggles.Godmode then
-            hum.MaxHealth = math.huge
-            hum.Health = math.huge
-            hum.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
-        else
-            hum.MaxHealth = 100
-            hum.Health = 100
-            hum.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOn
-        end
-    end)
-end
-
--- =========================================================
--- ⚙️ OTROS MÓDULOS ADICIONALES
--- =========================================================
-local function UpdateVelocidad()
-    local char = LocalPlayer.Character
-    if not char then return end
-    local hum = char:FindFirstChild("Humanoid")
-    if not hum then return end
-
-    if toggles.PiggySpeed then
-        hum.WalkSpeed = 35
-    elseif toggles.Speed then
-        hum.WalkSpeed = 25
-    else
-        hum.WalkSpeed = 16
-    end
-end
-
-local function UpdateFullBright()
-    if toggles.FullBright then
-        Lighting.Ambient = Color3.new(1,1,1)
-        Lighting.GlobalShadows = false
-        Lighting.Brightness = 2
-    else
-        Lighting.Ambient = Color3.new(0.25,0.25,0.25)
-        Lighting.GlobalShadows = true
-        Lighting.Brightness = 1
-    end
-end
-
--- =========================================================
--- 🔄 BUCLES DE ACTUALIZACIÓN
--- =========================================================
--- Actualizar ESP cada 1 segundo
-task.spawn(function()
-    while task.wait(1) do
-        UpdateESP_Items()
-        UpdateESP_Players()
-        UpdateESP_Bots()
-    end
-end)
-
--- Actualizar Noclip y Godmode cada cuadro
-RunService.Stepped:Connect(function()
-    UpdateNoclip()
-    UpdateGodmode()
-end)
-
--- Actualizar velocidad y luz
-RunService.RenderStepped:Connect(function()
-    UpdateVelocidad()
-    UpdateFullBright()
-end)
-
--- Salto infinito
-UserInputService.JumpRequest:Connect(function()
-    if toggles.InfJump then
-        local char = LocalPlayer.Character
-        local hum = char and char:FindFirstChild("Humanoid")
-        if hum and hum:GetState() ~= Enum.HumanoidStateType.Freefall then
-            hum:ChangeState(Enum.HumanoidStateType.Jumping)
-        end
-    end
-end)
-
--- Auto matar
-RunService.RenderStepped:Connect(function()
-    if toggles.PiggyAutoKill then
-        local char = LocalPlayer.Character
-        if not char then return end
-        local hum = char:FindFirstChild("Humanoid")
-        if not hum then return end
-        for _, jugador in ipairs(Players:GetPlayers()) do
-            if jugador ~= LocalPlayer and jugador.Character and jugador.Character:FindFirstChild("HumanoidRootPart") then
-                char:SetPrimaryPartCFrame(jugador.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,3))
-            end
-        end
-    end
-end)
-
--- =========================================================
--- 🎨 INTERFAZ DEL MENÚ
--- =========================================================
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "JoseAngel_BloxPiggyPro"
+ScreenGui.Name = "JoseAngel_Blox_Piggy_PRO"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = CoreGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
-local ToggleMenuBtn = Instance.new("TextButton")
-ToggleMenuBtn.Size = UDim2.new(0, 150, 0, 40)
-ToggleMenuBtn.Position = UDim2.new(0, 10, 0, 10)
-ToggleMenuBtn.BackgroundColor3 = Color3.fromRGB(15,15,15)
-ToggleMenuBtn.Text = "👁️ Abrir/Cerrar Menú"
-ToggleMenuBtn.TextColor3 = Color3.new(0,1,1)
-ToggleMenuBtn.Font = Enum.Font.GothamBold
-ToggleMenuBtn.TextSize = 12
-ToggleMenuBtn.Parent = ScreenGui
-Instance.new("UICorner", ToggleMenuBtn).CornerRadius = UDim.new(0,8)
-
+-- Marco principal: cuadrado, esquinas redondeadas, borde rojo
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0,450,0,380)
-MainFrame.Position = UDim2.new(0.5,-225,0.5,-190)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20,20,20)
-MainFrame.BorderSizePixel = 0
+MainFrame.Size = UDim2.new(0, 260, 0, 320)
+MainFrame.Position = UDim2.new(0.03, 0, 0.15, 0)
+MainFrame.BackgroundColor3 = Color3.new(0.12, 0.12, 0.15)
+MainFrame.BorderSizePixel = 2
+MainFrame.BorderColor3 = Color3.new(0.9, 0, 0) -- Rojo
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0,10)
 
-ToggleMenuBtn.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
-end)
+-- Esquinas redondeadas
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 12)
+UICorner.Parent = MainFrame
 
-local Title = Instance.new("TextLabel", MainFrame)
-Title.Size = UDim2.new(1,0,0,40)
-Title.BackgroundTransparency = 1
-Title.Text = "JoseAngel_Blox Piggy Pro V1.6"
-Title.TextColor3 = Color3.new(0,1,1)
-Title.TextSize = 20
-Title.Font = Enum.Font.GothamBold
+-- Título principal
+local Titulo = Instance.new("TextLabel")
+Titulo.Size = UDim2.new(1, 0, 0, 45)
+Titulo.BackgroundColor3 = Color3.new(0.18, 0, 0)
+Titulo.Text = "🐷 JoseAngel_Blox Piggy PRO"
+Titulo.Font = Enum.Font.GothamBold
+Titulo.TextSize = 16
+Titulo.TextColor3 = Color3.new(1, 1, 1)
+Titulo.Parent = MainFrame
 
-local Separator = Instance.new("Frame", MainFrame)
-Separator.Size = UDim2.new(0.9,0,0,2)
-Separator.Position = UDim2.new(0.05,0,0,40)
-Separator.BackgroundColor3 = Color3.new(0,1,1)
+local UICornerTitulo = Instance.new("UICorner")
+UICornerTitulo.CornerRadius = UDim.new(0, 10)
+UICornerTitulo.Parent = Titulo
 
-local OptionsFrame = Instance.new("ScrollingFrame", MainFrame)
-OptionsFrame.Size = UDim2.new(1,0,1,-50)
-OptionsFrame.Position = UDim2.new(0,0,0,50)
-OptionsFrame.BackgroundTransparency = 1
-OptionsFrame.ScrollBarThickness = 4
+-- Función para crear secciones desplegables
+local function CrearSeccion(nombre, posY)
+    local SeccionBtn = Instance.new("TextButton")
+    SeccionBtn.Size = UDim2.new(0.9, 0, 0, 30)
+    SeccionBtn.Position = UDim2.new(0.05, 0, posY, 0)
+    SeccionBtn.BackgroundColor3 = Color3.new(0.2, 0.2, 0.25)
+    SeccionBtn.Text = nombre .. " ↓"
+    SeccionBtn.Font = Enum.Font.GothamSemibold
+    SeccionBtn.TextSize = 14
+    SeccionBtn.TextColor3 = Color3.new(1, 1, 1)
+    SeccionBtn.Parent = MainFrame
 
-local UIListLayout = Instance.new("UIListLayout", OptionsFrame)
-UIListLayout.Padding = UDim.new(0,5)
-UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    local UICornerSec = Instance.new("UICorner")
+    UICornerSec.CornerRadius = UDim.new(0, 8)
+    UICornerSec.Parent = SeccionBtn
 
--- =========================================================
--- 🛠️ FUNCIÓN PARA CREAR BOTONES
--- =========================================================
-local layoutOrder = 0
-local function CreateToggle(nombre, clave)
-    layoutOrder += 1
-    local Frame = Instance.new("Frame", OptionsFrame)
-    Frame.Size = UDim2.new(0.9,0,0,35)
-    Frame.BackgroundTransparency = 1
-    Frame.LayoutOrder = layoutOrder
+    local Contenido = Instance.new("Frame")
+    Contenido.Size = UDim2.new(0.9, 0, 0, 0)
+    Contenido.Position = UDim2.new(0.05, 0, posY + 0.07, 0)
+    Contenido.BackgroundTransparency = 1
+    Contenido.Visible = false
+    Contenido.Parent = MainFrame
 
-    local Label = Instance.new("TextLabel", Frame)
-    Label.Size = UDim2.new(0.7,0,1,0)
-    Label.Position = UDim2.new(0.02,0,0,0)
-    Label.BackgroundTransparency = 1
-    Label.Text = nombre
-    Label.TextColor3 = Color3.new(1,1,1)
-    Label.Font = Enum.Font.Gotham
-    Label.TextXAlignment = Enum.TextXAlignment.Left
+    local Abierto = false
+    SeccionBtn.MouseButton1Click:Connect(function()
+        Abierto = not Abierto
+        SeccionBtn.Text = nombre .. (Abierto and " ↑" or " ↓")
+        Contenido.Visible = Abierto
+        TweenService:Create(Contenido, TweenInfo.new(0.25), {Size = Abierto and UDim2.new(0.9, 0, 0, 150) or UDim2.new(0.9, 0, 0, 0)}):Play()
+    end)
 
-    local Switch = Instance.new("Frame", Frame)
-    Switch.Size = UDim2.new(0,40,0,20)
-    Switch.Position = UDim2.new(0.85,-10,0.5,-10)
-    Switch.BackgroundColor3 = Color3.new(1,0.2,0.2)
-    Instance.new("UICorner", Switch).CornerRadius = UDim.new(1,0)
+    return Contenido
+end
 
-    local Knob = Instance.new("Frame", Switch)
-    Knob.Size = UDim2.new(0,16,0,16)
-    Knob.Position = UDim2.new(0,2,0.5,-8)
-    Knob.BackgroundColor3 = Color3.new(1,1,1)
-    Instance.new("UICorner", Knob).CornerRadius = UDim.new(1,0)
+-- Función para crear interruptores
+local function CrearInterruptor(contenedor, texto, posY, variableGlobal)
+    local Btn = Instance.new("TextButton")
+    Btn.Size = UDim2.new(1, 0, 0, 28)
+    Btn.Position = UDim2.new(0, 0, posY, 0)
+    Btn.BackgroundColor3 = Color3.new(0.25, 0.25, 0.3)
+    Btn.Text = texto .. ": OFF"
+    Btn.Font = Enum.Font.Gotham
+    Btn.TextSize = 13
+    Btn.TextColor3 = Color3.new(1, 1, 1)
+    Btn.Parent = contenedor
 
-    local Btn = Instance.new("TextButton", Switch)
-    Btn.Size = UDim2.new(1,0,1,0)
-    Btn.BackgroundTransparency = 1
-    Btn.Text = ""
+    local UICornerBtn = Instance.new("UICorner")
+    UICornerBtn.CornerRadius = UDim.new(0, 6)
+    UICornerBtn.Parent = Btn
 
     Btn.MouseButton1Click:Connect(function()
-        toggles[clave] = not toggles[clave]
-        local estado = toggles[clave]
-        TweenService:Create(Switch, TweenInfo.new(0.2), {BackgroundColor3 = estado and Color3.new(0.2,1,0.2) or Color3.new(1,0.2,0.2)}):Play()
-        TweenService:Create(Knob, TweenInfo.new(0.2), {Position = estado and UDim2.new(1,-18,0.5,-8) or UDim2.new(0,2,0.5,-8)}):Play()
+        _G[variableGlobal] = not _G[variableGlobal]
+        Btn.Text = texto .. ": " .. (_G[variableGlobal] and "ON" or "OFF")
+        Btn.BackgroundColor3 = _G[variableGlobal] and Color3.new(0.15, 0.5, 0.25) or Color3.new(0.5, 0.15, 0.2)
     end)
 end
 
--- =========================================================
--- 📋 ARMAR OPCIONES DEL MENÚ
--- =========================================================
-local function AddHeader(texto)
-    layoutOrder += 1
-    local lbl = Instance.new("TextLabel", OptionsFrame)
-    lbl.Size = UDim2.new(1,0,0,25)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = texto
-    lbl.TextColor3 = Color3.new(0,1,1)
-    lbl.Font = Enum.Font.GothamBlack
-    lbl.LayoutOrder = layoutOrder
+-- ==================================
+-- 📋 ARMAR LAS SECCIONES
+-- ==================================
+
+-- 1) INFO
+local ContenidoInfo = CrearSeccion("Info", 0.18)
+local TextoInfo = Instance.new("TextLabel")
+TextoInfo.Size = UDim2.new(1, 0, 1, 0)
+TextoInfo.BackgroundTransparency = 1
+TextoInfo.Text = [[
+Creador: JoseAngel_Blox
+Fecha: 11/07/2026
+Versión: 1.2
+]]
+TextoInfo.Font = Enum.Font.Gotham
+TextoInfo.TextSize = 12
+TextoInfo.TextColor3 = Color3.new(0.9, 0.9, 0.9)
+TextoInfo.TextWrapped = true
+TextoInfo.Parent = ContenidoInfo
+
+-- 2) MAIN
+local ContenidoMain = CrearSeccion("Main", 0.38)
+CrearInterruptor(ContenidoMain, "ESP (Todos)", 0.02, "ESP_Jugadores")
+CrearInterruptor(ContenidoMain, "ESP Objetos", 0.18, "ESP_Items")
+CrearInterruptor(ContenidoMain, "NoClip", 0.34, "NoClip")
+CrearInterruptor(ContenidoMain, "Modo Dios", 0.50, "GodMode")
+CrearInterruptor(ContenidoMain, "Velocidad + Salto", 0.66, "SpeedJump")
+CrearInterruptor(ContenidoMain, "Resistencia Infinita", 0.82, "InfiniteStamina")
+
+-- 3) ROL PIGGY
+local ContenidoPiggy = CrearSeccion("Rol Piggy", 0.62)
+CrearInterruptor(ContenidoPiggy, "Aura para Matar", 0.02, "KillAura")
+CrearInterruptor(ContenidoPiggy, "Velocidad + Salto", 0.22, "PiggySpeedJump")
+CrearInterruptor(ContenidoPiggy, "ESP Jugadores", 0.42, "ESP_PiggyRol")
+
+-- ==================================
+-- ⚙️ FUNCIONES DEL SCRIPT
+-- ==================================
+
+-- Modo Dios
+RunService.Heartbeat:Connect(function()
+    if _G.GodMode and Humanoid and Humanoid.Health > 0 then
+        Humanoid.MaxHealth = math.huge
+        Humanoid.Health = Humanoid.MaxHealth
+        Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+    elseif Humanoid then
+        Humanoid.MaxHealth = 100
+        Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+    end
+end)
+
+-- NoClip
+RunService.RenderStepped:Connect(function()
+    if not Humanoid or Humanoid.Health <= 0 then return end
+    Character = LocalPlayer.Character or Character
+    RootPart = Character:FindFirstChild("HumanoidRootPart")
+    if not RootPart then return end
+
+    if _G.NoClip then
+        Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+        RootPart.CanCollide = false
+    else
+        RootPart.CanCollide = true
+    end
+end)
+
+-- Velocidad y Salto
+RunService.Heartbeat:Connect(function()
+    if not Humanoid or Humanoid.Health <= 0 then return end
+    if _G.SpeedJump then
+        Humanoid.WalkSpeed = 65
+        Humanoid.JumpPower = 60
+    elseif _G.PiggySpeedJump then
+        Humanoid.WalkSpeed = 90
+        Humanoid.JumpPower = 75
+    else
+        Humanoid.WalkSpeed = 16
+        Humanoid.JumpPower = 50
+    end
+end)
+
+-- Resistencia Infinita
+RunService.Heartbeat:Connect(function()
+    if _G.InfiniteStamina and Humanoid and Humanoid.Health > 0 then
+        Humanoid:SetAttribute("Stamina", 100)
+    end
+end)
+
+-- Función para crear ESP
+local function CrearESP(objetivo, color)
+    if objetivo:FindFirstChild("ESP_JABP") then return end
+    local parte = objetivo:FindFirstChild("HumanoidRootPart") or objetivo:FindFirstChild("PrimaryPart")
+    if not parte then return end
+
+    local esp = Instance.new("BillboardGui")
+    esp.Name = "ESP_JABP"
+    esp.AlwaysOnTop = true
+    esp.Size = UDim2.new(0, 120, 0, 30)
+    esp.Adornee = parte
+    esp.Parent = objetivo
+
+    local texto = Instance.new("TextLabel")
+    texto.Size = UDim2.new(1, 0, 1, 0)
+    texto.BackgroundTransparency = 1
+    texto.TextColor3 = color
+    texto.Font = Enum.Font.GothamBold
+    texto.TextSize = 14
+    texto.Text = objetivo.Name
+    texto.Parent = esp
+
+    Debris:AddItem(esp, 0.1)
 end
 
-AddHeader("📦 ESP")
-CreateToggle("ESP Ítems", "ESP_Items")
-CreateToggle("ESP Jugadores", "ESP_Players")
-CreateToggle("ESP Piggy/Bots", "ESP_Bots")
+-- Actualizar ESP
+RunService.Heartbeat:Connect(function()
+    -- ESP Jugadores / Bots / Piggy
+    if _G.ESP_Jugadores then
+        for _, entidad in ipairs(Workspace:GetChildren()) do
+            if entidad:IsA("Model") and entidad:FindFirstChild("Humanoid") and entidad ~= Character then
+                if entidad.Name:find("Piggy") then
+                    CrearESP(entidad, Color3.new(1, 0, 0)) -- Rojo
+                else
+                    CrearESP(entidad, Color3.new(0, 0.7, 1)) -- Azul
+                end
+            end
+        end
+    end
 
-AddHeader("👻 MOVIMIENTO")
-CreateToggle("Noclip", "Noclip")
-CreateToggle("Salto Infinito", "InfJump")
-CreateToggle("Velocidad Superviviente", "Speed")
-CreateToggle("Velocidad Piggy", "PiggySpeed")
+    -- ESP Objetos
+    if _G.ESP_Items then
+        for _, objeto in ipairs(Workspace:GetDescendants()) do
+            if objeto:IsA("Model") and (
+                objeto.Name:find("Key") or objeto.Name:find("Hammer") or
+                objeto.Name:find("Plank") or objeto.Name:find("Gear") or
+                objeto.Name:find("Item")
+            ) then
+                CrearESP(objeto, Color3.new(0, 1, 0)) -- Verde
+            end
+        end
+    end
 
-AddHeader("🛡️ PROTECCIÓN")
-CreateToggle("Godmode", "Godmode")
-CreateToggle("Visión Completa", "FullBright")
+    -- ESP para Rol Piggy
+    if _G.ESP_PiggyRol then
+        for _, jugador in ipairs(Players:GetPlayers()) do
+            if jugador ~= LocalPlayer and jugador.Character and jugador.Character:FindFirstChild("HumanoidRootPart") then
+                CrearESP(jugador.Character, Color3.new(1, 0.8, 0)) -- Amarillo
+            end
+        end
+    end
+end)
 
-AddHeader("🔪 ACCIONES")
-CreateToggle("Auto Matar", "PiggyAutoKill")
+-- Aura para matar (Rol Piggy)
+RunService.Heartbeat:Connect(function()
+    if not _G.KillAura or not RootPart or Humanoid.Health <= 0 then return end
+    local distanciaMax = 12
+    for _, objetivo in ipairs(Workspace:GetChildren()) do
+        if objetivo:IsA("Model") and objetivo:FindFirstChild("Humanoid") and objetivo ~= Character then
+            local distancia = (RootPart.Position - objetivo.HumanoidRootPart.Position).Magnitude
+            if distancia <= distanciaMax and objetivo.Humanoid.Health > 0 then
+                objetivo.Humanoid.Health = 0
+            end
+        end
+    end
+end)
 
-print("✅ Script cargado | Módulos separados correctamente")
+-- Notificación de inicio
+StarterGui:SetCore("SendNotification", {
+    Title = "✅ Script Cargado",
+    Text = "JoseAngel_Blox Piggy PRO v1.2",
+    Duration = 3
+})
+
+--[[
+📌 CÓDIGO PARA CARGAR DESDE GITHUB:
+Reemplaza con tus datos:
+loadstring(game:HttpGet("https://raw.githubusercontent.com/TU_USUARIO/TU_REPOSITORIO/main/JoseAngel_Blox_Piggy_PRO.lua"))()
+]]
