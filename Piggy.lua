@@ -1,6 +1,6 @@
 -- =========================================================
--- SCRIPT: JoseAngel_Blox Piggy Pro V1.3
--- CREADO PARA: Piggy 
+-- SCRIPT: JoseAngel_Blox Piggy Pro V1.4
+-- CREADO PARA: Piggy (Fix Ítems, Godmode y Menú Ocultable)
 -- FECHA DE ACTUALIZACIÓN: 10/07/2026
 -- =========================================================
 
@@ -21,6 +21,22 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "JoseAngel_BloxPiggyPro"
 ScreenGui.Parent = CoreGui
 
+-- Botón para Ocultar/Mostrar Menú
+local ToggleMenuBtn = Instance.new("TextButton")
+ToggleMenuBtn.Size = UDim2.new(0, 150, 0, 40)
+ToggleMenuBtn.Position = UDim2.new(0, 10, 0, 10)
+ToggleMenuBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+ToggleMenuBtn.Text = "👁️ Abrir / Cerrar Menú"
+ToggleMenuBtn.TextColor3 = Color3.fromRGB(0, 255, 255)
+ToggleMenuBtn.Font = Enum.Font.GothamBold
+ToggleMenuBtn.TextSize = 12
+ToggleMenuBtn.Parent = ScreenGui
+
+local BtnCorner = Instance.new("UICorner")
+BtnCorner.CornerRadius = UDim.new(0, 8)
+BtnCorner.Parent = ToggleMenuBtn
+
+-- Marco Principal (MainFrame)
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 450, 0, 350) 
 MainFrame.Position = UDim2.new(0.5, -225, 0.5, -175)
@@ -34,10 +50,15 @@ local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 10)
 UICorner.Parent = MainFrame
 
+-- Funcionalidad del botón ocultar
+ToggleMenuBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.BackgroundTransparency = 1
-Title.Text = "JoseAngel_Blox Piggy Pro"
+Title.Text = "JoseAngel_Blox Piggy Pro V1.4"
 Title.TextColor3 = Color3.fromRGB(0, 255, 255)
 Title.TextSize = 20
 Title.Font = Enum.Font.GothamBold
@@ -78,37 +99,51 @@ local toggles = {
 local ESPFolder = Instance.new("Folder", CoreGui)
 ESPFolder.Name = "JoseAngel_ESP"
 
--- Detección de Piggy (Bot o Jugador)
-local function IsModelPiggy(model)
-    if model:IsA("Model") and model:FindFirstChild("HumanoidRootPart") then
-        if not Players:GetPlayerFromCharacter(model) then return true end
-        if model:FindFirstChild("Bat") or model:FindFirstChild("Weapon") then return true end
-    end
-    return false
-end
+-- Diccionario de ítems extraído de tu lista (Libro 1 y Libro 2)
+local validItems = {
+    "key", "llave", "hammer", "martillo", "wrench", "inglesa", 
+    "plank", "tabla", "gear", "engranaje", "gas", "battery", 
+    "bateria", "egg", "huevo", "torch", "antorcha", "wood", 
+    "leña", "book", "libro", "syringe", "jeringa", "crossbow", 
+    "ballesta", "ammo", "municion", "chain", "cadena", "hook", 
+    "gancho", "grass", "pasto", "shovel", "pala", "code", "codigo", 
+    "tube", "tubo", "screwdriver", "destornillador", "broom", 
+    "escoba", "scissors", "tijeras", "carrot", "zanahoria", 
+    "ladder", "escalera", "smoke", "humo", "lens", "lente", 
+    "crowbar", "palanca", "elevator", "ascensor"
+}
 
 local function UpdateESP()
     for _, child in pairs(ESPFolder:GetChildren()) do
         child:Destroy()
     end
 
-    -- ESP Ítems Corregido (Sin números raros)
+    -- ESP Ítems Corregido (Usando diccionario exacto)
     if toggles.ESP_Items then
-        for _, item in pairs(workspace:GetDescendants()) do
-            if item:IsA("ClickDetector") and item.Parent then
-                local obj = item.Parent
-                -- Filtro estricto: Debe ser texto, no un número, y mayor a 2 letras
-                if typeof(obj.Name) == "string" and not tonumber(obj.Name) and string.len(obj.Name) > 2 then
+        for _, clickDetect in pairs(workspace:GetDescendants()) do
+            if clickDetect:IsA("ClickDetector") and clickDetect.Parent then
+                local objName = string.lower(clickDetect.Parent.Name)
+                local isRealItem = false
+                
+                -- Verificar si el nombre coincide con algún ítem de la lista
+                for _, itemName in pairs(validItems) do
+                    if string.find(objName, itemName) then
+                        isRealItem = true
+                        break
+                    end
+                end
+                
+                if isRealItem then
                     local Billboard = Instance.new("BillboardGui", ESPFolder)
-                    Billboard.Adornee = obj
+                    Billboard.Adornee = clickDetect.Parent
                     Billboard.Size = UDim2.new(0, 100, 0, 25)
                     Billboard.AlwaysOnTop = true
                     
                     local Text = Instance.new("TextLabel", Billboard)
                     Text.Size = UDim2.new(1, 0, 1, 0)
                     Text.BackgroundTransparency = 1
-                    Text.Text = obj.Name
-                    Text.TextColor3 = Color3.fromRGB(255, 255, 0)
+                    Text.Text = clickDetect.Parent.Name
+                    Text.TextColor3 = Color3.fromRGB(255, 255, 0) -- Amarillo
                     Text.TextScaled = true
                     Text.Font = Enum.Font.GothamBold
                 end
@@ -118,36 +153,47 @@ local function UpdateESP()
 
     -- ESP Jugadores y Piggy Corregido
     if toggles.ESP_Players then
-        -- Jugadores y Bots mezclados
-        for _, model in pairs(workspace:GetChildren()) do
-            if model:IsA("Model") and model:FindFirstChild("HumanoidRootPart") and model ~= LocalPlayer.Character then
-                local isPlayer = Players:GetPlayerFromCharacter(model)
-                local isPiggy = IsModelPiggy(model)
-                
+        -- Buscar Jugadores
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                 local Billboard = Instance.new("BillboardGui", ESPFolder)
-                Billboard.Adornee = model:FindFirstChild("HumanoidRootPart")
+                Billboard.Adornee = player.Character:FindFirstChild("Head") or player.Character.PrimaryPart
                 Billboard.Size = UDim2.new(0, 100, 0, 25)
                 Billboard.AlwaysOnTop = true
                 
                 local Text = Instance.new("TextLabel", Billboard)
                 Text.Size = UDim2.new(1, 0, 1, 0)
                 Text.BackgroundTransparency = 1
+                Text.Text = player.Name
+                Text.TextColor3 = Color3.fromRGB(0, 255, 0) -- Verde
                 Text.TextScaled = true
                 Text.Font = Enum.Font.GothamBold
-                
-                if isPiggy then
-                    Text.Text = isPlayer and "🚨 PIGGY ("..isPlayer.Name..")" or "🚨 PIGGY BOT 🚨"
-                    Text.TextColor3 = Color3.fromRGB(255, 0, 0)
-                elseif isPlayer then
-                    Text.Text = isPlayer.Name
-                    Text.TextColor3 = Color3.fromRGB(0, 255, 0)
+            end
+        end
+        
+        -- Buscar Bots (NPCs)
+        for _, model in pairs(workspace:GetDescendants()) do
+            if model:IsA("Model") and model:FindFirstChild("Humanoid") and model ~= LocalPlayer.Character then
+                if not Players:GetPlayerFromCharacter(model) then -- Si no es un jugador, es el Bot Asesino
+                    local Billboard = Instance.new("BillboardGui", ESPFolder)
+                    Billboard.Adornee = model:FindFirstChild("Head") or model.PrimaryPart
+                    Billboard.Size = UDim2.new(0, 120, 0, 30)
+                    Billboard.AlwaysOnTop = true
+                    
+                    local Text = Instance.new("TextLabel", Billboard)
+                    Text.Size = UDim2.new(1, 0, 1, 0)
+                    Text.BackgroundTransparency = 1
+                    Text.Text = "🚨 PIGGY BOT 🚨"
+                    Text.TextColor3 = Color3.fromRGB(255, 0, 0) -- Rojo
+                    Text.TextScaled = true
+                    Text.Font = Enum.Font.GothamBlack
                 end
             end
         end
     end
 end
 
--- Funciones Continuas
+-- Funciones Continuas Rápidas (Godmode y más)
 RunService.Stepped:Connect(function()
     -- Noclip
     if toggles.Noclip and LocalPlayer.Character then
@@ -156,14 +202,24 @@ RunService.Stepped:Connect(function()
         end
     end
 
-    -- Godmode Corregido (Elimina TODO el daño de Piggy y Bots)
-    if toggles.Godmode then
-        for _, model in pairs(workspace:GetChildren()) do
-            if model:IsA("Model") and model:FindFirstChild("Humanoid") and model ~= LocalPlayer.Character then
-                -- Busca transmisores de toque (lo que te mata al tocarlo) y los destruye
-                for _, part in pairs(model:GetDescendants()) do
-                    if part:IsA("TouchTransmitter") then
-                        part:Destroy()
+    -- Godmode Total: Bloquea toques y destruye armas enemigas
+    if toggles.Godmode and LocalPlayer.Character then
+        for _, enemy in pairs(workspace:GetDescendants()) do
+            if enemy:IsA("Model") and enemy:FindFirstChild("Humanoid") and enemy ~= LocalPlayer.Character then
+                local isPlayer = Players:GetPlayerFromCharacter(enemy)
+                local isEnemyBot = not isPlayer
+                local isPiggyPlayer = enemy:FindFirstChild("Bat") or enemy:FindFirstChild("Weapon")
+                
+                if isEnemyBot or isPiggyPlayer then
+                    for _, part in pairs(enemy:GetDescendants()) do
+                        -- Deshabilita CanTouch para que su script de daño no funcione
+                        if part:IsA("BasePart") then
+                            part.CanTouch = false 
+                        end
+                        -- Destruye cualquier herramienta que tenga
+                        if part:IsA("Tool") or part.Name == "Bat" or part.Name == "Weapon" then
+                            part:Destroy()
+                        end
                     end
                 end
             end
@@ -205,7 +261,7 @@ task.spawn(function()
     end
 end)
 
--- ==================== CREADOR DE INTERFAZ (UI COMPONENTS) ====================
+-- ==================== CREADOR DE INTERFAZ ====================
 local layoutOrderCounter = 0
 
 local function CreateHeader(text)
@@ -234,7 +290,6 @@ local function CreateInfoText(text)
     Label.Parent = OptionsFrame
 end
 
--- Creación del Interruptor (Toggle Switch) Moderno
 local function CreateModernToggle(name, flagName)
     layoutOrderCounter = layoutOrderCounter + 1
     local ToggleFrame = Instance.new("Frame")
@@ -254,18 +309,16 @@ local function CreateModernToggle(name, flagName)
     Label.TextXAlignment = Enum.TextXAlignment.Left
     Label.Parent = ToggleFrame
 
-    -- Fondo del interruptor
     local SwitchBack = Instance.new("Frame")
     SwitchBack.Size = UDim2.new(0, 40, 0, 20)
     SwitchBack.Position = UDim2.new(0.85, -10, 0.5, -10)
-    SwitchBack.BackgroundColor3 = Color3.fromRGB(255, 50, 50) -- Empieza en rojo
+    SwitchBack.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
     SwitchBack.Parent = ToggleFrame
 
     local SwitchCorner = Instance.new("UICorner")
     SwitchCorner.CornerRadius = UDim.new(1, 0)
     SwitchCorner.Parent = SwitchBack
 
-    -- Círculo deslizable
     local Knob = Instance.new("Frame")
     Knob.Size = UDim2.new(0, 16, 0, 16)
     Knob.Position = UDim2.new(0, 2, 0.5, -8)
@@ -286,17 +339,15 @@ local function CreateModernToggle(name, flagName)
         toggles[flagName] = not toggles[flagName]
         local state = toggles[flagName]
 
-        -- Animaciones
         local goalColor = state and Color3.fromRGB(50, 255, 50) or Color3.fromRGB(255, 50, 50)
         local goalPos = state and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
         
         TweenService:Create(SwitchBack, TweenInfo.new(0.2), {BackgroundColor3 = goalColor}):Play()
         TweenService:Create(Knob, TweenInfo.new(0.2), {Position = goalPos}):Play()
 
-        if state then
-            if flagName == "ESP_Items" or flagName == "ESP_Players" then UpdateESP() end
-        else
-            if flagName == "ESP_Items" or flagName == "ESP_Players" then UpdateESP() end
+        pcall(UpdateESP)
+
+        if not state then
             if flagName == "Speed" or flagName == "PiggySpeed" then
                 if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
                     LocalPlayer.Character.Humanoid.WalkSpeed = 16
@@ -314,16 +365,16 @@ end
 CreateHeader("1) Info ↓")
 CreateInfoText("Nombre del Creador: JoseAngel_Blox")
 CreateInfoText("Fecha de actualización: 10/07/2026")
-CreateInfoText("Versión: 1.3")
+CreateInfoText("Versión: 1.4")
 CreateInfoText("") 
 
 CreateHeader("2) Main")
-CreateModernToggle("🛡️ Godmode (Anti-Piggy/Bots)", "Godmode")
+CreateModernToggle("🛡️ Godmode (Inmortalidad Total)", "Godmode")
 CreateModernToggle("👻 Noclip (Atravesar Paredes)", "Noclip")
 CreateModernToggle("🚀 Salto Infinito", "InfJump")
 CreateModernToggle("⚡ Correr Rápido (Superviviente)", "Speed")
-CreateModernToggle("🔍 ESP Ítems (Filtro numérico)", "ESP_Items")
-CreateModernToggle("👀 ESP Jugadores y Piggy", "ESP_Players")
+CreateModernToggle("🔍 ESP Ítems (Lista Libro 1 y 2)", "ESP_Items")
+CreateModernToggle("👀 ESP Jugadores y Bots", "ESP_Players")
 CreateModernToggle("💡 Visión Nocturna", "FullBright")
 CreateInfoText("")
 
