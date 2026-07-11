@@ -1,6 +1,6 @@
 -- =========================================================
--- SCRIPT: JoseAngel_Blox Piggy Pro V1.5
--- CREADO PARA: Piggy (Fix Noclip, ESP Instantáneo y Godmode Aura)
+-- SCRIPT: JoseAngel_Blox Piggy Pro V1.6
+-- CREADO PARA: Piggy (Optimización Extrema y Fix de Crasheos)
 -- =========================================================
 
 local CoreGui = game:GetService("CoreGui")
@@ -10,6 +10,7 @@ local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
+-- Limpieza de versiones anteriores
 if CoreGui:FindFirstChild("JoseAngel_BloxPiggyPro") then
     CoreGui.JoseAngel_BloxPiggyPro:Destroy()
 end
@@ -53,7 +54,7 @@ end)
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.BackgroundTransparency = 1
-Title.Text = "JoseAngel_Blox Piggy Pro V1.5"
+Title.Text = "JoseAngel_Blox Piggy Pro V1.6"
 Title.TextColor3 = Color3.fromRGB(0, 255, 255)
 Title.TextSize = 20
 Title.Font = Enum.Font.GothamBold
@@ -94,138 +95,118 @@ local toggles = {
 local ESPFolder = Instance.new("Folder", CoreGui)
 ESPFolder.Name = "JoseAngel_ESP"
 
-local validItems = {
-    "key", "llave", "hammer", "martillo", "wrench", "inglesa", 
-    "plank", "tabla", "gear", "engranaje", "gas", "battery", 
-    "bateria", "egg", "huevo", "torch", "antorcha", "wood", 
-    "leña", "book", "libro", "syringe", "jeringa", "crossbow", 
-    "ballesta", "ammo", "municion", "chain", "cadena", "hook", 
-    "gancho", "grass", "pasto", "shovel", "pala", "code", "codigo", 
-    "tube", "tubo", "screwdriver", "destornillador", "broom", 
-    "escoba", "scissors", "tijeras", "carrot", "zanahoria", 
-    "ladder", "escalera", "smoke", "humo", "lens", "lente", 
-    "crowbar", "palanca", "elevator", "ascensor", "keycard"
-}
-
 local function UpdateESP()
+    -- Limpiar ESP anterior sin romper la carpeta
     for _, child in pairs(ESPFolder:GetChildren()) do
         child:Destroy()
     end
 
+    -- ESP ÍTEMS (Optimizado y Universal)
     if toggles.ESP_Items then
-        for _, clickDetect in pairs(workspace:GetDescendants()) do
-            -- pcall a nivel individual para evitar que un ítem roto crashee el ESP entero
-            pcall(function()
-                if clickDetect:IsA("ClickDetector") and clickDetect.Parent then
-                    local objName = string.lower(clickDetect.Parent.Name)
-                    local isRealItem = false
-                    
-                    for _, itemName in pairs(validItems) do
-                        if string.find(objName, itemName) then
-                            isRealItem = true
-                            break
-                        end
-                    end
-                    
-                    if isRealItem then
-                        local Billboard = Instance.new("BillboardGui", ESPFolder)
-                        Billboard.Adornee = clickDetect.Parent
-                        Billboard.Size = UDim2.new(0, 100, 0, 25)
-                        Billboard.AlwaysOnTop = true
-                        
-                        local Text = Instance.new("TextLabel", Billboard)
-                        Text.Size = UDim2.new(1, 0, 1, 0)
-                        Text.BackgroundTransparency = 1
-                        Text.Text = clickDetect.Parent.Name
-                        Text.TextColor3 = Color3.fromRGB(255, 255, 0)
-                        Text.TextScaled = true
-                        Text.Font = Enum.Font.GothamBold
-                    end
-                end
-            end)
-        end
-    end
-
-    if toggles.ESP_Players then
-        -- Jugadores
-        for _, player in pairs(Players:GetPlayers()) do
-            pcall(function()
-                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("ClickDetector") and obj.Parent then
+                local name = tostring(obj.Parent.Name)
+                -- Ignora si el nombre es puro número o es muy corto (basura del juego)
+                if not tonumber(name) and string.len(name) > 2 then
                     local Billboard = Instance.new("BillboardGui", ESPFolder)
-                    Billboard.Adornee = player.Character:FindFirstChild("Head") or player.Character.PrimaryPart
+                    Billboard.Adornee = obj.Parent
                     Billboard.Size = UDim2.new(0, 100, 0, 25)
                     Billboard.AlwaysOnTop = true
                     
                     local Text = Instance.new("TextLabel", Billboard)
                     Text.Size = UDim2.new(1, 0, 1, 0)
                     Text.BackgroundTransparency = 1
-                    Text.Text = player.Name
-                    Text.TextColor3 = Color3.fromRGB(0, 255, 0)
+                    Text.Text = name
+                    Text.TextColor3 = Color3.fromRGB(255, 255, 0) -- Amarillo
                     Text.TextScaled = true
                     Text.Font = Enum.Font.GothamBold
                 end
-            end)
-        end
-        
-        -- Bots
-        for _, model in pairs(workspace:GetDescendants()) do
-            pcall(function()
-                if model:IsA("Model") and model:FindFirstChild("Humanoid") and model ~= LocalPlayer.Character then
-                    if not Players:GetPlayerFromCharacter(model) then
-                        local Billboard = Instance.new("BillboardGui", ESPFolder)
-                        Billboard.Adornee = model:FindFirstChild("Head") or model.PrimaryPart
-                        Billboard.Size = UDim2.new(0, 120, 0, 30)
-                        Billboard.AlwaysOnTop = true
-                        
-                        local Text = Instance.new("TextLabel", Billboard)
-                        Text.Size = UDim2.new(1, 0, 1, 0)
-                        Text.BackgroundTransparency = 1
-                        Text.Text = "🚨 PIGGY BOT 🚨"
-                        Text.TextColor3 = Color3.fromRGB(255, 0, 0)
-                        Text.TextScaled = true
-                        Text.Font = Enum.Font.GothamBlack
-                    end
-                end
-            end)
-        end
-    end
-end
-
-RunService.Stepped:Connect(function()
-    -- Noclip Corregido (Anti-Caídas al agacharse)
-    if toggles.Noclip and LocalPlayer.Character then
-        for _, part in pairs(LocalPlayer.Character:GetChildren()) do
-            -- Protegemos el HumanoidRootPart para que el suelo no te trague
-            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then 
-                part.CanCollide = false 
             end
         end
     end
 
-    -- Godmode V2: Aura Repulsora (Empuja a bots y jugadores enemigos)
-    if toggles.Godmode and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local myRoot = LocalPlayer.Character.HumanoidRootPart
-        
-        for _, enemy in pairs(workspace:GetDescendants()) do
-            if enemy:IsA("Model") and enemy:FindFirstChild("Humanoid") and enemy ~= LocalPlayer.Character then
-                local isPlayer = Players:GetPlayerFromCharacter(enemy)
-                local isEnemyBot = not isPlayer
-                local isPiggyPlayer = enemy:FindFirstChild("Bat") or enemy:FindFirstChild("Weapon")
+    -- ESP JUGADORES Y BOTS
+    if toggles.ESP_Players then
+        -- Jugadores reales
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+                local Billboard = Instance.new("BillboardGui", ESPFolder)
+                Billboard.Adornee = player.Character.Head
+                Billboard.Size = UDim2.new(0, 100, 0, 25)
+                Billboard.AlwaysOnTop = true
                 
-                if isEnemyBot or isPiggyPlayer then
-                    local enemyRoot = enemy:FindFirstChild("HumanoidRootPart")
-                    if enemyRoot then
-                        -- Si se acerca a menos de 6 studs, lo teletransporta lejos de ti
-                        local distance = (myRoot.Position - enemyRoot.Position).Magnitude
-                        if distance < 6 then
-                            enemyRoot.CFrame = enemyRoot.CFrame * CFrame.new(0, 0, 15) -- Lo empuja hacia atrás 15 pasos
-                        end
-                    end
+                local Text = Instance.new("TextLabel", Billboard)
+                Text.Size = UDim2.new(1, 0, 1, 0)
+                Text.BackgroundTransparency = 1
+                Text.Text = player.Name
+                Text.TextColor3 = Color3.fromRGB(0, 255, 0) -- Verde
+                Text.TextScaled = true
+                Text.Font = Enum.Font.GothamBold
+            end
+        end
+        
+        -- Bots de Piggy (Modelos en el Workspace con Humanoid)
+        for _, model in pairs(workspace:GetChildren()) do
+            if model:IsA("Model") and model:FindFirstChild("Humanoid") and model ~= LocalPlayer.Character then
+                if not Players:GetPlayerFromCharacter(model) then -- Si no es jugador, es bot
+                    local Billboard = Instance.new("BillboardGui", ESPFolder)
+                    Billboard.Adornee = model:FindFirstChild("Head") or model.PrimaryPart
+                    Billboard.Size = UDim2.new(0, 120, 0, 30)
+                    Billboard.AlwaysOnTop = true
                     
-                    -- Adicionalmente borra sus hitboxes por seguridad
-                    for _, part in pairs(enemy:GetChildren()) do
-                        if part.Name == "Hitbox" or part:IsA("Tool") or part.Name == "Bat" then
-                            part:Destroy()
+                    local Text = Instance.new("TextLabel", Billboard)
+                    Text.Size = UDim2.new(1, 0, 1, 0)
+                    Text.BackgroundTransparency = 1
+                    Text.Text = "🚨 PIGGY BOT 🚨"
+                    Text.TextColor3 = Color3.fromRGB(255, 0, 0) -- Rojo
+                    Text.TextScaled = true
+                    Text.Font = Enum.Font.GothamBlack
+                end
+            end
+        end
+    end
+end
+
+-- BUCLE PRINCIPAL (Optimizado para no crashear)
+RunService.Stepped:Connect(function()
+    local char = LocalPlayer.Character
+    if not char then return end
+
+    -- Noclip Seguro
+    if toggles.Noclip then
+        for _, part in pairs(char:GetDescendants()) do
+            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                part.CanCollide = false
+            end
+        end
+    end
+
+    -- Godmode Seguro y Ligero
+    if toggles.Godmode then
+        local myRoot = char:FindFirstChild("HumanoidRootPart")
+        if myRoot then
+            -- Solo revisa hijos directos del workspace (super rápido)
+            for _, model in pairs(workspace:GetChildren()) do
+                if model:IsA("Model") and model:FindFirstChild("Humanoid") and model ~= char then
+                    local isBot = not Players:GetPlayerFromCharacter(model)
+                    local isPiggy = model:FindFirstChild("Bat") or model:FindFirstChildWhichIsA("Tool")
+                    
+                    if isBot or isPiggy then
+                        local enemyRoot = model:FindFirstChild("HumanoidRootPart")
+                        if enemyRoot then
+                            -- Si se acerca a menos de 6.5 metros, lo empuja hacia atrás
+                            local distance = (myRoot.Position - enemyRoot.Position).Magnitude
+                            if distance < 6.5 then
+                                enemyRoot.CFrame = enemyRoot.CFrame * CFrame.new(0, 0, 10)
+                            end
+                        end
+                        
+                        -- Deshabilita daño
+                        local weapon = model:FindFirstChild("Bat") or model:FindFirstChildWhichIsA("Tool")
+                        if weapon then
+                            for _, wp in pairs(weapon:GetDescendants()) do
+                                if wp:IsA("BasePart") then wp.CanTouch = false end
+                            end
                         end
                     end
                 end
@@ -233,22 +214,23 @@ RunService.Stepped:Connect(function()
         end
     end
     
-    if toggles.PiggyAutoKill and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+    -- Auto Matar Piggy
+    if toggles.PiggyAutoKill and char:FindFirstChild("HumanoidRootPart") then
         for _, v in pairs(Players:GetPlayers()) do
             if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                LocalPlayer.Character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 1.5)
+                char.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 1.5)
             end
         end
     end
 end)
 
 RunService.RenderStepped:Connect(function()
-    if toggles.Speed and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.WalkSpeed = 25
+    local char = LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        if toggles.Speed then char.Humanoid.WalkSpeed = 25 end
+        if toggles.PiggySpeed then char.Humanoid.WalkSpeed = 35 end
     end
-    if toggles.PiggySpeed and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.WalkSpeed = 35
-    end
+    
     if toggles.FullBright then
         game:GetService("Lighting").Ambient = Color3.new(1, 1, 1)
         game:GetService("Lighting").GlobalShadows = false
@@ -256,14 +238,16 @@ RunService.RenderStepped:Connect(function()
 end)
 
 UserInputService.JumpRequest:Connect(function()
-    if toggles.InfJump and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    local char = LocalPlayer.Character
+    if toggles.InfJump and char and char:FindFirstChild("Humanoid") then
+        char.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
     end
 end)
 
+-- Bucle del ESP cada 1 segundo (Seguro)
 task.spawn(function()
-    while task.wait(1.5) do
-        UpdateESP()
+    while task.wait(1) do
+        pcall(UpdateESP)
     end
 end)
 
@@ -372,19 +356,19 @@ end
 CreateHeader("1) Info ↓")
 CreateInfoText("Nombre del Creador: JoseAngel_Blox")
 CreateInfoText("Fecha de actualización: 10/07/2026")
-CreateInfoText("Versión: 1.5")
+CreateInfoText("Versión: 1.6")
 CreateInfoText("") 
 
 CreateHeader("2) Main")
-CreateModernToggle("🛡️ Godmode (Aura Repulsora Anti-Touch)", "Godmode")
-CreateModernToggle("👻 Noclip (Atravesar Paredes)", "Noclip")
+CreateModernToggle("🛡️ Godmode (Optimizado V2)", "Godmode")
+CreateModernToggle("👻 Noclip Seguro (No te caes)", "Noclip")
 CreateModernToggle("🚀 Salto Infinito", "InfJump")
 CreateModernToggle("⚡ Correr Rápido (Superviviente)", "Speed")
-CreateModernToggle("🔍 ESP Ítems (Lista Libro 1 y 2)", "ESP_Items")
+CreateModernToggle("🔍 ESP Ítems (Universal)", "ESP_Items")
 CreateModernToggle("👀 ESP Jugadores y Bots", "ESP_Players")
 CreateModernToggle("💡 Visión Nocturna", "FullBright")
 CreateInfoText("")
 
 CreateHeader("3) Rol Piggy")
-CreateModernToggle("🔪 Auto-Matar (Teleport a Todos)", "PiggyAutoKill")
-CreateModernToggle("🔥 Correr Súper Rápido (Piggy)", "PiggySpeed")
+CreateModernToggle("🔪 Auto-Matar (Teleport)", "PiggyAutoKill")
+CreateModernToggle("🔥 Correr Súper Rápido", "PiggySpeed")
