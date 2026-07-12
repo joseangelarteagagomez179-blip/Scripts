@@ -1,291 +1,320 @@
 --[[
-🌴 JoseAngel_Blox Jungle Events
-   TP a la Safe Zone al instante — para Kick a Lucky Block
-   Compatible con PC y celular
+╔══════════════════════════════════════════════════════════╗
+║   🐒  KICK A LUCKY BLOCK — JUNGLE EVENT AUTO-FARM      ║
+║   Evento de la Selva — Auto Banana Farmer                ║
+║   Hecho por Zapia para José Angel                       ║
+╚══════════════════════════════════════════════════════════╝
 --]]
 
+-- ============================================
+-- ⚙️  CONFIGURACIÓN
+-- ============================================
+local Settings = {
+    ToggleKey = "X",
+    AutoKick = true,
+    DebugMode = false,
+    JumpInterval = 0.3,
+    RunSpeed = 22,
+    MaxCourseTime = 45,
+    LavaDetectionHeight = 3,
+    AutoReturnToZone = true,
+}
+
+-- ============================================
+-- 🧩  VARIABLES GLOBALES
+-- ============================================
 local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local CoreGui = game:GetService("CoreGui")
+local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local player = Players.LocalPlayer
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualInputManager = game:GetService("VirtualInputManager")
 
--- ============================================================
--- 🔍 Buscar Safe Zone (zona segura donde se acreditan rewards)
--- ============================================================
-local function FindSafeZone()
-    -- Primero busca partes con "safe" en el nombre
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+local Humanoid = Character:WaitForChild("Humanoid")
+
+local Running = false
+local IsInCourse = false
+local EventActive = false
+local CurrentTask = "🟢 Esperando..."
+
+-- ============================================
+-- 📢  NOTIFICACIONES
+-- ============================================
+local function notify(msg)
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "🌴 Evento Selva",
+        Text = msg,
+        Duration = 5
+    })
+end
+
+local function log(msg)
+    if Settings.DebugMode then
+        print("[🌴 Selva] " .. msg)
+    end
+end
+
+-- ============================================
+-- 🔍  DETECCIÓN DE ELEMENTOS DEL EVENTO
+-- ============================================
+
+local function findPortal()
     for _, obj in ipairs(Workspace:GetDescendants()) do
         local name = obj.Name:lower()
-        if (name:find("safezone") or name:find("safe_zone") or name:find("safe")
-            or name:find("spawn") or name:find("lobby"))
-            and obj:IsA("BasePart") then
-            return obj
+        if (name:find("portal") or name:find("jungle") or name:find("event")) and obj:IsA("Part") then
+            if obj.BrickColor and obj.BrickColor.Name == "Bright yellow" then
+                return obj
+            end
+            local color = obj.Color
+            if color and color.r > 0.8 and color.g > 0.7 and color.b < 0.3 then
+                return obj
+            end
         end
     end
-
-    -- Buscar por el sufijo común en zonas de respawn
-    local spawn = Workspace:FindFirstChild("SpawnLocation")
-    if spawn then return spawn end
-
-    -- Fallback: buscar cualquier parte llamada "Zone" grande (suele ser el area segura)
-    for _, obj in ipairs(Workspace:GetDescendants()) do
-        local name = obj.Name:lower()
-        if (name:find("zone") or name:find("area"))
-            and obj:IsA("BasePart")
-            and obj.Size.Magnitude > 50 then
-            return obj
-        end
-    end
-
     return nil
 end
 
--- ============================================================
--- 🚀 TP a Safe Zone
--- ============================================================
-local function TeleportToSafeZone()
-    local char = player.Character
-    if not char then return end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
+local function findBanana()
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        local name = obj.Name:lower()
+        if (name:find("banana") or name:find("platano") or name:find("fruit")) and obj:IsA("BasePart") then
+            return obj
+        end
+    end
+    return nil
+end
 
-    local safe = FindSafeZone()
-    if safe then
-        hrp.CFrame = CFrame.new(safe.Position + Vector3.new(0, 5, 0))
+local function findFinishLine()
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        local name = obj.Name:lower()
+        if (name:find("finish") or name:find("meta") or name:find("goal") or name:find("end") or name:find("llegada")) and obj:IsA("BasePart") then
+            return obj
+        end
+    end
+    return nil
+end
+
+-- ============================================
+-- 🦶  MOVIMIENTO Y PARKOUR AUTOMÁTICO
+-- ============================================
+
+local function moveTo(targetPos, speed)
+    speed = speed or Settings.RunSpeed
+    local direction = (targetPos - HumanoidRootPart.Position).Unit
+    Humanoid:Move(direction, true)
+end
+
+local function stopMoving()
+    Humanoid:Move(Vector3.zero, false)
+end
+
+local function jump()
+    Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+end
+
+local function isLavaBelow()
+    local origin = HumanoidRootPart.Position
+    local ray = Ray.new(origin, Vector3.new(0, -Settings.LavaDetectionHeight, 0))
+    local hit, pos = Workspace:FindPartOnRay(ray, Character)
+    if hit then
+        local name = hit.Name:lower()
+        if name:find("lava") or name:find("fire") or name:find("fuego") or name:find("damage") or hit.BrickColor.Name == "Bright red" or hit.BrickColor.Name == "Really red" then
+            return true
+        end
+    end
+    return false
+end
+
+local function isObstacleAhead(distance)
+    distance = distance or 5
+    local origin = HumanoidRootPart.Position
+    local lookDir = HumanoidRootPart.CFrame.LookVector
+    local ray = Ray.new(origin + Vector3.new(0, 1, 0), lookDir * distance)
+    local hit = Workspace:FindPartOnRay(ray, Character)
+    return hit ~= nil
+end
+
+-- ============================================
+-- 🏃  NAVEGACIÓN DEL RECORRIDO
+-- ============================================
+
+local function navigateObstacleCourse()
+    IsInCourse = true
+    local startTime = tick()
+
+    while IsInCourse and (tick() - startTime) < Settings.MaxCourseTime do
+        local finish = findFinishLine()
+        if finish then
+            local dist = (HumanoidRootPart.Position - finish.Position).Magnitude
+            if dist < 5 then
+                stopMoving()
+                IsInCourse = false
+                return true
+            end
+            moveTo(finish.Position)
+        else
+            local lookDir = HumanoidRootPart.CFrame.LookVector
+            moveTo(HumanoidRootPart.Position + lookDir * 20)
+        end
+
+        if isLavaBelow() then
+            jump()
+            wait(0.1)
+        end
+
+        if isObstacleAhead(4) then
+            jump()
+            wait(0.15)
+        end
+
+        if HumanoidRootPart.Position.Y < -10 then
+            IsInCourse = false
+            return false
+        end
+
+        wait(Settings.JumpInterval)
+    end
+
+    stopMoving()
+    IsInCourse = false
+    return false
+end
+
+-- ============================================
+-- 🔄  CICLO PRINCIPAL DEL EVENTO
+-- ============================================
+
+local function executeJungleRun()
+    notify("Buscando portal del evento...")
+    wait(2)
+
+    local portal = findPortal()
+    if not portal then
+        return false
+    end
+
+    HumanoidRootPart.CFrame = portal.CFrame + Vector3.new(0, 3, 0)
+    wait(1.5)
+
+    local banana = findBanana()
+    if not banana then
+        return false
+    end
+
+    HumanoidRootPart.CFrame = banana.CFrame + Vector3.new(0, 2, 1)
+    wait(0.5)
+
+    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, nil)
+    wait(0.1)
+    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, nil)
+
+    notify("🍌 Plátano robado! A correr!")
+    wait(0.5)
+
+    local success = navigateObstacleCourse()
+
+    if success then
+        notify("🎉 Banana obtenida!")
+        return true
     else
-        hrp.CFrame = CFrame.new(0, 10, 0)
+        return false
     end
 end
 
--- ============================================================
--- 🌿 INTERFAZ — Temática Jungla
--- ============================================================
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "JoseAngelBloxJungleEvents"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = CoreGui
+-- ============================================
+-- 🦶  AUTO KICK (mientras espera)
+-- ============================================
 
--- Panel principal
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 220, 0, 280)
-mainFrame.Position = UDim2.new(0.5, -110, 0.5, -140)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 55, 30)
-mainFrame.BackgroundTransparency = 0.08
-mainFrame.BorderSizePixel = 0
-mainFrame.Active = true
-mainFrame.Draggable = true
-mainFrame.Parent = screenGui
-
--- Borde redondeado
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 18)
-corner.Parent = mainFrame
-
--- Borde decorativo interno
-local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, -4, 1, -4)
-borderFrame.Position = UDim2.new(0, 2, 0, 2)
-borderFrame.BackgroundColor3 = Color3.fromRGB(30, 75, 40)
-borderFrame.BackgroundTransparency = 0
-borderFrame.BorderSizePixel = 0
-local cornerBorder = Instance.new("UICorner")
-cornerBorder.CornerRadius = UDim.new(0, 16)
-cornerBorder.Parent = borderFrame
-borderFrame.Parent = mainFrame
-
--- Barra superior verde (follaje)
-local topBar = Instance.new("Frame")
-topBar.Size = UDim2.new(1, 0, 0, 6)
-topBar.Position = UDim2.new(0, 0, 0, 0)
-topBar.BackgroundColor3 = Color3.fromRGB(50, 180, 70)
-topBar.BackgroundTransparency = 0
-topBar.BorderSizePixel = 0
-local cornerTop = Instance.new("UICorner")
-cornerTop.CornerRadius = UDim.new(0, 16)
-cornerTop.Parent = topBar
-topBar.Parent = mainFrame
-
--- Título
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 40)
-title.Position = UDim2.new(0, 0, 0, 10)
-title.BackgroundTransparency = 1
-title.Text = "🌴 JoseAngel_Blox"
-title.TextColor3 = Color3.fromRGB(255, 255, 200)
-title.TextSize = 20
-title.Font = Enum.Font.GothamBold
-title.TextScaled = true
-title.Parent = mainFrame
-
--- Subtítulo
-local subtitle = Instance.new("TextLabel")
-subtitle.Size = UDim2.new(1, 0, 0, 24)
-subtitle.Position = UDim2.new(0, 0, 0, 48)
-subtitle.BackgroundTransparency = 1
-subtitle.Text = "🍌 Jungle Events"
-subtitle.TextColor3 = Color3.fromRGB(144, 238, 144)
-subtitle.TextSize = 14
-subtitle.Font = Enum.Font.GothamSemibold
-subtitle.TextScaled = true
-subtitle.Parent = mainFrame
-
--- Separador decorativo
-local divider = Instance.new("TextLabel")
-divider.Size = UDim2.new(0.8, 0, 0, 20)
-divider.Position = UDim2.new(0.1, 0, 0, 72)
-divider.BackgroundTransparency = 1
-divider.Text = "🌿 🌺 🌿"
-divider.TextColor3 = Color3.fromRGB(200, 255, 180)
-divider.TextSize = 14
-divider.Font = Enum.Font.Gotham
-divider.TextScaled = true
-divider.Parent = mainFrame
-
--- Indicador de estado
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(0.9, 0, 0, 28)
-statusLabel.Position = UDim2.new(0.05, 0, 0, 98)
-statusLabel.BackgroundColor3 = Color3.fromRGB(15, 40, 20)
-statusLabel.BackgroundTransparency = 0.4
-statusLabel.TextColor3 = Color3.fromRGB(200, 255, 200)
-statusLabel.Text = "🌴 Listo para usar"
-statusLabel.TextSize = 13
-statusLabel.Font = Enum.Font.Gotham
-statusLabel.TextScaled = true
-local cornerStatus = Instance.new("UICorner")
-cornerStatus.CornerRadius = UDim.new(0, 8)
-cornerStatus.Parent = statusLabel
-statusLabel.Parent = mainFrame
-
--- Botón TP grandote
-local tpButton = Instance.new("TextButton")
-tpButton.Size = UDim2.new(0.8, 0, 0, 65)
-tpButton.Position = UDim2.new(0.1, 0, 0, 140)
-tpButton.BackgroundColor3 = Color3.fromRGB(210, 160, 40)
-tpButton.BackgroundTransparency = 0.1
-tpButton.BorderSizePixel = 0
-tpButton.Text = "🚀 TP A SAFE ZONE"
-tpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-tpButton.TextSize = 18
-tpButton.Font = Enum.Font.GothamBold
-tpButton.TextScaled = true
-local cornerBtn = Instance.new("UICorner")
-cornerBtn.CornerRadius = UDim.new(0, 14)
-cornerBtn.Parent = tpButton
-tpButton.Parent = mainFrame
-
--- Brillo del botón (glow)
-local btnGlow = Instance.new("Frame")
-btnGlow.Size = UDim2.new(0.8, 0, 0, 65)
-btnGlow.Position = UDim2.new(0.1, 0, 0, 140)
-btnGlow.BackgroundColor3 = Color3.fromRGB(255, 200, 50)
-btnGlow.BackgroundTransparency = 0.7
-btnGlow.BorderSizePixel = 0
-local cornerGlow = Instance.new("UICorner")
-cornerGlow.CornerRadius = UDim.new(0, 14)
-cornerGlow.Parent = btnGlow
-btnGlow.Parent = mainFrame
-btnGlow.ZIndex = 0
-tpButton.ZIndex = 1
-
--- Feedback
-local feedbackLabel = Instance.new("TextLabel")
-feedbackLabel.Size = UDim2.new(0.9, 0, 0, 24)
-feedbackLabel.Position = UDim2.new(0.05, 0, 0, 220)
-feedbackLabel.BackgroundTransparency = 1
-feedbackLabel.Text = ""
-feedbackLabel.TextColor3 = Color3.fromRGB(200, 255, 180)
-feedbackLabel.TextSize = 12
-feedbackLabel.Font = Enum.Font.Gotham
-feedbackLabel.TextScaled = true
-feedbackLabel.Parent = mainFrame
-
--- Decoración inferior
-local bottomDeco = Instance.new("TextLabel")
-bottomDeco.Size = UDim2.new(0.9, 0, 0, 22)
-bottomDeco.Position = UDim2.new(0.05, 0, 0, 250)
-bottomDeco.BackgroundTransparency = 1
-bottomDeco.Text = "🦎 🐒 🌴"
-bottomDeco.TextColor3 = Color3.fromRGB(180, 255, 160)
-bottomDeco.TextSize = 14
-bottomDeco.Font = Enum.Font.Gotham
-bottomDeco.TextScaled = true
-bottomDeco.Parent = mainFrame
-
--- ============================================================
--- 🎮 Funcionalidad del botón
--- ============================================================
-
-local function SetStatus(text, isGood)
-    statusLabel.Text = text
-    if isGood then
-        statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
-    else
-        statusLabel.TextColor3 = Color3.fromRGB(255, 180, 100)
-    end
-    task.delay(3, function()
-        statusLabel.Text = "🌴 Listo para usar"
-        statusLabel.TextColor3 = Color3.fromRGB(200, 255, 200)
-    end)
-end
-
-local function ShowFeedback(text)
-    feedbackLabel.Text = text
-    task.delay(2, function()
-        feedbackLabel.Text = ""
-    end)
-end
-
--- Animación al presionar
-tpButton.MouseButton1Down:Connect(function()
-    tpButton.TextScaled = false
-    tpButton.TextSize = 16
-    tpButton.BackgroundColor3 = Color3.fromRGB(180, 130, 20)
-end)
-
-tpButton.MouseButton1Up:Connect(function()
-    tpButton.TextScaled = true
-    tpButton.BackgroundColor3 = Color3.fromRGB(210, 160, 40)
-end)
-
--- TP action
-local function OnTPClick()
-    local char = player.Character
-    if not char then
-        SetStatus("❌ Sin personaje en el juego", false)
-        ShowFeedback("Entra al juego primero")
-        return
+local function autoKick()
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        local name = obj.Name:lower()
+        if (name:find("block") or name:find("lucky") or name:find("kick")) and obj:IsA("BasePart") and obj:FindFirstChild("ClickDetector") then
+            fireclickdetector(obj.ClickDetector)
+            return
+        end
     end
 
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if not hrp then
-        SetStatus("❌ No se encontró el personaje", false)
-        ShowFeedback("Espera a cargar")
-        return
+    local parts = Workspace:GetPartsInPart(HumanoidRootPart, 15)
+    for _, part in ipairs(parts) do
+        if part:FindFirstChild("ClickDetector") then
+            fireclickdetector(part.ClickDetector)
+            return
+        end
     end
-
-    SetStatus("🚀 Teletransportando...", true)
-    TeleportToSafeZone()
-    ShowFeedback("✅ En la Safe Zone 🌴")
-    task.wait(1)
-    SetStatus("🌴 Listo para usar", true)
 end
 
-tpButton.MouseButton1Click:Connect(OnTPClick)
-tpButton.TouchTap:Connect(OnTPClick)
+-- ============================================
+-- 🚀  MAIN LOOP
+-- ============================================
 
--- Tecla END como atajo
-UserInputService.InputBegan:Connect(function(input, gp)
-    if gp then return end
-    if input.KeyCode == Enum.KeyCode.End then
-        OnTPClick()
+local function farmLoop()
+    while Running do
+        local portal = findPortal()
+        EventActive = portal ~= nil
+
+        if EventActive then
+            notify("🌴 Evento de la Selva detectado!")
+            local ok = executeJungleRun()
+
+            if ok and Settings.AutoReturnToZone then
+                wait(2)
+                local spawnLocation = Workspace:FindFirstChild("SpawnLocation") or
+                                     Workspace:FindFirstChild("Spawn") or
+                                     Workspace:FindFirstChild("Baseplate")
+                if spawnLocation then
+                    HumanoidRootPart.CFrame = spawnLocation.CFrame + Vector3.new(0, 5, 0)
+                end
+                wait(3)
+            elseif not ok then
+                wait(5)
+            end
+        else
+            if Settings.AutoKick then
+                autoKick()
+            end
+            wait(2.5)
+        end
+        wait(1)
+    end
+end
+
+-- ============================================
+-- 🎮  CONTROLES
+-- ============================================
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode[Settings.ToggleKey] then
+        Running = not Running
+        if Running then
+            notify("🌴 Auto-Farm ACTIVADO")
+            coroutine.wrap(farmLoop)()
+        else
+            notify("⏸️ Auto-Farm PAUSADO")
+            IsInCourse = false
+            stopMoving()
+        end
     end
 end)
 
--- ============================================================
--- 🚀 Inicio
--- ============================================================
-print("🌴 JoseAngel_Blox Jungle Events cargado!")
-print("   🚀 Toca el botón o presiona END para TP a Safe Zone")
-print("   🍌 Agarra la banana, luego TP directo a la zona segura 🏆")
+LocalPlayer.CharacterAdded:Connect(function(char)
+    Character = char
+    HumanoidRootPart = char:WaitForChild("HumanoidRootPart")
+    Humanoid = char:WaitForChild("Humanoid")
+end)
+
+print([[
+╔══════════════════════════════════════════╗
+║  🌴  KICK A LUCKY BLOCK                  ║
+║     JUNGLE EVENT AUTO-FARM               ║
+║                                          ║
+║  Presiona X para iniciar                 ║
+║  Corre cada 2h — Dura 15 min             ║
+║  Hasta el 19 de Julio 2026               ║
+╚══════════════════════════════════════════╝
+]])
+
+notify("🌴 Script cargado! Presiona X para iniciar")
