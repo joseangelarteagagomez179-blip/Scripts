@@ -5,13 +5,18 @@ if CoreGui:FindFirstChild("JoseAngel_Blox_Menu") then
 end
 
 local TweenService = game:GetService("TweenService")
-local Jugador = game.Players.LocalPlayer
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local VirtualUser = game:GetService("VirtualUser")
+local RunService = game:GetService("RunService")
+local Jugador = Players.LocalPlayer
 
 -- ==========================================
 -- 1. CREACIÓN DE LA INTERFAZ PRINCIPAL (GUI)
 -- ==========================================
 local MenuGui = Instance.new("ScreenGui")
 MenuGui.Name = "JoseAngel_Blox_Menu"
+MenuGui.ResetOnSpawn = false -- Para que no se borre al revivir
 MenuGui.Parent = CoreGui
 
 local Marco = Instance.new("Frame")
@@ -108,16 +113,17 @@ local function crearTextoInfo(texto, yPos)
     lbl.TextSize = 14
 end
 
-crearTextoInfo("Nombre del Creador: JoseAngel_Blox", 10)
-crearTextoInfo("Fecha de lanzamiento: 12/07/2026", 45)
-crearTextoInfo("Versión: 1.1", 80)
+crearTextoInfo("Nombre: JoseAngel_Blox", 10)
+crearTextoInfo("Evento: Selva 🐒", 45)
+crearTextoInfo("Versión: 1.2 Corregida", 80)
 
 -- ==========================================
--- 3. INTERRUPTORES (TOGGLES) Y VARIABLES
+-- 3. INTERRUPTORES Y VARIABLES
 -- ==========================================
 local autoFarmActivo = false
 local autoRecogerActivo = false
-local miSafeZone = nil -- Guardará el lugar donde te paras
+local miSafeZone = nil
+local basePosicion = nil -- Aquí guardamos la posición de tu parcela/base
 
 local function crearInterruptor(parent, yPos, texto, callback)
     local Contenedor = Instance.new("Frame")
@@ -171,89 +177,79 @@ local function crearInterruptor(parent, yPos, texto, callback)
 end
 
 -- ==========================================
--- 4. CONFIGURACIÓN DE LOS BOTONES
+-- 4. CONFIGURACIÓN DE BOTONES
 -- ==========================================
-crearInterruptor(FrameMain, 10, "Auto Farm (Patear + Safezone)", function(estado)
+crearInterruptor(FrameMain, 10, "Auto Farm + Safe Zone", function(estado)
     autoFarmActivo = estado
     local personaje = Jugador.Character
-    
     if estado and personaje and personaje:FindFirstChild("HumanoidRootPart") then
-        -- Cuando lo enciendes, guarda la posición en la que estás parado como tu "Safe Zone"
         miSafeZone = personaje.HumanoidRootPart.CFrame
+        -- Guardamos también la base una sola vez
+        if not basePosicion then
+            basePosicion = miSafeZone
+        end
     end
 end)
 
-crearInterruptor(FrameMain, 60, "Auto Recoger (Bananas)", function(estado)
+crearInterruptor(FrameMain, 60, "Auto Recoger → Regresar a Base", function(estado)
     autoRecogerActivo = estado
     local personaje = Jugador.Character
-    
-    if estado and personaje and personaje:FindFirstChild("HumanoidRootPart") and miSafeZone == nil then
-        -- Guarda la posición por si solo activas el Auto Recoger
-        miSafeZone = personaje.HumanoidRootPart.CFrame
+    if estado and personaje and personaje:FindFirstChild("HumanoidRootPart") and not basePosicion then
+        basePosicion = personaje.HumanoidRootPart.CFrame
     end
 end)
 
 -- ==========================================
--- 5. EL CEREBRO DEL SCRIPT (Lógica Principal)
+-- 5. LÓGICA PRINCIPAL CORREGIDA
 -- ==========================================
 task.spawn(function()
-    local VirtualUser = game:GetService("VirtualUser")
-    
-    while task.wait(0.05) do
-        local personaje = Jugador.Character
-        local root = personaje and personaje:FindFirstChild("HumanoidRootPart")
+    while task.wait(0.1) do -- Intervalo más estable
+        local personaje = Jugador.Character or Jugador.CharacterAdded:Wait()
+        local root = personaje:FindFirstChild("HumanoidRootPart")
+        local humanoide = personaje:FindFirstChildOfClass("Humanoid")
         
-        if not personaje or not root then continue end
+        if not root or not humanoide or humanoide.Health <= 0 then continue end
 
-        -- LÓGICA DE AUTO FARM (Patear)
-        if autoFarmActivo then
-            -- 1. Obligar al personaje a quedarse en el Safe Zone (Teletransporte instantáneo sin trabarse)
-            if miSafeZone then
-                root.CFrame = miSafeZone
-            end
+        -- === AUTO FARM: Patear y mantener en zona segura ===
+        if autoFarmActivo and miSafeZone then
+            -- Mantener posición sin moverse
+            root.CFrame = miSafeZone
             
-            -- 2. Equipar automáticamente el zapato o herramienta si está en la mochila
+            -- Equipar herramienta automáticamente
             local herramienta = personaje:FindFirstChildOfClass("Tool")
             if not herramienta then
-                local toolMochila = Jugador.Backpack:FindFirstChildOfClass("Tool")
-                if toolMochila then
-                    toolMochila.Parent = personaje
-                    herramienta = toolMochila
+                local herramientaMochila = Jugador.Backpack:FindFirstChildOfClass("Tool")
+                if herramientaMochila then
+                    herramientaMochila.Parent = personaje
+                    herramienta = herramientaMochila
                 end
             end
             
-            -- 3. Patear sin parar
-            if herramienta then
+            -- Activar el golpe correctamente
+            if herramienta and herramienta:FindFirstChild("Activated") then
                 herramienta:Activate()
+                VirtualUser:Button1Down(Vector2.new(500, 500))
+                task.wait(0.02)
+                VirtualUser:Button1Up(Vector2.new(500, 500))
             end
-            VirtualUser:ClickButton1(Vector2.new(0,0))
         end
-        
-        -- LÓGICA DE AUTO RECOGER BANANAS
-        if autoRecogerActivo and miSafeZone then
-            for _, objeto in pairs(workspace:GetDescendants()) do
-                -- Si encuentra algo que se puede tocar (TouchInterest) y es una pieza física
-                if objeto:IsA("TouchInterest") and objeto.Parent and objeto.Parent:IsA("BasePart") then
-                    
-                    local pieza = objeto.Parent
-                    
-                    -- Filtro para asegurarnos de que es un botín (las bananas no suelen estar ancladas)
-                    if not pieza.Anchored or pieza.Name:lower():match("banana") then
-                        
-                        -- TELETRANSPORTE AL OBJETO
-                        root.CFrame = pieza.CFrame
-                        
-                        -- Esperamos una fracción de segundo para que el juego nos dé la banana
-                        task.wait(0.15) 
-                        
-                        -- NOS REGRESAMOS AL SAFEZONE DE INMEDIATO
-                        root.CFrame = miSafeZone
-                        task.wait(0.05)
-                    end
+
+        -- === AUTO RECOGER BANANAS Y REGRESAR A BASE ===
+        if autoRecogerActivo and basePosicion then
+            local encontrado = false
+            -- Buscar objetos por nombre y tipo
+            for _, objeto in ipairs(Workspace:GetDescendants()) do
+                if objeto:IsA("BasePart") and objeto.Name:lower():find("banana") then
+                    encontrado = true
+                    -- Ir por la fruta
+                    root.CFrame = objeto.CFrame * CFrame.new(0, 3, 0) -- Un poco arriba para no trabarse
+                    task.wait(0.12) -- Tiempo para que se registre la recolección
+                    -- Regresar a la base automáticamente
+                    root.CFrame = basePosicion
+                    task.wait(0.15)
+                    break
                 end
             end
         end
     end
 end)
-
-
