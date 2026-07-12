@@ -1,6 +1,6 @@
 --[[
 🌴 JoseAngel_Blox Jungle Events
-   TP a tu base al instante — para Kick a Lucky Block
+   TP a la Safe Zone al instante — para Kick a Lucky Block
    Compatible con PC y celular
 --]]
 
@@ -11,44 +11,48 @@ local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 
 -- ============================================================
--- 🔍 Buscar base
+-- 🔍 Buscar Safe Zone (zona segura donde se acreditan rewards)
 -- ============================================================
-local function FindBase()
+local function FindSafeZone()
+    -- Primero busca partes con "safe" en el nombre
     for _, obj in ipairs(Workspace:GetDescendants()) do
         local name = obj.Name:lower()
-        if (name:find("plot") or name:find("base") or name:find("spawn")
-            or name:find("safe") or name:find("home") or name:find("tycoon"))
+        if (name:find("safezone") or name:find("safe_zone") or name:find("safe")
+            or name:find("spawn") or name:find("lobby"))
             and obj:IsA("BasePart") then
             return obj
         end
     end
 
-    local playerName = player.Name:lower()
+    -- Buscar por el sufijo común en zonas de respawn
+    local spawn = Workspace:FindFirstChild("SpawnLocation")
+    if spawn then return spawn end
+
+    -- Fallback: buscar cualquier parte llamada "Zone" grande (suele ser el area segura)
     for _, obj in ipairs(Workspace:GetDescendants()) do
         local name = obj.Name:lower()
-        if name:find(playerName) and obj:IsA("BasePart") then
+        if (name:find("zone") or name:find("area"))
+            and obj:IsA("BasePart")
+            and obj.Size.Magnitude > 50 then
             return obj
         end
     end
-
-    local spawn = Workspace:FindFirstChild("SpawnLocation")
-    if spawn then return spawn end
 
     return nil
 end
 
 -- ============================================================
--- 🚀 TP a base
+-- 🚀 TP a Safe Zone
 -- ============================================================
-local function TeleportToBase()
+local function TeleportToSafeZone()
     local char = player.Character
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
-    local base = FindBase()
-    if base then
-        hrp.CFrame = CFrame.new(base.Position + Vector3.new(0, 5, 0))
+    local safe = FindSafeZone()
+    if safe then
+        hrp.CFrame = CFrame.new(safe.Position + Vector3.new(0, 5, 0))
     else
         hrp.CFrame = CFrame.new(0, 10, 0)
     end
@@ -78,7 +82,7 @@ local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 18)
 corner.Parent = mainFrame
 
--- Sombra/borde decorativo
+-- Borde decorativo interno
 local borderFrame = Instance.new("Frame")
 borderFrame.Size = UDim2.new(1, -4, 1, -4)
 borderFrame.Position = UDim2.new(0, 2, 0, 2)
@@ -154,14 +158,14 @@ cornerStatus.CornerRadius = UDim.new(0, 8)
 cornerStatus.Parent = statusLabel
 statusLabel.Parent = mainFrame
 
--- Botón TP grande
+-- Botón TP grandote
 local tpButton = Instance.new("TextButton")
 tpButton.Size = UDim2.new(0.8, 0, 0, 65)
 tpButton.Position = UDim2.new(0.1, 0, 0, 140)
 tpButton.BackgroundColor3 = Color3.fromRGB(210, 160, 40)
 tpButton.BackgroundTransparency = 0.1
 tpButton.BorderSizePixel = 0
-tpButton.Text = "🚀 TP A MI BASE"
+tpButton.Text = "🚀 TP A SAFE ZONE"
 tpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 tpButton.TextSize = 18
 tpButton.Font = Enum.Font.GothamBold
@@ -171,7 +175,7 @@ cornerBtn.CornerRadius = UDim.new(0, 14)
 cornerBtn.Parent = tpButton
 tpButton.Parent = mainFrame
 
--- Brillo del botón
+-- Brillo del botón (glow)
 local btnGlow = Instance.new("Frame")
 btnGlow.Size = UDim2.new(0.8, 0, 0, 65)
 btnGlow.Position = UDim2.new(0.1, 0, 0, 140)
@@ -262,8 +266,8 @@ local function OnTPClick()
     end
 
     SetStatus("🚀 Teletransportando...", true)
-    TeleportToBase()
-    ShowFeedback("✅ Llegaste a tu base 🏠")
+    TeleportToSafeZone()
+    ShowFeedback("✅ En la Safe Zone 🌴")
     task.wait(1)
     SetStatus("🌴 Listo para usar", true)
 end
@@ -271,7 +275,7 @@ end
 tpButton.MouseButton1Click:Connect(OnTPClick)
 tpButton.TouchTap:Connect(OnTPClick)
 
--- Tecla END como atajo en PC
+-- Tecla END como atajo
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.KeyCode == Enum.KeyCode.End then
@@ -283,4 +287,5 @@ end)
 -- 🚀 Inicio
 -- ============================================================
 print("🌴 JoseAngel_Blox Jungle Events cargado!")
-print("   🚀 Toca el botón o presiona END para TP a tu base")
+print("   🚀 Toca el botón o presiona END para TP a Safe Zone")
+print("   🍌 Agarra la banana, luego TP directo a la zona segura 🏆")
