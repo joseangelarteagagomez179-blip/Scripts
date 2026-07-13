@@ -1,72 +1,360 @@
 -- ============================================
--- 🍌 SCRIPT EVENTO JUNGLE - KICK A LUCKY BLOCK
+-- 🌴 JoseAngel_Blox Jungle Events
+-- Versión: 2.0 (PC y Móvil)
 -- ============================================
 -- Creado especialmente para ti
--- Instrucciones: Copia y pega en tu ejecutor
--- Teclas: F=Recolectar | P=Pausar | K=Kick
+-- Interfaz con interruptores (toggles)
+-- Fondo de jungla y diseño cuadrado con bordes redondeados
 -- ============================================
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 local root = character:WaitForChild("HumanoidRootPart")
 
 -- ============================================
--- CONFIGURACIÓN (Puedes cambiar estos valores)
+-- CONFIGURACIÓN INICIAL
 -- ============================================
 local config = {
-    autoCollect = true,      -- Recolectar plátanos automático
-    autoRun = true,          -- Correr obstáculos automático
-    autoKick = true,         -- Patear bloques automático
-    autoClaim = true,        -- Reclamar recompensas automático
-    speed = 50,              -- Velocidad de movimiento
-    jumpPower = 50,          -- Poder de salto
-    collectDistance = 20,    -- Distancia para recolectar
-    kickDelay = 0.5,         -- Delay entre kicks
-    waitTime = 1,            -- Tiempo de espera entre acciones
+    autoCollect = false,
+    autoRun = false,
+    autoKick = false,
+    autoClaim = false,
+    speed = 50,
+    jumpPower = 50,
 }
 
--- ============================================
--- VARIABLES GLOBALES
--- ============================================
 local isActive = true
 local isCollecting = false
 local isRunning = false
-local currentState = "Esperando..."
 
 -- ============================================
--- FUNCIÓN: MEJORAR ESTADÍSTICAS
+-- CREAR GUI PRINCIPAL
 -- ============================================
-local function setStats()
-    if humanoid then
-        humanoid.WalkSpeed = config.speed
-        humanoid.JumpPower = config.jumpPower
-        currentState = "⚡ Estadísticas mejoradas"
-        print("⚡ Velocidad: " .. config.speed .. " | Salto: " .. config.jumpPower)
+local function createMainGUI()
+    -- Limpiar GUI anterior si existe
+    local oldGui = player.PlayerGui:FindFirstChild("JoseAngelGUI")
+    if oldGui then oldGui:Destroy() end
+    
+    -- ScreenGui principal
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "JoseAngelGUI"
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = player.PlayerGui
+    
+    -- ============================================
+    -- FONDO DE JUNGLA (Imagen o color degradado)
+    -- ============================================
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 340, 0, 460)
+    mainFrame.Position = UDim2.new(0.5, -170, 0.5, -230)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(20, 60, 20)
+    mainFrame.BackgroundTransparency = 0.15
+    mainFrame.BorderSizePixel = 0
+    mainFrame.ClipsDescendants = true
+    mainFrame.Parent = screenGui
+    
+    -- Hacer esquinas redondeadas
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 20)
+    corner.Parent = mainFrame
+    
+    -- Degradado de fondo (simula jungla)
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 80, 0)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 130, 30)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 60, 20))
+    })
+    gradient.Rotation = 45
+    gradient.Parent = mainFrame
+    
+    -- ============================================
+    -- TÍTULO
+    -- ============================================
+    local titleFrame = Instance.new("Frame")
+    titleFrame.Size = UDim2.new(1, 0, 0, 50)
+    titleFrame.Position = UDim2.new(0, 0, 0, 0)
+    titleFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    titleFrame.BackgroundTransparency = 0.5
+    titleFrame.BorderSizePixel = 0
+    titleFrame.Parent = mainFrame
+    
+    local titleCorner = Instance.new("UICorner")
+    titleCorner.CornerRadius = UDim.new(0, 20)
+    titleCorner.Parent = titleFrame
+    
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 1, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "🌴 JoseAngel_Blox Jungle Events"
+    title.TextColor3 = Color3.fromRGB(255, 215, 0)
+    title.TextScaled = true
+    title.Font = Enum.Font.SourceSansBold
+    title.Parent = titleFrame
+    
+    -- ============================================
+    -- SUBTÍTULO (Estado del evento)
+    -- ============================================
+    local statusFrame = Instance.new("Frame")
+    statusFrame.Size = UDim2.new(1, -20, 0, 35)
+    statusFrame.Position = UDim2.new(0, 10, 0, 55)
+    statusFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    statusFrame.BackgroundTransparency = 0.5
+    statusFrame.BorderSizePixel = 0
+    statusFrame.Parent = mainFrame
+    
+    local statusCorner = Instance.new("UICorner")
+    statusCorner.CornerRadius = UDim.new(0, 10)
+    statusCorner.Parent = statusFrame
+    
+    local statusText = Instance.new("TextLabel")
+    statusText.Size = UDim2.new(1, 0, 1, 0)
+    statusText.BackgroundTransparency = 1
+    statusText.Text = "⏳ Esperando evento..."
+    statusText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    statusText.TextScaled = true
+    statusText.Font = Enum.Font.SourceSans
+    statusText.Name = "StatusLabel"
+    statusText.Parent = statusFrame
+    
+    -- ============================================
+    -- INTERRUPTORES (TOGGLES)
+    -- ============================================
+    local toggleY = 100
+    local toggleHeight = 45
+    local spacing = 55
+    local toggles = {}
+    
+    -- Lista de funciones
+    local functions = {
+        {name = "🍌 Auto Recolectar", key = "autoCollect", color = Color3.fromRGB(255, 200, 50)},
+        {name = "🏃 Auto Correr", key = "autoRun", color = Color3.fromRGB(100, 200, 255)},
+        {name = "👢 Auto Kick", key = "autoKick", color = Color3.fromRGB(255, 100, 100)},
+        {name = "🎁 Auto Reclamar", key = "autoClaim", color = Color3.fromRGB(100, 255, 100)}
+    }
+    
+    for i, func in ipairs(functions) do
+        local toggleFrame = Instance.new("Frame")
+        toggleFrame.Size = UDim2.new(1, -20, 0, toggleHeight)
+        toggleFrame.Position = UDim2.new(0, 10, 0, toggleY + (i-1) * spacing)
+        toggleFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        toggleFrame.BackgroundTransparency = 0.4
+        toggleFrame.BorderSizePixel = 0
+        toggleFrame.Parent = mainFrame
+        
+        local toggleCorner = Instance.new("UICorner")
+        toggleCorner.CornerRadius = UDim.new(0, 10)
+        toggleCorner.Parent = toggleFrame
+        
+        -- Texto de la función
+        local label = Instance.new("TextLabel")
+        label.Size = UDim2.new(0.6, 0, 1, 0)
+        label.Position = UDim2.new(0, 10, 0, 0)
+        label.BackgroundTransparency = 1
+        label.Text = func.name
+        label.TextColor3 = Color3.fromRGB(255, 255, 255)
+        label.TextScaled = true
+        label.TextXAlignment = Enum.TextXAlignment.Left
+        label.Font = Enum.Font.SourceSans
+        label.Parent = toggleFrame
+        
+        -- Interruptor (Toggle)
+        local toggleBg = Instance.new("Frame")
+        toggleBg.Size = UDim2.new(0, 55, 0, 30)
+        toggleBg.Position = UDim2.new(1, -65, 0.5, -15)
+        toggleBg.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+        toggleBg.BorderSizePixel = 0
+        toggleBg.Parent = toggleFrame
+        
+        local toggleCorner2 = Instance.new("UICorner")
+        toggleCorner2.CornerRadius = UDim.new(1, 0)
+        toggleCorner2.Parent = toggleBg
+        
+        -- Círculo del interruptor
+        local toggleCircle = Instance.new("Frame")
+        toggleCircle.Size = UDim2.new(0, 24, 0, 24)
+        toggleCircle.Position = UDim2.new(0, 3, 0.5, -12)
+        toggleCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        toggleCircle.BorderSizePixel = 0
+        toggleCircle.Parent = toggleBg
+        
+        local circleCorner = Instance.new("UICorner")
+        circleCorner.CornerRadius = UDim.new(1, 0)
+        circleCorner.Parent = toggleCircle
+        
+        -- Guardar referencia
+        toggles[func.key] = {
+            bg = toggleBg,
+            circle = toggleCircle,
+            value = false,
+            toggleFrame = toggleFrame
+        }
+        
+        -- Función para cambiar el estado del toggle
+        local function setToggle(value)
+            toggles[func.key].value = value
+            config[func.key] = value
+            
+            if value then
+                toggleBg.BackgroundColor3 = func.color
+                toggleCircle.Position = UDim2.new(1, -27, 0.5, -12)
+            else
+                toggleBg.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+                toggleCircle.Position = UDim2.new(0, 3, 0.5, -12)
+            end
+            
+            print("🔄 " .. func.name .. ": " .. (value and "✅ Activado" or "❌ Desactivado"))
+        end
+        
+        -- Evento click para PC
+        local function onToggleClick()
+            setToggle(not toggles[func.key].value)
+        end
+        
+        toggleBg.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+               input.UserInputType == Enum.UserInputType.Touch then
+                onToggleClick()
+            end
+        end)
+        
+        toggleFrame.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+               input.UserInputType == Enum.UserInputType.Touch then
+                onToggleClick()
+            end
+        end)
+        
+        -- Activar por defecto? (desactivado)
+        setToggle(false)
     end
+    
+    -- ============================================
+    -- BOTÓN DE ESTADÍSTICAS
+    -- ============================================
+    local statsY = toggleY + (#functions * spacing) + 10
+    
+    local statsFrame = Instance.new("Frame")
+    statsFrame.Size = UDim2.new(1, -20, 0, 40)
+    statsFrame.Position = UDim2.new(0, 10, 0, statsY)
+    statsFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    statsFrame.BackgroundTransparency = 0.4
+    statsFrame.BorderSizePixel = 0
+    statsFrame.Parent = mainFrame
+    
+    local statsCorner = Instance.new("UICorner")
+    statsCorner.CornerRadius = UDim.new(0, 10)
+    statsCorner.Parent = statsFrame
+    
+    local statsLabel = Instance.new("TextLabel")
+    statsLabel.Size = UDim2.new(1, 0, 1, 0)
+    statsLabel.BackgroundTransparency = 1
+    statsLabel.Text = "⚡ Mejorar Estadísticas"
+    statsLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
+    statsLabel.TextScaled = true
+    statsLabel.Font = Enum.Font.SourceSansBold
+    statsLabel.Parent = statsFrame
+    
+    -- Click en estadísticas
+    statsFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+           input.UserInputType == Enum.UserInputType.Touch then
+            if humanoid then
+                humanoid.WalkSpeed = config.speed
+                humanoid.JumpPower = config.jumpPower
+                statsLabel.Text = "✅ Estadísticas mejoradas!"
+                task.wait(1)
+                statsLabel.Text = "⚡ Mejorar Estadísticas"
+                print("⚡ Estadísticas mejoradas!")
+            end
+        end
+    end)
+    
+    -- ============================================
+    -- CRÉDITOS
+    -- ============================================
+    local creditsY = statsY + 50
+    
+    local credits = Instance.new("TextLabel")
+    credits.Size = UDim2.new(1, 0, 0, 20)
+    credits.Position = UDim2.new(0, 0, 0, creditsY)
+    credits.BackgroundTransparency = 1
+    credits.Text = "🧑‍💻 Creado por JoseAngel_Blox"
+    credits.TextColor3 = Color3.fromRGB(150, 150, 150)
+    credits.TextScaled = true
+    credits.Font = Enum.Font.SourceSans
+    credits.Parent = mainFrame
+    
+    -- ============================================
+    -- BOTÓN DE CERRAR
+    -- ============================================
+    local closeBtn = Instance.new("ImageButton")
+    closeBtn.Size = UDim2.new(0, 30, 0, 30)
+    closeBtn.Position = UDim2.new(1, -40, 0, 10)
+    closeBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    closeBtn.BackgroundTransparency = 0.3
+    closeBtn.BorderSizePixel = 0
+    closeBtn.Image = "rbxassetid://3926305904"
+    closeBtn.Parent = mainFrame
+    
+    local closeCorner = Instance.new("UICorner")
+    closeCorner.CornerRadius = UDim.new(1, 0)
+    closeCorner.Parent = closeBtn
+    
+    -- Efecto hover
+    closeBtn.MouseEnter:Connect(function()
+        closeBtn.BackgroundTransparency = 0
+    end)
+    closeBtn.MouseLeave:Connect(function()
+        closeBtn.BackgroundTransparency = 0.3
+    end)
+    
+    closeBtn.MouseButton1Click:Connect(function()
+        mainFrame.Visible = false
+        print("📱 GUI ocultada - Presiona 'J' para mostrar de nuevo")
+    end)
+    
+    -- ============================================
+    -- MOSTRAR GUI CON ANIMACIÓN
+    -- ============================================
+    mainFrame.BackgroundTransparency = 1
+    mainFrame.Size = UDim2.new(0, 0, 0, 0)
+    
+    local tweenInfo = TweenInfo.new(
+        0.5,
+        Enum.EasingStyle.Quad,
+        Enum.EasingDirection.Out
+    )
+    
+    local tween1 = TweenService:Create(mainFrame, tweenInfo, {
+        BackgroundTransparency = 0.15,
+        Size = UDim2.new(0, 340, 0, 460)
+    })
+    tween1:Play()
+    
+    return screenGui, statusText
 end
 
 -- ============================================
--- FUNCIÓN: DETECTAR EVENTO JUNGLE
+-- FUNCIONES DEL SCRIPT
 -- ============================================
+
+-- Función para detectar evento
 local function isJungleEventActive()
     for _, obj in pairs(workspace:GetDescendants()) do
         if obj:IsA("Part") and obj.Name:find("Jungle") then
-            return true
-        end
-        if obj:IsA("Model") and obj.Name:find("Portal") and obj.Name:find("Jungle") then
             return true
         end
     end
     return false
 end
 
--- ============================================
--- FUNCIÓN: RECOLECTAR PLÁTANO
--- ============================================
+-- Recolectar plátano
 local function collectBanana()
     if isCollecting then return end
     isCollecting = true
@@ -74,12 +362,11 @@ local function collectBanana()
     local banana = nil
     local shortestDist = math.huge
     
-    -- Buscar el plátano más cercano
     for _, obj in pairs(workspace:GetDescendants()) do
         if obj:IsA("Tool") and (obj.Name:find("Banana") or obj.Name:find("Platano")) then
             if obj.Parent ~= character and obj.Parent ~= player.Backpack then
                 local dist = (obj.Position - root.Position).Magnitude
-                if dist < shortestDist and dist < config.collectDistance then
+                if dist < shortestDist and dist < 20 then
                     shortestDist = dist
                     banana = obj
                 end
@@ -88,14 +375,9 @@ local function collectBanana()
     end
     
     if banana then
-        currentState = "🍌 Recolectando plátano..."
-        print("🍌 Encontré un plátano a " .. math.floor(shortestDist) .. "m")
-        
-        -- Ir hacia el plátano
         humanoid:MoveTo(banana.Position)
-        task.wait(0.3)
+        task.wait(0.5)
         
-        -- Intentar recoger
         for _, tool in pairs(workspace:GetDescendants()) do
             if tool:IsA("Tool") and (tool.Name:find("Banana") or tool.Name:find("Platano")) then
                 if tool.Parent ~= character then
@@ -104,8 +386,7 @@ local function collectBanana()
                         local dist = (handle.Position - root.Position).Magnitude
                         if dist < 5 then
                             fireproximityprompt(tool)
-                            print("✅ ¡Plátano recolectado!")
-                            currentState = "✅ Plátano recolectado"
+                            print("✅ Plátano recolectado!")
                             isCollecting = false
                             return true
                         end
@@ -119,78 +400,41 @@ local function collectBanana()
     return false
 end
 
--- ============================================
--- FUNCIÓN: CORRER OBSTÁCULOS
--- ============================================
+-- Correr obstáculos
 local function runObstacleCourse()
     if isRunning then return end
     isRunning = true
     
-    currentState = "🏃 Corriendo obstáculos..."
-    print("🏃 Corriendo el curso de obstáculos...")
-    
-    -- Buscar puntos de control o camino
     local pathPoints = {}
     for _, obj in pairs(workspace:GetDescendants()) do
-        if obj:IsA("BasePart") then
-            if obj.Name:find("Checkpoint") or 
-               obj.Name:find("Path") or 
-               obj.Name:find("Plataforma") or
-               obj.Name:find("Floor") then
-                if (obj.Position - root.Position).Magnitude < 100 then
-                    table.insert(pathPoints, obj.Position)
-                end
-            end
-        end
-    end
-    
-    -- Si no encuentra puntos, buscar el portal
-    if #pathPoints == 0 then
-        for _, obj in pairs(workspace:GetDescendants()) do
-            if obj:IsA("BasePart") and obj.Name:find("Portal") then
+        if obj:IsA("BasePart") and (obj.Name:find("Checkpoint") or obj.Name:find("Path") or obj.Name:find("Plataforma")) then
+            if (obj.Position - root.Position).Magnitude < 100 then
                 table.insert(pathPoints, obj.Position)
-                break
             end
         end
     end
     
-    -- Ordenar por distancia
     table.sort(pathPoints, function(a, b)
         return (a - root.Position).Magnitude < (b - root.Position).Magnitude
     end)
     
-    -- Recorrer el camino
-    for i, point in pairs(pathPoints) do
+    for _, point in pairs(pathPoints) do
         if not isActive then break end
-        
         humanoid:MoveTo(point)
-        currentState = "🏃 Avanzando... (" .. i .. "/" .. #pathPoints .. ")"
         task.wait(0.8)
-        
-        -- Saltar si hay obstáculo
-        if i % 3 == 0 and humanoid then
-            humanoid.Jump = true
-            task.wait(0.1)
-        end
     end
     
-    currentState = "✅ Curso completado"
-    print("✅ ¡Curso de obstáculos completado!")
     isRunning = false
     return true
 end
 
--- ============================================
--- FUNCIÓN: KICK AUTOMÁTICO
--- ============================================
+-- Auto Kick
 local function autoKick()
     local block = nil
     local shortestDist = math.huge
     
-    -- Buscar bloque para patear
     for _, obj in pairs(workspace:GetDescendants()) do
         if obj:IsA("BasePart") and obj.Name:find("Block") and obj.Parent:IsA("Model") then
-            -- Verificar que sea un lucky block
             if obj.Parent.Name:find("Lucky") or obj.Parent.Name:find("Block") then
                 local dist = (obj.Position - root.Position).Magnitude
                 if dist < shortestDist and dist < 15 then
@@ -202,260 +446,129 @@ local function autoKick()
     end
     
     if block then
-        currentState = "👢 Pateando bloque..."
-        -- Simular el kick (click derecho en el bloque)
         local args = {
             [1] = block.Parent,
             [2] = block.Position
         }
-        game:GetService("ReplicatedStorage"):FindFirstChild("KickBlock"):FireServer(unpack(args))
-        print("👢 ¡Bloque pateado!")
-        task.wait(config.kickDelay)
-        return true
+        local remote = game:GetService("ReplicatedStorage"):FindFirstChild("KickBlock")
+        if remote then
+            remote:FireServer(unpack(args))
+            print("👢 Bloque pateado!")
+            return true
+        end
     end
     return false
 end
 
--- ============================================
--- FUNCIÓN: RECLAMAR RECOMPENSAS
--- ============================================
+-- Reclamar recompensas
 local function claimRewards()
-    currentState = "🎁 Reclamando recompensas..."
-    print("🎁 Buscando recompensas...")
-    
-    -- Buscar botones de reclamar
     for _, obj in pairs(workspace:GetDescendants()) do
         if obj:IsA("Part") and obj.Name:find("Claim") then
             fireclickdetector(obj)
-            print("✅ ¡Recompensa reclamada!")
-            currentState = "✅ Recompensa reclamada"
+            print("🎁 Recompensa reclamada!")
             return true
         end
     end
     
-    -- Buscar en la GUI
     for _, gui in pairs(player.PlayerGui:GetChildren()) do
         for _, btn in pairs(gui:GetDescendants()) do
             if btn:IsA("TextButton") and (btn.Name:find("Claim") or btn.Name:find("Reclamar")) then
                 btn:FireClient()
-                print("✅ ¡Recompensa reclamada por GUI!")
-                currentState = "✅ Recompensa reclamada"
+                print("🎁 Recompensa reclamada por GUI!")
                 return true
             end
         end
     end
-    
     return false
 end
 
 -- ============================================
--- FUNCIÓN: CICLO PRINCIPAL DEL EVENTO
+-- BUCLE PRINCIPAL
 -- ============================================
-local function eventLoop()
-    while isActive do
-        task.wait(config.waitTime)
+local function mainLoop()
+    while wait(1) do
+        if not isActive then continue end
         
-        -- Verificar si el evento está activo
+        -- Actualizar estado en GUI
+        local statusLabel = player.PlayerGui:FindFirstChild("JoseAngelGUI")
+        if statusLabel then
+            local label = statusLabel:FindFirstChild("MainFrame"):FindFirstChild("StatusLabel")
+            if label then
+                if isJungleEventActive() then
+                    label.Text = "🌴 ¡EVENTO ACTIVO!"
+                    label.TextColor3 = Color3.fromRGB(100, 255, 100)
+                else
+                    label.Text = "⏳ Esperando evento..."
+                    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+                end
+            end
+        end
+        
+        -- Solo ejecutar si el evento está activo
         if not isJungleEventActive() then
-            currentState = "⏳ Esperando evento..."
-            task.wait(5)
+            wait(5)
             continue
         end
         
-        print("🌴 ¡EVENTO JUNGLE ACTIVO!")
-        currentState = "🌴 Evento activo!"
-        
-        -- PASO 1: Recolectar plátanos
+        -- Ejecutar funciones según toggles
         if config.autoCollect then
             for i = 1, 3 do
-                if not isActive then break end
                 collectBanana()
-                task.wait(1)
+                wait(0.8)
             end
         end
         
-        -- PASO 2: Correr obstáculos
         if config.autoRun then
             runObstacleCourse()
-            task.wait(1)
+            wait(1)
         end
         
-        -- PASO 3: Patear bloques
         if config.autoKick then
-            for i = 1, 5 do
-                if not isActive then break end
+            for i = 1, 3 do
                 autoKick()
-                task.wait(0.3)
+                wait(0.3)
             end
         end
         
-        -- PASO 4: Reclamar recompensas
         if config.autoClaim then
             claimRewards()
-            task.wait(1)
+            wait(1)
         end
-        
-        currentState = "🔄 Ciclo completado, repitiendo..."
-        print("🔄 Ciclo completado, repitiendo...")
     end
 end
 
 -- ============================================
--- FUNCIÓN: CARRERA COMPLETA HACIA EL PORTAL
--- ============================================
-local function rushToPortal()
-    currentState = "🚀 Corriendo al portal..."
-    print("🚀 ¡Corriendo al portal!")
-    
-    -- Buscar el portal
-    local portal = nil
-    for _, obj in pairs(workspace:GetDescendants()) do
-        if obj:IsA("BasePart") and (obj.Name:find("Portal") or obj.Name:find("End")) then
-            portal = obj
-            break
-        end
-    end
-    
-    if portal then
-        humanoid:MoveTo(portal.Position + Vector3.new(0, 5, 0))
-        task.wait(3)
-        humanoid.Jump = true
-        task.wait(0.5)
-        print("✅ ¡Llegaste al portal!")
-        currentState = "✅ Portal alcanzado"
-        return true
-    end
-    return false
-end
-
--- ============================================
--- CREAR GUI DE CONTROL
--- ============================================
-local function createGUI()
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "JungleEventScript"
-    screenGui.Parent = player.PlayerGui
-    
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 250, 0, 120)
-    frame.Position = UDim2.new(0, 10, 0, 10)
-    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    frame.BackgroundTransparency = 0.5
-    frame.BorderSizePixel = 2
-    frame.BorderColor3 = Color3.fromRGB(255, 200, 50)
-    frame.Parent = screenGui
-    
-    -- Título
-    local title = Instance.new("TextLabel")
-    title.Size = UDim2.new(1, 0, 0.3, 0)
-    title.Position = UDim2.new(0, 0, 0, 0)
-    title.BackgroundTransparency = 1
-    title.Text = "🍌 EVENTO JUNGLE"
-    title.TextColor3 = Color3.fromRGB(255, 200, 50)
-    title.TextScaled = true
-    title.Font = Enum.Font.SourceSansBold
-    title.Parent = frame
-    
-    -- Estado
-    local status = Instance.new("TextLabel")
-    status.Size = UDim2.new(1, 0, 0.4, 0)
-    status.Position = UDim2.new(0, 0, 0.3, 0)
-    status.BackgroundTransparency = 1
-    status.Text = "⏳ Esperando evento..."
-    status.TextColor3 = Color3.fromRGB(255, 255, 255)
-    status.TextScaled = true
-    status.Font = Enum.Font.SourceSans
-    status.Name = "StatusLabel"
-    status.Parent = frame
-    
-    -- Controles
-    local controls = Instance.new("TextLabel")
-    controls.Size = UDim2.new(1, 0, 0.3, 0)
-    controls.Position = UDim2.new(0, 0, 0.7, 0)
-    controls.BackgroundTransparency = 1
-    controls.Text = "F=Recolectar | P=Pausar | K=Kick"
-    controls.TextColor3 = Color3.fromRGB(200, 200, 200)
-    controls.TextScaled = true
-    controls.Font = Enum.Font.SourceSans
-    controls.Parent = frame
-    
-    return status
-end
-
-local statusLabel = createGUI()
-
--- ============================================
--- ACTUALIZAR GUI
--- ============================================
-spawn(function()
-    while wait(0.5) do
-        if statusLabel then
-            local stateText = currentState
-            if not isActive then
-                stateText = "⏸️ PAUSADO"
-            end
-            statusLabel.Text = stateText
-        end
-    end
-end)
-
--- ============================================
--- CONTROLES DE TECLADO
+-- MOSTRAR/OCULTAR GUI CON TECLA J
 -- ============================================
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     
-    -- F = Recolectar plátano manual
-    if input.KeyCode == Enum.KeyCode.F then
-        collectBanana()
-        print("🍌 Recolección manual")
-    end
-    
-    -- P = Pausar/Activar
-    if input.KeyCode == Enum.KeyCode.P then
-        isActive = not isActive
-        print(isActive and "▶️ SCRIPT ACTIVADO" or "⏸️ SCRIPT PAUSADO")
-        if isActive then
-            currentState = "▶️ Activo"
-        else
-            currentState = "⏸️ Pausado"
+    if input.KeyCode == Enum.KeyCode.J then
+        local gui = player.PlayerGui:FindFirstChild("JoseAngelGUI")
+        if gui then
+            local mainFrame = gui:FindFirstChild("MainFrame")
+            if mainFrame then
+                mainFrame.Visible = not mainFrame.Visible
+                print(mainFrame.Visible and "📱 GUI mostrada" or "📱 GUI ocultada")
+            end
         end
-    end
-    
-    -- K = Kick manual
-    if input.KeyCode == Enum.KeyCode.K then
-        autoKick()
-        print("👢 Kick manual")
-    end
-    
-    -- R = Correr al portal
-    if input.KeyCode == Enum.KeyCode.R then
-        rushToPortal()
-    end
-    
-    -- M = Mejorar estadísticas
-    if input.KeyCode == Enum.KeyCode.M then
-        setStats()
     end
 end)
 
 -- ============================================
--- INICIAR EL SCRIPT
+-- INICIAR TODO
 -- ============================================
-print("🍌 ¡SCRIPT EVENTO JUNGLE CARGADO!")
-print("📌 Teclas:")
-print("   F = Recolectar plátano")
-print("   P = Pausar/Activar")
-print("   K = Kick manual")
-print("   R = Correr al portal")
-print("   M = Mejorar estadísticas")
+local gui, statusText = createMainGUI()
+print("🌴 JoseAngel_Blox Jungle Events CARGADO!")
+print("📱 Presiona 'J' para mostrar/ocultar la GUI")
+print("🎮 ¡Esperando el evento Jungle!")
 
--- Mejorar estadísticas al inicio
-setStats()
+-- Mejorar estadísticas automáticamente
+wait(1)
+if humanoid then
+    humanoid.WalkSpeed = config.speed
+    humanoid.JumpPower = config.jumpPower
+end
 
--- Iniciar el bucle principal
-spawn(eventLoop)
-
-print("✅ ¡Todo listo! El script está funcionando.")
-print("🎮 Esperando el evento Jungle...")
-currentState = "🎮 Esperando evento..."
+-- Iniciar bucle principal
+spawn(mainLoop)
