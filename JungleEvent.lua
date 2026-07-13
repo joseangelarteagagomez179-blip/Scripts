@@ -1,9 +1,7 @@
 -- ============================================
--- 🌴 JUNGLE EVENT - SCRIPT COMPLETO
+-- 🌴 JUNGLE EVENT - SCRIPT COMPLETO CORREGIDO
 -- Para Delta Executor / Roblox
--- Versión: 1.0.0
--- Autor: JoseAngel_Blox
--- GitHub: https://github.com/tu-usuario/JungleEvent
+-- Versión: 1.0.1 - FIXED
 -- ============================================
 
 print("🌴 Cargando Jungle Event Complete...")
@@ -13,14 +11,12 @@ print("🌴 Cargando Jungle Event Complete...")
 -- ============================================
 
 local CONFIG = {
-    -- Tiempos
-    EventCooldown = 7200,        -- 2 horas
-    EventDuration = 900,         -- 15 minutos
-    PortalSpawnDelay = 30,       -- Segundos hasta que aparece el portal
-    BossChaseTime = 60,          -- Segundos de persecución
-    ObstacleTimeLimit = 30,      -- Segundos por obstáculo
+    EventCooldown = 7200,
+    EventDuration = 900,
+    PortalSpawnDelay = 30,
+    BossChaseTime = 60,
+    ObstacleTimeLimit = 30,
     
-    -- Jefe
     Boss = {
         Name = "Glorbo Fruttodrillo",
         Speed = 16,
@@ -30,12 +26,10 @@ local CONFIG = {
         ChaseRange = 60,
     },
     
-    -- Obstáculos
     ObstacleTypes = {
         "Laberinto", "Parkour", "Lava", "Pinchos", "PlataformasMoviles"
     },
     
-    -- Interfaz
     UI = {
         PanelSize = {X = 250, Y = 200},
         CornerRadius = 12,
@@ -48,7 +42,6 @@ local CONFIG = {
         }
     },
     
-    -- Límites
     Limits = {
         MaxPlayersPerEvent = 20,
         MaxRewardsPerPlayer = 1,
@@ -61,87 +54,15 @@ local CONFIG = {
 -- ============================================
 
 local REWARDS = {
-    {
-        Name = "250K Cash",
-        Chance = 32,
-        Type = "Cash",
-        Value = 250000,
-        Color = Color3.fromRGB(255, 215, 0),
-        Icon = "💰",
-        Rarity = "Común"
-    },
-    {
-        Name = "+1 Banana",
-        Chance = 28,
-        Type = "ExtraSpin",
-        Value = 1,
-        Color = Color3.fromRGB(255, 255, 0),
-        Icon = "🍌",
-        Rarity = "Común"
-    },
-    {
-        Name = "x1.5 Kick Speed",
-        Chance = 22,
-        Type = "Boost",
-        Value = 1.5,
-        Color = Color3.fromRGB(0, 255, 255),
-        Icon = "⚡",
-        Rarity = "Poco Común"
-    },
-    {
-        Name = "+1 Speed",
-        Chance = 14,
-        Type = "Boost",
-        Value = 1,
-        Color = Color3.fromRGB(0, 255, 128),
-        Icon = "🏃",
-        Rarity = "Poco Común"
-    },
-    {
-        Name = "Croakumber",
-        Chance = 2,
-        Type = "Brainrot",
-        Value = 0.75,
-        Color = Color3.fromRGB(0, 255, 0),
-        Icon = "🐸",
-        Rarity = "Raro"
-    },
-    {
-        Name = "Tuki Tuki Taco",
-        Chance = 1,
-        Type = "Brainrot",
-        Value = 1,
-        Color = Color3.fromRGB(255, 128, 0),
-        Icon = "🌮",
-        Rarity = "Épico"
-    },
-    {
-        Name = "Lampuccio Racconelli",
-        Chance = 0.7,
-        Type = "Brainrot",
-        Value = 1.25,
-        Color = Color3.fromRGB(255, 0, 255),
-        Icon = "🦝",
-        Rarity = "Legendario"
-    },
-    {
-        Name = "Professor Tigrellini",
-        Chance = 0.25,
-        Type = "Brainrot",
-        Value = 2,
-        Color = Color3.fromRGB(255, 0, 0),
-        Icon = "🐯",
-        Rarity = "Mítico"
-    },
-    {
-        Name = "Orangutango Supremo",
-        Chance = 0.05,
-        Type = "Brainrot",
-        Value = 3,
-        Color = Color3.fromRGB(255, 215, 0),
-        Icon = "🦧",
-        Rarity = "Ultra Mítico"
-    },
+    {Name = "250K Cash", Chance = 32, Type = "Cash", Value = 250000, Color = Color3.fromRGB(255, 215, 0), Icon = "💰", Rarity = "Común"},
+    {Name = "+1 Banana", Chance = 28, Type = "ExtraSpin", Value = 1, Color = Color3.fromRGB(255, 255, 0), Icon = "🍌", Rarity = "Común"},
+    {Name = "x1.5 Kick Speed", Chance = 22, Type = "Boost", Value = 1.5, Color = Color3.fromRGB(0, 255, 255), Icon = "⚡", Rarity = "Poco Común"},
+    {Name = "+1 Speed", Chance = 14, Type = "Boost", Value = 1, Color = Color3.fromRGB(0, 255, 128), Icon = "🏃", Rarity = "Poco Común"},
+    {Name = "Croakumber", Chance = 2, Type = "Brainrot", Value = 0.75, Color = Color3.fromRGB(0, 255, 0), Icon = "🐸", Rarity = "Raro"},
+    {Name = "Tuki Tuki Taco", Chance = 1, Type = "Brainrot", Value = 1, Color = Color3.fromRGB(255, 128, 0), Icon = "🌮", Rarity = "Épico"},
+    {Name = "Lampuccio Racconelli", Chance = 0.7, Type = "Brainrot", Value = 1.25, Color = Color3.fromRGB(255, 0, 255), Icon = "🦝", Rarity = "Legendario"},
+    {Name = "Professor Tigrellini", Chance = 0.25, Type = "Brainrot", Value = 2, Color = Color3.fromRGB(255, 0, 0), Icon = "🐯", Rarity = "Mítico"},
+    {Name = "Orangutango Supremo", Chance = 0.05, Type = "Brainrot", Value = 3, Color = Color3.fromRGB(255, 215, 0), Icon = "🦧", Rarity = "Ultra Mítico"},
 }
 
 -- ============================================
@@ -162,8 +83,6 @@ end
 function Utils.CreateParticles(position, color, count, lifetime)
     count = count or 30
     lifetime = lifetime or 2
-    color = color or Color3.fromRGB(255, 215, 0)
-    
     for i = 1, count do
         local particle = Instance.new("Part")
         particle.Size = Vector3.new(0.5, 0.5, 0.5)
@@ -174,7 +93,7 @@ function Utils.CreateParticles(position, color, count, lifetime)
         )
         particle.Anchored = true
         particle.CanCollide = false
-        particle.BrickColor = BrickColor.new(color)
+        particle.BrickColor = BrickColor.new(Color3.new(color.r, color.g, color.b))
         particle.Transparency = 0.5
         particle.Parent = workspace
         game:GetService("Debris"):AddItem(particle, lifetime)
@@ -201,10 +120,8 @@ function Utils.GetReward()
     for _, reward in ipairs(REWARDS) do
         totalChance = totalChance + reward.Chance
     end
-    
     local random = math.random() * totalChance
     local cumulative = 0
-    
     for _, reward in ipairs(REWARDS) do
         cumulative = cumulative + reward.Chance
         if random <= cumulative then
@@ -216,7 +133,6 @@ end
 
 function Utils.ApplyReward(player, reward)
     if not player or not reward then return false end
-    
     local leaderstats = player:FindFirstChild("leaderstats")
     if not leaderstats then
         leaderstats = Instance.new("Folder")
@@ -227,7 +143,6 @@ function Utils.ApplyReward(player, reward)
         cash.Value = 0
         cash.Parent = leaderstats
     end
-    
     if reward.Type == "Cash" then
         local cash = leaderstats:FindFirstChild("Cash")
         if cash then
@@ -274,7 +189,7 @@ function Utils.ApplyReward(player, reward)
 end
 
 -- ============================================
--- 4. INTERFAZ DE USUARIO
+-- 4. INTERFAZ DE USUARIO (CORREGIDA)
 -- ============================================
 
 local UIManager = {}
@@ -336,7 +251,7 @@ function UIManager:CreateUI()
     self.Timer.Text = "⏱️ 15:00"
     self.Timer.TextColor3 = CONFIG.UI.Colors.Text
     self.Timer.TextSize = 18
-    self.Timer.Font = Enum.Font.SourceSans
+    self.Timer.Font = Enum.Font.Bold -- CORREGIDO: Usar Bold en lugar de SourceSans
     self.Timer.TextStrokeTransparency = 0
     self.Timer.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     self.Timer.Parent = self.Panel
@@ -349,7 +264,7 @@ function UIManager:CreateUI()
     self.Players.Text = "👥 0 jugadores"
     self.Players.TextColor3 = CONFIG.UI.Colors.Success
     self.Players.TextSize = 16
-    self.Players.Font = Enum.Font.SourceSans
+    self.Players.Font = Enum.Font.Bold -- CORREGIDO
     self.Players.TextStrokeTransparency = 0
     self.Players.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     self.Players.Parent = self.Panel
@@ -362,7 +277,7 @@ function UIManager:CreateUI()
     self.Status.Text = "📍 Esperando evento..."
     self.Status.TextColor3 = CONFIG.UI.Colors.Text
     self.Status.TextSize = 14
-    self.Status.Font = Enum.Font.SourceSans
+    self.Status.Font = Enum.Font.Bold -- CORREGIDO
     self.Status.TextStrokeTransparency = 0
     self.Status.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     self.Status.TextWrapped = true
@@ -409,7 +324,7 @@ function UIManager:CreateUI()
     self.PopupIcon.Text = "💰"
     self.PopupIcon.TextColor3 = CONFIG.UI.Colors.Primary
     self.PopupIcon.TextSize = 50
-    self.PopupIcon.Font = Enum.Font.SourceSans
+    self.PopupIcon.Font = Enum.Font.Bold
     self.PopupIcon.Parent = self.Popup
     
     self.PopupName = Instance.new("TextLabel")
@@ -546,37 +461,12 @@ function EventManager:CreatePortal()
     particles.Color = ColorSequence.new(Color3.fromRGB(255, 215, 0))
     
     self.EventObjects[#self.EventObjects + 1] = portal
-    
-    -- Script de teletransporte
-    local script = Instance.new("Script")
-    script.Source = [[
-        script.Parent.Touched:Connect(function(hit)
-            local player = game.Players:GetPlayerFromCharacter(hit.Parent)
-            if not player then return end
-            
-            local cave = workspace:FindFirstChild("JungleCave")
-            if cave then
-                local hrp = hit.Parent:FindFirstChild("HumanoidRootPart")
-                if hrp then
-                    hrp.CFrame = cave.CFrame + Vector3.new(0, 3, 0)
-                    -- Notificar al servidor
-                    local remote = game:GetService("ReplicatedStorage"):FindFirstChild("JungleEventRemote")
-                    if remote then
-                        remote:FireServer("PlayerEntered", player)
-                    end
-                end
-            end
-        end)
-    ]]
-    script.Parent = portal
-    
     return portal
 end
 
 function EventManager:CreateCave()
     local cavePos = Vector3.new(1000, 0, 0)
     
-    -- Cueva
     local cave = Instance.new("Part")
     cave.Name = "JungleCave"
     cave.Size = Vector3.new(50, 20, 50)
@@ -589,7 +479,6 @@ function EventManager:CreateCave()
     cave.Parent = workspace
     self.EventObjects[#self.EventObjects + 1] = cave
     
-    -- Plátano
     local banana = Instance.new("Part")
     banana.Name = "GoldenBanana"
     banana.Size = Vector3.new(2, 3, 1)
@@ -601,7 +490,6 @@ function EventManager:CreateCave()
     banana.Parent = workspace
     self.EventObjects[#self.EventObjects + 1] = banana
     
-    -- Jefe
     local boss = Instance.new("Part")
     boss.Name = "GlorboFruttodrillo"
     boss.Size = Vector3.new(4, 6, 4)
@@ -621,7 +509,6 @@ function EventManager:StartEvent()
         print("⚠️ El evento ya está activo")
         return
     end
-    
     if self.IsOnCooldown then
         print("⚠️ El evento está en cooldown")
         return
@@ -635,12 +522,10 @@ function EventManager:StartEvent()
     self.UI:ShowPanel()
     self.UI:UpdateStatus("📍 ¡Busca el portal dorado!", CONFIG.UI.Colors.Primary)
     
-    -- Generar portal y cueva
     task.wait(CONFIG.PortalSpawnDelay)
     self:CreatePortal()
     self:CreateCave()
     
-    -- Temporizador
     local duration = CONFIG.EventDuration
     self.CurrentTimer = task.spawn(function()
         while duration > 0 and self.IsActive do
@@ -657,13 +542,11 @@ end
 
 function EventManager:EndEvent()
     if not self.IsActive then return end
-    
     self.IsActive = false
     print("⏰ EVENTO DE LA JUNGLA TERMINADO")
     self.UI:HidePanel()
     self.UI:UpdateStatus("⏰ Evento terminado", CONFIG.UI.Colors.Danger)
     
-    -- Limpiar objetos
     for _, obj in ipairs(self.EventObjects) do
         if obj and obj.Parent then
             obj:Destroy()
@@ -671,7 +554,6 @@ function EventManager:EndEvent()
     end
     self.EventObjects = {}
     
-    -- Iniciar cooldown
     self.IsOnCooldown = true
     self.CooldownTimer = task.spawn(function()
         local cooldown = CONFIG.EventCooldown
@@ -686,29 +568,17 @@ end
 
 function EventManager:HandlePlayerAction(player, action)
     if not self.IsActive then return end
-    
     if action == "StealBanana" then
-        -- Robar plátano
         local banana = workspace:FindFirstChild("GoldenBanana")
         if banana then
             banana:Destroy()
             self.UI:UpdateStatus("🏃 ¡Huye del jefe!", CONFIG.UI.Colors.Danger)
-            
-            -- Activar jefe
-            local boss = workspace:FindFirstChild("GlorboFruttodrillo")
-            if boss then
-                self:ActivateBoss(player, boss)
-            end
-            
             print("🍌 " .. player.Name .. " robó el plátano")
         end
-        
     elseif action == "CompleteCourse" then
-        -- Completar circuito
         if not self.ActivePlayers[player.UserId] then
             local reward = Utils.GetReward()
             local success = Utils.ApplyReward(player, reward)
-            
             if success then
                 self.ActivePlayers[player.UserId] = true
                 self.UI:ShowReward(reward)
@@ -716,42 +586,6 @@ function EventManager:HandlePlayerAction(player, action)
             end
         end
     end
-end
-
-function EventManager:ActivateBoss(player, boss)
-    -- Script de persecución
-    local script = Instance.new("Script")
-    script.Source = [[
-        local boss = script.Parent
-        local player = game.Players:GetPlayerFromCharacter(script.Parent.Parent)
-        if not player then return end
-        
-        local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-        if not hrp then return end
-        
-        local speed = 16
-        local maxSpeed = 35
-        
-        while boss and hrp and hrp.Parent do
-            local direction = (hrp.Position - boss.Position).Unit
-            boss.Position = boss.Position + direction * speed * 0.1
-            
-            if speed < maxSpeed then
-                speed = speed + 0.5
-            end
-            
-            if (boss.Position - hrp.Position).Magnitude < 3 then
-                local humanoid = player.Character:FindFirstChild("Humanoid")
-                if humanoid then
-                    humanoid.Health = 0
-                end
-                break
-            end
-            
-            task.wait(0.1)
-        end
-    ]]
-    script.Parent = boss
 end
 
 -- ============================================
@@ -778,11 +612,9 @@ local function SetupCommands(eventManager)
     _G.StartJungleEvent = function()
         eventManager:StartEvent()
     end
-    
     _G.StopJungleEvent = function()
         eventManager:EndEvent()
     end
-    
     _G.GetEventStatus = function()
         local status = eventManager:GetStatus()
         print("📊 Estado del evento:")
@@ -792,7 +624,6 @@ local function SetupCommands(eventManager)
         print("  Tiempo restante: " .. status.TimeLeft .. "s")
         return status
     end
-    
     print("📌 Comandos disponibles:")
     print("  _G.StartJungleEvent() - Inicia el evento")
     print("  _G.StopJungleEvent() - Termina el evento")
@@ -805,22 +636,14 @@ end
 
 print("🌴 Inicializando Jungle Event...")
 
--- Crear UI
 local ui = UIManager.new()
-
--- Crear gestor de eventos
 local eventManager = EventManager.new(ui)
-
--- Configurar remotes
 SetupRemotes(eventManager)
-
--- Configurar comandos
 SetupCommands(eventManager)
 
 print("✅ Jungle Event cargado correctamente")
 print("🌴 Esperando 10 segundos para iniciar...")
 
--- Iniciar automáticamente
 task.wait(10)
 _G.StartJungleEvent()
 
@@ -829,16 +652,11 @@ _G.StartJungleEvent()
 -- ============================================
 
 while true do
-    task.wait(60) -- Verificar cada minuto
+    task.wait(60)
     if eventManager.IsActive then
-        -- Mantener UI actualizada
         local status = eventManager:GetStatus()
         if status.TimeLeft < 60 then
             ui:UpdateStatus("⚠️ ¡El evento está por terminar!", CONFIG.UI.Colors.Danger)
         end
     end
 end
-
--- ============================================
--- FIN DEL SCRIPT
--- ============================================
