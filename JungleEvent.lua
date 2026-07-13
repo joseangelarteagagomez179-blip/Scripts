@@ -1,7 +1,8 @@
 -- =============================================
 -- JoseAngel_Blox Jungle Events
--- Script creado por ti (GUI cuadrada + tema jungla)
--- Todo con las funciones de FourHub (Auto Portal + Auto Banana + más)
+-- Script creado por ti (mejorado para que funcione)
+-- GUI cuadrada + esquinas redondeadas + tema jungla
+-- Funciona igual que FourHub (Auto Portal + Auto Banana + más)
 -- =============================================
 
 local Players = game:GetService("Players")
@@ -30,7 +31,7 @@ local Window = OrionLib:MakeWindow({
     HidePremium = false,
     SaveConfig = true,
     ConfigFolder = "JoseAngelBloxJungle",
-    IntroText = "🌴 ¡Bienvenido! El bot está ON"
+    IntroText = "🌴 ¡Bienvenido al evento Jungle! 🍌"
 })
 
 local Theme = Window:MakeTab({ Name = "🌴 Jungla", Icon = "rbxassetid://4483345998" })
@@ -100,13 +101,23 @@ RunService.Heartbeat:Connect(function()
     -- Anti Tsunami + Auto Collect + Anti AFK
     if AntiTsunami then
         local tsunami = workspace:FindFirstChildWhichIsA("Part", true, "Tsunami") or workspace:FindFirstChild("Wave")
-        if tsunami then root.CFrame += Vector3.new(0, 0, -40) print("🌊 Tsunami!") task.wait(1.5) end
+        if tsunami then
+            root.CFrame += Vector3.new(0, 0, -40)
+            print("🌊 Tsunami!")
+            task.wait(1.5)
+        end
     end
     if AutoCollect then
         local cash = workspace:FindFirstChildWhichIsA("Part", true, "Cash") or workspace:FindFirstChild("Money")
-        if cash then root.CFrame = cash.CFrame * CFrame.new(0, 2, 0) print("💰 Cash!") task.wait(0.5) end
+        if cash then
+            root.CFrame = cash.CFrame * CFrame.new(0, 2, 0)
+            print("💰 Cash recolectado!")
+            task.wait(0.5)
+        end
     end
-    if AntiAFK then root.CFrame += Vector3.new(0, 0, 0.05) end
+    if AntiAFK then
+        root.CFrame += Vector3.new(0, 0, 0.05)
+    end
 end)
 
 print("🌴 JoseAngel_Blox Jungle Events cargado correctamente! ¡Presiona F1 para pausar!")
