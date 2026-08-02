@@ -1,12 +1,27 @@
--- Busca en el PlayerGui elementos que contengan la palabra o textura del botón
-local player = game:GetService("Players").LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+-- MINI SCRIPT DE PRUEBA: Auto-Click X2
+local playerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
 
-for _, gui in ipairs(playerGui:GetDescendants()) do
-    if gui:IsA("TextButton") or gui:IsA("ImageButton") then
-        -- Puedes filtrar por nombre o si ves que coincide con los botones x2
-        if string.find(string.lower(gui.Name), "x2") or string.find(string.lower(gui.Name), "click") or string.find(string.lower(gui.Name), "button") then
-            print("Botón encontrado:", gui:GetFullName())
+print("Iniciando prueba de auto-click x2...")
+
+task.spawn(function()
+    while true do
+        task.wait(0.5) -- Velocidad de prueba (medio segundo)
+        
+        for _, obj in ipairs(playerGui:GetDescendants()) do
+            if obj:IsA("TextButton") or obj:IsA("ImageButton") then
+                -- Busca si el nombre o algún texto hijo contiene "x2"
+                local nombre = string.lower(obj.Name)
+                if string.find(nombre, "x2") then
+                    print("¡Botón x2 encontrado!", obj:GetFullName())
+                    
+                    -- Dispara el evento del botón de forma forzada
+                    pcall(function()
+                        for _, conn in ipairs(getconnections(obj.Activated)) do
+                            conn:Fire()
+                        end
+                    end)
+                end
+            end
         end
     end
-end
+end)
