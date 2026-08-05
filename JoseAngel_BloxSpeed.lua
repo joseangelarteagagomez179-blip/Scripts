@@ -1,97 +1,90 @@
--- SERVICIOS PRINCIPALES
-local TweenService = game:GetService("TweenService")
+-- ============================================
+-- 🚀 Vuelo Rápido a KickReady
+-- Juego: Kick a Lucky Block
+-- ============================================
+
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local localPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
 
--- CONFIGURACIÓN
-local VelocidadVuelo = 200 -- Velocidad del deslizamiento terrestre
+local Player = Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Root = Character:WaitForChild("HumanoidRootPart")
 
--- FUNCIÓN PARA VOLAR A RAS DE SUELO
-local function VolarAKickReady()
-    local character = localPlayer.Character
-    local rootPart = character and character:FindFirstChild("HumanoidRootPart")
-    if not rootPart then return end
+-- ===== CONFIGURACIÓN =====
+local SPEED = 250          -- Velocidad de vuelo (súbele para ir más rápido)
+local FLOOR_OFFSET = 2.5   -- Altura sobre el piso (vuelo pegado al piso)
+local STOP_DISTANCE = 6    -- Distancia a la que se detiene al llegar
 
-    -- Busca el objeto kickready en cualquier parte del mapa
-    local targetZone = game.Workspace:FindFirstChild("kickready", true)
-    
-    if targetZone then
-        local destinoPos = targetZone:IsA("Model") and targetZone:GetPivot().Position or targetZone.Position
-        -- Mantener la altura actual de tus pies para arrastrarse por el suelo
-        local destinoAjustado = Vector3.new(destinoPos.X, rootPart.Position.Y, destinoPos.Z)
-        
-        local distancia = (rootPart.Position - destinoAjustado).Magnitude
-        local duracion = distancia / VelocidadVuelo
-        
-        local infoTween = TweenInfo.new(duracion, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-        local objetivos = {CFrame = CFrame.new(destinoAjustado)}
-        local tween = TweenService:Create(rootPart, infoTween, objetivos)
-        
-        -- Bypass de gravedad y velocidad del juego
-        local bodyVelocity = Instance.new("BodyVelocity")
-        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-        bodyVelocity.MaxForce = Vector3.new(500000, 500000, 500000)
-        bodyVelocity.Parent = rootPart
-        
-        local humanoid = character:FindFirstChild("Humanoid")
-        if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.Physics) end
-        
-        tween:Play()
-        
-        -- Al llegar a kickready restablece el personaje
-        tween.Completed:Connect(function()
-            bodyVelocity:Destroy()
-            if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.GettingUp) end
-        end)
+-- Zona destino según tu imagen: Workspace > Areas > KickReady
+local TargetZone = Workspace:WaitForChild("Areas"):WaitForChild("KickReady")
+
+-- Obtener la posición de la zona
+local function GetTargetPosition()
+    if TargetZone:IsA("Model") and TargetZone.PrimaryPart then
+        return TargetZone.PrimaryPart.Position
     end
+    if TargetZone:IsA("BasePart") then
+        return TargetZone.Position
+    end
+    for _, child in ipairs(TargetZone:GetDescendants()) do
+        if child:IsA("BasePart") then
+            return child.Position
+        end
+    end
+    return nil
 end
 
--- CREACIÓN DE INTERFAZ MÓVIL LIGERA (Botón Flotante)
-local CoreGui = game:GetService("CoreGui")
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "DeltaMobileBypass"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = CoreGui
+-- Detectar la altura del piso para ir pegado a él
+local function GetGroundHeight(x, z, fallback)
+    local params = RaycastParams.new()
+    params.FilterType = Enum.RaycastFilterType.Exclude
+    params.FilterDescendantsInstances = {Character}
+    local result = Workspace:Raycast(Vector3.new(x, 2000, z), Vector3.new(0, -4000, 0), params)
+    return result and result.Position.Y or fallback
+end
 
-local Button = Instance.new("TextButton")
-Button.Size = UDim2.new(0, 70, 0, 70)
-Button.Position = UDim2.new(0.1, 0, 0.4, 0) -- Posición inicial en tu pantalla
-Button.BackgroundColor3 = Color3.fromRGB(240, 50, 50)
-Button.Text = "RUN"
-Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-Button.Font = Enum.Font.SourceSansBold
-Button.TextSize = 20
-Button.Parent = ScreenGui
+local targetPos = GetTargetPosition()
+if not targetPos then
+    warn("❌ No se encontró la posición de KickReady")
+    return
+end
 
--- Hacer el botón redondo y estético
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 35)
-UICorner.Parent = Button
+print("🚀 Volando a KickReady...")
 
--- ACTIVACIÓN POR TOQUE EN PANTALLA TÁCTIL
-Button.MouseButton1Click:Connect(function()
-    VolarAKickReady()
-end)
-
--- SISTEMA PARA MOVER EL BOTÓN CON EL DEDO A DONDE QUIERAS
-local dragging, dragInput, dragStart, startPos
-Button.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = Button.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then dragging = false end
-        end)
+-- Bucle de vuelo
+local connection
+connection = RunService.Heartbeat:Connect(function(dt)
+    if not Root or not Root.Parent then
+        connection:Disconnect()
+        return
     end
-end)
-Button.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
-end)
-UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        local delta = input.Position - dragStart
-        Button.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+
+    local current = Root.Position
+    local flat = Vector3.new(targetPos.X, current.Y, targetPos.Z)
+    local direction = flat - current
+    local distance = direction.Magnitude
+
+    -- Al llegar a la zona, se detiene solo
+    if distance <= STOP_DISTANCE then
+        connection:Disconnect()
+        print("✅ ¡Llegaste a KickReady!")
+        return
     end
+
+    direction = direction.Unit
+
+    -- Altura pegada al piso (sigue el terreno)
+    local groundY = GetGroundHeight(current.X, current.Z, current.Y)
+    local targetY = groundY + FLOOR_OFFSET
+    local newY = current.Y + (targetY - current.Y) * math.min(1, dt * 10)
+
+    -- Movimiento a la velocidad configurada
+    local step = math.min(SPEED * dt, distance)
+    local newPos = current + direction * step
+    newPos = Vector3.new(newPos.X, newY, newPos.Z)
+
+    -- El personaje mira hacia donde vuela
+    local rotation = CFrame.lookAt(Vector3.new(0, 0, 0), direction)
+    Root.CFrame = CFrame.new(newPos) * rotation
 end)
