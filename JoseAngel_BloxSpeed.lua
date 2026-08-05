@@ -1,76 +1,97 @@
-local Library = loadstring(game:HttpGet("https://githubusercontent.com"))()
-local Window = Library.CreateLib("Lucky Block 'kickready' Bypass 🌊", "Midnight")
-local Tab = Window:NewTab("Auto-Safe")
-local Section = Tab:NewSection("Vuelo Directo a kickready")
-
--- SERVICIOS
+-- SERVICIOS PRINCIPALES
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
 local localPlayer = Players.LocalPlayer
 
--- VELOCIDAD AJUSTABLE (Muy rápida para ganarle a la ola)
-local VelocidadVuelo = 200 
+-- CONFIGURACIÓN
+local VelocidadVuelo = 200 -- Velocidad del deslizamiento terrestre
 
--- FUNCIÓN PRINCIPAL DE DESPLAZAMIENTO TERRESTRE
+-- FUNCIÓN PARA VOLAR A RAS DE SUELO
 local function VolarAKickReady()
     local character = localPlayer.Character
     local rootPart = character and character:FindFirstChild("HumanoidRootPart")
-    
-    if not rootPart then 
-        warn("¡Error! No se encontró el cuerpo de tu personaje.")
-        return 
-    end
+    if not rootPart then return end
 
-    -- BUSCADOR AUTOMÁTICO DEL MAPA: Busca el objeto llamado kickready
-    local targetZone = game.Workspace:FindFirstChild("kickready", true) 
+    -- Busca el objeto kickready en cualquier parte del mapa
+    local targetZone = game.Workspace:FindFirstChild("kickready", true)
     
-    if targetZone and (targetZone:IsA("BasePart") or targetZone:IsA("Model")) then
-        -- Obtener posición del objeto
+    if targetZone then
         local destinoPos = targetZone:IsA("Model") and targetZone:GetPivot().Position or targetZone.Position
-        
-        -- Ajustamos la altura para ir pegados al piso (Evita traspasar el mapa)
+        -- Mantener la altura actual de tus pies para arrastrarse por el suelo
         local destinoAjustado = Vector3.new(destinoPos.X, rootPart.Position.Y, destinoPos.Z)
         
-        -- Calculamos duración según la distancia para que la velocidad sea constante
         local distancia = (rootPart.Position - destinoAjustado).Magnitude
         local duracion = distancia / VelocidadVuelo
         
-        -- Configuración física del movimiento lineal
         local infoTween = TweenInfo.new(duracion, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-        local objetivos = {CFrame = CFrame.new(destinoAjustado) * CFrame.Angles(0, rootPart.Rotation.Y, 0)}
-        
+        local objetivos = {CFrame = CFrame.new(destinoAjustado)}
         local tween = TweenService:Create(rootPart, infoTween, objetivos)
         
-        -- CREACIÓN DE ANTIGRAVEDAD (Bypass de velocidad para que el juego no te regrese)
+        -- Bypass de gravedad y velocidad del juego
         local bodyVelocity = Instance.new("BodyVelocity")
         bodyVelocity.Velocity = Vector3.new(0, 0, 0)
         bodyVelocity.MaxForce = Vector3.new(500000, 500000, 500000)
         bodyVelocity.Parent = rootPart
         
-        -- Desactivar temporalmente la caída
         local humanoid = character:FindFirstChild("Humanoid")
         if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.Physics) end
         
-        -- Empezar a volar a ras de suelo
         tween:Play()
-        print("🚀 Volando directo a kickready sobre el suelo...")
         
-        -- Al llegar a kickready, te devuelve tus físicas normales para que cobres
+        -- Al llegar a kickready restablece el personaje
         tween.Completed:Connect(function()
             bodyVelocity:Destroy()
             if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.GettingUp) end
-            print("¡Llegaste a kickready sano y salvo! Brainrots asegurados.")
         end)
-    else
-        warn("No se pudo encontrar el objeto 'kickready' en el mapa. Revisa si está escrito exactamente así.")
     end
 end
 
--- INTERFAZ DE USUARIO PARA DELTA EXECUTOR
-Section:NewButton("⚡ Volar a kickready (Salvarse)", "Te desliza súper rápido por el piso hasta la base", function()
+-- CREACIÓN DE INTERFAZ MÓVIL LIGERA (Botón Flotante)
+local CoreGui = game:GetService("CoreGui")
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "DeltaMobileBypass"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = CoreGui
+
+local Button = Instance.new("TextButton")
+Button.Size = UDim2.new(0, 70, 0, 70)
+Button.Position = UDim2.new(0.1, 0, 0.4, 0) -- Posición inicial en tu pantalla
+Button.BackgroundColor3 = Color3.fromRGB(240, 50, 50)
+Button.Text = "RUN"
+Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+Button.Font = Enum.Font.SourceSansBold
+Button.TextSize = 20
+Button.Parent = ScreenGui
+
+-- Hacer el botón redondo y estético
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 35)
+UICorner.Parent = Button
+
+-- ACTIVACIÓN POR TOQUE EN PANTALLA TÁCTIL
+Button.MouseButton1Click:Connect(function()
     VolarAKickReady()
 end)
 
-Section:NewSlider("Ajustar Velocidad de Desplazamiento", "Cambia qué tan rápido te arrastras", 400, 100, function(v)
-    VelocidadVuelo = v
+-- SISTEMA PARA MOVER EL BOTÓN CON EL DEDO A DONDE QUIERAS
+local dragging, dragInput, dragStart, startPos
+Button.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = Button.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then dragging = false end
+        end)
+    end
+end)
+Button.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        Button.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
 end)
