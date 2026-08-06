@@ -1,6 +1,6 @@
 -- ==========================================
 -- Script: JoseAngel_Blox premium no key
--- Versión: Delta Executor Compatible (v1.1)
+-- Versión: Delta Executor Compatible (v1.3)
 -- ==========================================
 
 local Players = game:GetService("Players")
@@ -27,7 +27,7 @@ getgenv().AutoFarm = false
 getgenv().VelocidadFarm = 500
 getgenv().MultiplierX2 = false
 getgenv().AutoCollectCash = false
-getgenv().InfinitePotions = false -- NUEVA VARIABLE PARA POCIONES
+getgenv().InfinitePotions = false
 
 -- Variables globales (Pestaña Player)
 getgenv().InfiniteJump = false
@@ -99,7 +99,49 @@ local function collectCash()
 end
 
 -- ==========================================
--- 3. CREACIÓN DE LA GUI Y BOTÓN FLOTANTE
+-- 3. FUNCIÓN ESPECIAL: POTION FIREWORKS
+-- ==========================================
+local function triggerPotionFireworks()
+    pcall(function()
+        local modules = ReplicatedStorage:FindFirstChild("Modules")
+        if modules then
+            local controllerLoader = modules:FindFirstChild("ControllerLoader")
+            if controllerLoader then
+                local envController = controllerLoader:FindFirstChild("EnvironmentController")
+                if envController then
+                    local potionFireworks = envController:FindFirstChild("Potion Fireworks")
+                    if potionFireworks then
+                        -- 1. Si contiene remotos dentro, los disparará
+                        for _, child in pairs(potionFireworks:GetChildren()) do
+                            if child:IsA("RemoteEvent") then
+                                child:FireServer()
+                            elseif child:IsA("BindableEvent") then
+                                child:Fire()
+                            end
+                        end
+                        
+                        -- 2. Si es un ModuleScript, intentará requerirlo y ejecutarlo
+                        if potionFireworks:IsA("ModuleScript") then
+                            local mod = require(potionFireworks)
+                            if type(mod) == "function" then
+                                pcall(mod)
+                            elseif type(mod) == "table" then
+                                for _, v in pairs(mod) do
+                                    if type(v) == "function" then
+                                        pcall(v)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end)
+end
+
+-- ==========================================
+-- 4. CREACIÓN DE LA GUI Y BOTÓN FLOTANTE
 -- ==========================================
 if CoreGui:FindFirstChild("JoseAngel_Blox_GUI") then
     CoreGui.JoseAngel_Blox_GUI:Destroy()
@@ -191,7 +233,7 @@ local TitleLabel = Instance.new("TextLabel")
 TitleLabel.Size = UDim2.new(1, 0, 0, 28)
 TitleLabel.Position = UDim2.new(0, 0, 0, 4)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "JoseAngel_Blox premium no key v1.1"
+TitleLabel.Text = "JoseAngel_Blox premium no key v1.3"
 TitleLabel.Font = Enum.Font.GothamBold
 TitleLabel.TextSize = 18
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -262,7 +304,7 @@ MainPage.Position = UDim2.new(0, 8, 0, 8)
 MainPage.BackgroundTransparency = 1
 MainPage.Visible = false
 MainPage.ScrollBarThickness = 3
-MainPage.CanvasSize = UDim2.new(0, 0, 0, 240) -- AMPLIADO PARA EL NUEVO BOTÓN
+MainPage.CanvasSize = UDim2.new(0, 0, 0, 240)
 MainPage.ZIndex = 4
 MainPage.Parent = ContentContainer
 
@@ -335,13 +377,13 @@ InfoText.TextWrapped = true
 InfoText.ZIndex = 4
 InfoText.Text = "Nombre del Creador: JoseAngel_Blox\n\n" ..
                 "Fecha de lanzamiento: 02/08/2026\n\n" ..
-                "Versión: 1.1 (Delta Compatible)\n\n" ..
+                "Versión: 1.3 (Potion Fireworks Fix)\n\n" ..
                 "Características:\n" ..
                 "- Auto Kick\n" ..
                 "- Auto Farm (Safe Zone)\n" ..
                 "- Multiplier x2\n" ..
                 "- Auto Collect Cash\n" ..
-                "- Infinite Potions (Free Boosts)\n" ..
+                "- Auto Boosts & Potion Fireworks 🧪\n" ..
                 "- Infinite Jump\n" ..
                 "- Anti Lag\n" ..
                 "- Mostrar FPS\n\n" ..
@@ -349,7 +391,7 @@ InfoText.Text = "Nombre del Creador: JoseAngel_Blox\n\n" ..
 InfoText.Parent = InfoPage
 
 -- ==========================================
--- 4. GENERADOR DE TOGGLES
+-- 5. GENERADOR DE TOGGLES
 -- ==========================================
 local function createToggle(parent, name, posY, callback)
     local container = Instance.new("TextButton")
@@ -412,7 +454,7 @@ local function createToggle(parent, name, posY, callback)
 end
 
 -- ==========================================
--- 5. TOGGLES: PESTAÑA MAIN
+-- 6. TOGGLES: PESTAÑA MAIN
 -- ==========================================
 
 -- Auto Kick
@@ -493,42 +535,48 @@ createToggle(MainPage, "Auto Collect Cash 💰", 132, function(state)
     end
 end)
 
--- Infinite Potions / Free Boosts (NUEVO TOGGLE)
-createToggle(MainPage, "Infinite Potions (Free)", 176, function(state)
+-- Auto Boosts & Potion Fireworks (ACTUALIZADO V1.3)
+createToggle(MainPage, "Auto Boosts & Potions 🧪", 176, function(state)
     getgenv().InfinitePotions = state
     if state then
         task.spawn(function()
             while getgenv().InfinitePotions do
+                -- 1. Activamos la nueva función del Potion Fireworks que encontraste
+                triggerPotionFireworks()
+                
+                -- 2. Escaneo complementario por si hay remotos de regalos o boosts
                 pcall(function()
-                    -- Dispara los eventos de Boosts disponibles en el servidor
-                    local boostRemotes = {
-                        "rev_UseBoost",
-                        "rev_ClaimFreeBoost",
-                        "rev_ActivateBoost"
-                    }
-                    for _, remoteName in pairs(boostRemotes) do
-                        local remote = Network:FindFirstChild(remoteName)
-                        if remote then
-                            remote:FireServer("Speed")
-                            remote:FireServer("Power")
-                            remote:FireServer("Coins")
-                            remote:FireServer("Luck")
-                            remote:FireServer()
+                    for _, remote in pairs(Network:GetChildren()) do
+                        if remote:IsA("RemoteEvent") or remote:IsA("RemoteFunction") then
+                            local name = string.lower(remote.Name)
+                            if string.find(name, "boost") or string.find(name, "potion") or string.find(name, "gift") or string.find(name, "reward") or string.find(name, "claim") or string.find(name, "free") then
+                                pcall(function()
+                                    for i = 1, 12 do
+                                        remote:FireServer(i)
+                                    end
+                                    remote:FireServer("Speed")
+                                    remote:FireServer("Power")
+                                    remote:FireServer("Coins")
+                                    remote:FireServer("Luck")
+                                    remote:FireServer()
+                                end)
+                            end
                         end
                     end
-                    -- También refrescamos el evento TaviMishkal por seguridad
+                    
                     if MultiplierEvent then
                         MultiplierEvent:FireServer()
                     end
                 end)
-                task.wait(4) -- Re-activa cada 4 segundos para mantener el tiempo ilimitado
+                
+                task.wait(4)
             end
         end)
     end
 end)
 
 -- ==========================================
--- 6. TOGGLES: PESTAÑA PLAYER
+-- 7. TOGGLES: PESTAÑA PLAYER
 -- ==========================================
 
 -- Infinite Jump
