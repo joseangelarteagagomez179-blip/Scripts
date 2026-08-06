@@ -1,6 +1,6 @@
 -- ==========================================
 -- Script: JoseAngel_Blox premium no key
--- Versión: Delta Executor Compatible (v1.3)
+-- Versión: Delta Executor Compatible (v1.4)
 -- ==========================================
 
 local Players = game:GetService("Players")
@@ -21,7 +21,7 @@ local KickEvent = Network:WaitForChild("rev_KickEvent")
 local MultiplierEvent = Network:WaitForChild("rev_TaviMishkal")
 local kickArgs = {1, 1}
 
--- Variables globales
+-- Variables globales (Pestaña Main)
 getgenv().AutoKick = false
 getgenv().AutoFarm = false
 getgenv().VelocidadFarm = 500
@@ -99,7 +99,7 @@ local function collectCash()
 end
 
 -- ==========================================
--- 3. FUNCIÓN ESPECIAL: POTION FIREWORKS
+-- 3. FUNCIÓN ESPECIAL: POTION FIREWORKS (v1.4 FIX)
 -- ==========================================
 local function triggerPotionFireworks()
     pcall(function()
@@ -110,27 +110,14 @@ local function triggerPotionFireworks()
                 local envController = controllerLoader:FindFirstChild("EnvironmentController")
                 if envController then
                     local potionFireworks = envController:FindFirstChild("Potion Fireworks")
-                    if potionFireworks then
-                        -- 1. Si contiene remotos dentro, los disparará
-                        for _, child in pairs(potionFireworks:GetChildren()) do
-                            if child:IsA("RemoteEvent") then
-                                child:FireServer()
-                            elseif child:IsA("BindableEvent") then
-                                child:Fire()
-                            end
-                        end
+                    if potionFireworks and potionFireworks:IsA("ModuleScript") then
+                        -- 1. Requerimos el módulo descubierto
+                        local mod = require(potionFireworks)
                         
-                        -- 2. Si es un ModuleScript, intentará requerirlo y ejecutarlo
-                        if potionFireworks:IsA("ModuleScript") then
-                            local mod = require(potionFireworks)
-                            if type(mod) == "function" then
-                                pcall(mod)
-                            elseif type(mod) == "table" then
-                                for _, v in pairs(mod) do
-                                    if type(v) == "function" then
-                                        pcall(v)
-                                    end
-                                end
+                        -- 2. Ejecutamos la función "Start" del controlador si no está activa
+                        if mod and type(mod) == "table" and mod.Start then
+                            if not mod.Running then
+                                mod.Start()
                             end
                         end
                     end
@@ -233,7 +220,7 @@ local TitleLabel = Instance.new("TextLabel")
 TitleLabel.Size = UDim2.new(1, 0, 0, 28)
 TitleLabel.Position = UDim2.new(0, 0, 0, 4)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "JoseAngel_Blox premium no key v1.3"
+TitleLabel.Text = "JoseAngel_Blox premium no key v1.4"
 TitleLabel.Font = Enum.Font.GothamBold
 TitleLabel.TextSize = 18
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -377,7 +364,7 @@ InfoText.TextWrapped = true
 InfoText.ZIndex = 4
 InfoText.Text = "Nombre del Creador: JoseAngel_Blox\n\n" ..
                 "Fecha de lanzamiento: 02/08/2026\n\n" ..
-                "Versión: 1.3 (Potion Fireworks Fix)\n\n" ..
+                "Versión: 1.4 (Potion Fireworks Fix)\n\n" ..
                 "Características:\n" ..
                 "- Auto Kick\n" ..
                 "- Auto Farm (Safe Zone)\n" ..
@@ -535,16 +522,16 @@ createToggle(MainPage, "Auto Collect Cash 💰", 132, function(state)
     end
 end)
 
--- Auto Boosts & Potion Fireworks (ACTUALIZADO V1.3)
+-- Auto Boosts & Potion Fireworks (ACTUALIZADO V1.4)
 createToggle(MainPage, "Auto Boosts & Potions 🧪", 176, function(state)
     getgenv().InfinitePotions = state
     if state then
         task.spawn(function()
             while getgenv().InfinitePotions do
-                -- 1. Activamos la nueva función del Potion Fireworks que encontraste
+                -- 1. Activación del módulo Potion Fireworks (Start)
                 triggerPotionFireworks()
                 
-                -- 2. Escaneo complementario por si hay remotos de regalos o boosts
+                -- 2. Escaneo complementario de remotos de regalos y pociones
                 pcall(function()
                     for _, remote in pairs(Network:GetChildren()) do
                         if remote:IsA("RemoteEvent") or remote:IsA("RemoteFunction") then
