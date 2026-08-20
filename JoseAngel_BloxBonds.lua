@@ -1,228 +1,261 @@
--- ═══════════════════════════════════════════════════════════
--- JoseAngel_Blox Bonds - Auto Farm Script para Dead Rails
--- Optimizado para Delta Executor
--- ═══════════════════════════════════════════════════════════
+-- Script: JoseAngel_Blox Bonds
+-- Autor: JoseAngel_Blox
+-- Fecha: 20/08/2026
 
+-- Servicios
 local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
--- ═══════════════════════════════════════════════════════════
--- CONFIGURACIÓN
--- ═══════════════════════════════════════════════════════════
-local Settings = {
-    FarmEnabled = false,
-    FarmSpeed = 1, -- Segundos entre cada acción
-    CollectRadius = 100 -- Radio para detectar items
-}
+local jugador = Players.LocalPlayer
 
--- ═══════════════════════════════════════════════════════════
--- CREACIÓN DE LA UI
--- ═══════════════════════════════════════════════════════════
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "JoseAngelBloxUI"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = playerGui
+-- Crear GUI principal
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "JoseAngel_Blox_GUI"
+screenGui.Parent = game.CoreGui
 
--- Frame principal (cuadrado con esquinas redondeadas)
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 300, 0, 200)
-MainFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-MainFrame.BorderSizePixel = 0
-MainFrame.Parent = ScreenGui
+-- Marco principal con esquinas redondeadas
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 500, 0, 350)
+mainFrame.Position = UDim2.new(0.5, -250, 0.5, -175)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+mainFrame.BorderSizePixel = 0
+mainFrame.BackgroundTransparency = 0.2
+mainFrame.ZIndex = 10
+mainFrame.Parent = screenGui
 
--- Esquinas redondeadas
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 15)
-UICorner.Parent = MainFrame
+-- CornerRadius para esquinas redondeadas
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10)
+corner.Parent = mainFrame
 
--- Borde decorativo
-local UIStroke = Instance.new("UIStroke")
-UIStroke.Color = Color3.fromRGB(255, 215, 0) -- Dorado
-UIStroke.Thickness = 2
-UIStroke.Parent = MainFrame
+-- Título del script
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Position = UDim2.new(0, 0, 0, 10)
+title.Text = "JoseAngel_Blox Bonds"
+title.TextColor3 = Color3.fromRGB(255, 0, 0) -- Rojo
+title.Font = Enum.Font.GothamBold
+title.TextScaled = true
+title.BackgroundTransparency = 1
+title.ZIndex = 10
+title.Parent = mainFrame
 
--- Título: JoseAngel_Blox Bonds (en amarillo)
-local Title = Instance.new("TextLabel")
-Title.Name = "Title"
-Title.Size = UDim2.new(1, 0, 0, 40)
-Title.Position = UDim2.new(0, 0, 0, 10)
-Title.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-Title.BackgroundTransparency = 1
-Title.Text = "JoseAngel_Blox Bonds"
-Title.TextColor3 = Color3.fromRGB(255, 215, 0) -- Amarillo
-Title.TextSize = 22
-Title.Font = Enum.Font.GothamBold
-Title.Parent = MainFrame
+-- Texto transparente debajo del título
+local creatorText = Instance.new("TextLabel")
+creatorText.Size = UDim2.new(1, 0, 0, 20)
+creatorText.Position = UDim2.new(0, 0, 0, 50)
+creatorText.Text = "Creado por JoseAngel_Blox"
+creatorText.TextTransparency = 0.5
+creatorText.TextColor3 = Color3.fromRGB(255, 255, 255)
+creatorText.Font = Enum.Font.Gotham
+creatorText.TextScaled = true
+creatorText.BackgroundTransparency = 1
+creatorText.ZIndex = 10
+creatorText.Parent = mainFrame
 
--- Separador
-local Separator = Instance.new("Frame")
-Separator.Size = UDim2.new(0.9, 0, 0, 2)
-Separator.Position = UDim2.new(0.05, 0, 0, 55)
-Separator.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
-Separator.BorderSizePixel = 0
-Separator.Parent = MainFrame
+-- Contenedor de pestañas
+local tabContainer = Instance.new("Frame")
+tabContainer.Size = UDim2.new(0, 120, 1, -80)
+tabContainer.Position = UDim2.new(0, 10, 0, 80)
+tabContainer.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+tabContainer.BorderSizePixel = 0
+tabContainer.ZIndex = 10
+tabContainer.Parent = mainFrame
 
--- Label de la función
-local FunctionLabel = Instance.new("TextLabel")
-FunctionLabel.Name = "FunctionLabel"
-FunctionLabel.Size = UDim2.new(1, 0, 0, 30)
-FunctionLabel.Position = UDim2.new(0, 0, 0, 70)
-FunctionLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-FunctionLabel.BackgroundTransparency = 1
-FunctionLabel.Text = "Auto Farm Bonds"
-FunctionLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-FunctionLabel.TextSize = 18
-FunctionLabel.Font = Enum.Font.GothamMedium
-FunctionLabel.Parent = MainFrame
+-- Botón Info
+local infoButton = Instance.new("TextButton")
+infoButton.Size = UDim2.new(1, 0, 0, 40)
+infoButton.Position = UDim2.new(0, 0, 0, 0)
+infoButton.Text = "Info"
+infoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+infoButton.Font = Enum.Font.Gotham
+infoButton.BackgroundTransparency = 0.5
+infoButton.ZIndex = 10
+infoButton.Parent = tabContainer
 
--- Botón de Toggle
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Name = "ToggleButton"
-ToggleButton.Size = UDim2.new(0.7, 0, 0, 40)
-ToggleButton.Position = UDim2.new(0.15, 0, 0, 110)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
-ToggleButton.Text = "OFF"
-ToggleButton.TextColor3 = Color3.fromRGB(255, 80, 80) -- Rojo cuando está OFF
-ToggleButton.TextSize = 18
-ToggleButton.Font = Enum.Font.GothamBold
-ToggleButton.Parent = MainFrame
+-- Botón Auto Farm
+local autoFarmButton = Instance.new("TextButton")
+autoFarmButton.Size = UDim2.new(1, 0, 0, 40)
+autoFarmButton.Position = UDim2.new(0, 0, 0, 50)
+autoFarmButton.Text = "Auto Farm Bonds"
+autoFarmButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoFarmButton.Font = Enum.Font.Gotham
+autoFarmButton.BackgroundTransparency = 0.5
+autoFarmButton.ZIndex = 10
+autoFarmButton.Parent = tabContainer
 
-local ToggleCorner = Instance.new("UICorner")
-ToggleCorner.CornerRadius = UDim.new(0, 10)
-ToggleCorner.Parent = ToggleButton
+-- Contenido de las pestañas
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(1, -140, 1, -80)
+contentFrame.Position = UDim2.new(0, 140, 0, 80)
+contentFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+contentFrame.BorderSizePixel = 0
+contentFrame.ZIndex = 10
+contentFrame.Parent = mainFrame
 
-local ToggleStroke = Instance.new("UIStroke")
-ToggleStroke.Color = Color3.fromRGB(255, 80, 80)
-ToggleStroke.Thickness = 2
-ToggleStroke.Parent = ToggleButton
+-- Contenido Info
+local infoContent = Instance.new("ScrollingFrame")
+infoContent.Size = UDim2.new(1, 0, 1, 0)
+infoContent.BackgroundTransparency = 1
+infoContent.ScrollBarThickness = 5
+infoContent.ZIndex = 10
+infoContent.Parent = contentFrame
 
--- Estado actual
-local StatusLabel = Instance.new("TextLabel")
-StatusLabel.Size = UDim2.new(1, 0, 0, 20)
-StatusLabel.Position = UDim2.new(0, 0, 0, 160)
-StatusLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-StatusLabel.BackgroundTransparency = 1
-StatusLabel.Text = "Estado: Inactivo"
-StatusLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
-StatusLabel.TextSize = 14
-StatusLabel.Font = Enum.Font.Gotham
-StatusLabel.Parent = MainFrame
+local infoLabel = Instance.new("TextLabel")
+infoLabel.Size = UDim2.new(1, -20, 0, 20)
+infoLabel.Position = UDim2.new(0, 10, 0, 10)
+infoLabel.Text = "Nombre del Creador: JoseAngel_Blox"
+infoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+infoLabel.Font = Enum.Font.Gotham
+infoLabel.TextScaled = true
+infoLabel.BackgroundTransparency = 1
+infoLabel.ZIndex = 10
+infoLabel.Parent = infoContent
 
--- ═══════════════════════════════════════════════════════════
--- LÓGICA DEL AUTO FARM
--- ═══════════════════════════════════════════════════════════
-local function collectBonds()
-    if not Settings.FarmEnabled then return end
-    
-    local character = player.Character
-    if not character then return end
-    
-    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-    if not humanoidRootPart then return end
-    
-    -- Buscar items de valor (coal, scrap, gold, etc.)
-    for _, item in pairs(workspace:GetDescendants()) do
-        if not Settings.FarmEnabled then break end
-        
-        if item:IsA("Model") or item:IsA("Part") then
-            local itemName = string.lower(item.Name)
-            
-            -- Detectar items que dan bonds
-            if itemName:find("coal") or itemName:find("scrap") or 
-               itemName:find("gold") or itemName:find("corpse") or
-               itemName:find("bond") or itemName:find("money") then
-                
-                local itemPosition = item:FindFirstChild("HumanoidRootPart") 
-                    and item.HumanoidRootPart.Position 
-                    or item.Position
-                
-                local distance = (humanoidRootPart.Position - itemPosition).Magnitude
-                
-                if distance <= Settings.CollectRadius then
-                    -- Teletransportar al item
-                    humanoidRootPart.CFrame = CFrame.new(itemPosition)
-                    wait(0.5)
-                    
-                    -- Intentar recoger el item
-                    local tool = item:FindFirstChildWhichIsA("Tool")
-                    if tool then
-                        tool.Parent = character
-                        wait(0.2)
-                    end
-                end
-            end
-        end
-    end
-end
+local releaseDate = infoLabel:Clone()
+releaseDate.Text = "Fecha de lanzamiento: 20/08/2026"
+releaseDate.Position = UDim2.new(0, 10, 0, 40)
+releaseDate.Parent = infoContent
 
--- Loop principal del Auto Farm
-spawn(function()
-    while wait(Settings.FarmSpeed) do
-        if Settings.FarmEnabled then
-            collectBonds()
-        end
+local version = infoLabel:Clone()
+version.Text = "Versión: 1.1"
+version.Position = UDim2.new(0, 10, 0, 70)
+version.Parent = infoContent
+
+local update = infoLabel:Clone()
+update.Text = "Update: Bienvenidos y bienvenidas a mi Script. Este script es nuevo, rápido, sin bugs, con mayor compatibilidad. Espero y disfrutes del script. Atentamente, JoseAngel_Blox."
+update.Size = UDim2.new(1, -20, 0, 60)
+update.Position = UDim2.new(0, 10, 0, 100)
+update.TextWrapped = true
+update.Parent = infoContent
+
+-- Botones de Like y Dislike
+local likeButton = Instance.new("TextButton")
+likeButton.Size = UDim2.new(0, 80, 0, 30)
+likeButton.Position = UDim2.new(0, 10, 0, 170)
+likeButton.Text = "👍 Like"
+likeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+likeButton.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+likeButton.Font = Enum.Font.Gotham
+likeButton.ZIndex = 10
+likeButton.Parent = infoContent
+
+local dislikeButton = Instance.new("TextButton")
+dislikeButton.Size = UDim2.new(0, 80, 0, 30)
+dislikeButton.Position = UDim2.new(0, 100, 0, 170)
+dislikeButton.Text = "👎 Dislike"
+dislikeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+dislikeButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+dislikeButton.Font = Enum.Font.Gotham
+dislikeButton.ZIndex = 10
+dislikeButton.Parent = infoContent
+
+-- Contador de Likes y Dislikes
+local likeCount = Instance.new("TextLabel")
+likeCount.Size = UDim2.new(0, 100, 0, 20)
+likeCount.Position = UDim2.new(0, 10, 0, 210)
+likeCount.Text = "Likes: 0"
+likeCount.TextColor3 = Color3.fromRGB(0, 255, 0)
+likeCount.Font = Enum.Font.Gotham
+likeCount.TextScaled = true
+likeCount.BackgroundTransparency = 1
+likeCount.ZIndex = 10
+likeCount.Parent = infoContent
+
+local dislikeCount = Instance.new("TextLabel")
+dislikeCount.Size = UDim2.new(0, 100, 0, 20)
+dislikeCount.Position = UDim2.new(0, 10, 0, 240)
+dislikeCount.Text = "Dislikes: 0"
+dislikeCount.TextColor3 = Color3.fromRGB(255, 0, 0)
+dislikeCount.Font = Enum.Font.Gotham
+dislikeCount.TextScaled = true
+dislikeCount.BackgroundTransparency = 1
+dislikeCount.ZIndex = 10
+dislikeCount.Parent = infoContent
+
+-- Contenido Auto Farm
+local autoFarmContent = Instance.new("Frame")
+autoFarmContent.Size = UDim2.new(1, 0, 1, 0)
+autoFarmContent.BackgroundTransparency = 1
+autoFarmContent.Visible = false
+autoFarmContent.ZIndex = 10
+autoFarmContent.Parent = contentFrame
+
+local toggleLabel = Instance.new("TextLabel")
+toggleLabel.Size = UDim2.new(1, -20, 0, 20)
+toggleLabel.Position = UDim2.new(0, 10, 0, 10)
+toggleLabel.Text = "Auto Farm Bonds:"
+toggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleLabel.Font = Enum.Font.Gotham
+toggleLabel.TextScaled = true
+toggleLabel.BackgroundTransparency = 1
+toggleLabel.ZIndex = 10
+toggleLabel.Parent = autoFarmContent
+
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 60, 0, 30)
+toggleButton.Position = UDim2.new(0, 10, 0, 40)
+toggleButton.Text = "OFF"
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+toggleButton.Font = Enum.Font.Gotham
+toggleButton.ZIndex = 10
+toggleButton.Parent = autoFarmContent
+
+-- Variables para control
+local likes = 0
+local dislikes = 0
+local hasVoted = false
+
+-- Eventos de Like/Dislike
+likeButton.MouseButton1Click:Connect(function()
+    if not hasVoted then
+        likes = likes + 1
+        likeCount.Text = "Likes: " .. likes
+        hasVoted = true
     end
 end)
 
--- ═══════════════════════════════════════════════════════════
--- EVENTOS DEL TOGGLE
--- ═══════════════════════════════════════════════════════════
-ToggleButton.MouseButton1Click:Connect(function()
-    Settings.FarmEnabled = not Settings.FarmEnabled
-    
-    if Settings.FarmEnabled then
-        ToggleButton.Text = "ON"
-        ToggleButton.TextColor3 = Color3.fromRGB(80, 255, 80) -- Verde
-        ToggleStroke.Color = Color3.fromRGB(80, 255, 80)
-        StatusLabel.Text = "Estado: Farmeando Bonds..."
-        StatusLabel.TextColor3 = Color3.fromRGB(80, 255, 80)
-    else
-        ToggleButton.Text = "OFF"
-        ToggleButton.TextColor3 = Color3.fromRGB(255, 80, 80) -- Rojo
-        ToggleStroke.Color = Color3.fromRGB(255, 80, 80)
-        StatusLabel.Text = "Estado: Inactivo"
-        StatusLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+dislikeButton.MouseButton1Click:Connect(function()
+    if not hasVoted then
+        dislikes = dislikes + 1
+        dislikeCount.Text = "Dislikes: " .. dislikes
+        hasVoted = true
     end
 end)
 
--- Hacer el Frame arrastrable
-local dragging = false
-local dragInput, mousePos, framePos
+-- Control de pestañas
+infoButton.MouseButton1Click:Connect(function()
+    infoContent.Visible = true
+    autoFarmContent.Visible = false
+end)
 
-MainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        mousePos = input.Position
-        framePos = MainFrame.Position
-        
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
+autoFarmButton.MouseButton1Click:Connect(function()
+    infoContent.Visible = false
+    autoFarmContent.Visible = true
+end)
+
+-- Toggle de Auto Farm
+local isToggled = false
+toggleButton.MouseButton1Click:Connect(function()
+    isToggled = not isToggled
+    if isToggled then
+        toggleButton.Text = "ON"
+        toggleButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+        -- Aquí va la lógica de Auto Farm Bonds
+        spawn(function()
+            while isToggled do
+                task.wait(1) -- Ajusta según necesites
+                -- Lógica para recoger bonos
+                print("🔍 Recogiendo bonos automáticamente...")
             end
         end)
+    else
+        toggleButton.Text = "OFF"
+        toggleButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
     end
 end)
 
-MainFrame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        dragInput = input
-    end
-end)
-
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        local delta = input.Position - mousePos
-        MainFrame.Position = UDim2.new(
-            framePos.X.Scale,
-            framePos.X.Offset + delta.X,
-            framePos.Y.Scale,
-            framePos.Y.Offset + delta.Y
-        )
-    end
-end)
-
-print("✅ JoseAngel_Blox Bonds Script cargado correctamente!")
-print("🎮 Auto Farm Bonds: " .. (Settings.FarmEnabled and "ACTIVADO" or "DESACTIVADO"))
+print("🔧 GUI de JoseAngel_Blox Bonds cargada.")
