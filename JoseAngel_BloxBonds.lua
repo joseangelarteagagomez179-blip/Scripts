@@ -1,313 +1,239 @@
 -- ============================================
--- 🎩 JoseAngel_Blox Bonds
--- Creado por JoseAngel_Blox
--- Auto Farm Bonds: Banco | Castillo | Fuerte
+--   JoseAngel_Blox Bonds
+--   Creado por JoseAngel_Blox
+--   Auto Farm Bonds para Dead Rails
 -- ============================================
 
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local rootPart = character:WaitForChild("HumanoidRootPart")
-
--- 🔧 CONFIGURACIÓN
-local GUI_NAME = "JoseAngel_Blox Bonds"
-local BOND_COLOR = Color3.fromRGB(255, 0, 0) -- Rojo
-local TELEPORT_DELAY = 0.5
-local COLLECT_DELAY = 0.3
-local CHECK_INTERVAL = 1
-
--- 📍 UBICACIONES DE BONDS (actualiza según tu juego)
-local bondLocations = {
-    {name = "Banco", pos = Vector3.new(0, 10, 0)},      -- ⚠️ CAMBIA ESTAS COORDENADAS
-    {name = "Castillo", pos = Vector3.new(100, 10, 100)},
-    {name = "Fuerte", pos = Vector3.new(-80, 10, -80)},
-    {name = "Pueblo 1", pos = Vector3.new(50, 10, -50)},
-    {name = "Pueblo 2", pos = Vector3.new(-50, 10, 50)},
-}
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local TeleportService = game:GetService("TeleportService")
+local RunService = game:GetService("RunService")
 
 -- ============================================
--- 🖥️ CREACIÓN DE GUI
+--   VARIABLES
 -- ============================================
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = GUI_NAME
-screenGui.Parent = player:WaitForChild("PlayerGui") or gethui()
+local Cooldown = 0.1
+local TrackCount = 1
+local BondCount = 0
+local TrackPassed = false
+local FoundLobby = false
+local Farming = false
 
--- 📦 Frame Principal (cuadrado con esquinas redondeadas)
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 250, 0, 320)
-frame.Position = UDim2.new(0.5, -125, 0.5, -160)
-frame.BackgroundColor3 = BOND_COLOR
-frame.BackgroundTransparency = 0.15
-frame.BorderSizePixel = 0
-frame.ClipsDescendants = true
-frame.Parent = screenGui
+-- ============================================
+--   GUI
+-- ============================================
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "JoseAngelGui"
+ScreenGui.Parent = gethui() or game:GetService("CoreGui")
 
--- Esquinas redondeadas (usando UI Corner)
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 15)
-corner.Parent = frame
+-- Fondo principal
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 250, 0, 180)
+MainFrame.Position = UDim2.new(0.5, -125, 0.5, -90)
+MainFrame.BackgroundColor3 = Color3.fromRGB(180, 0, 0) -- Rojo oscuro
+MainFrame.BackgroundTransparency = 0.1
+MainFrame.BorderSizePixel = 0
+MainFrame.Parent = ScreenGui
 
--- Borde interior (opcional)
-local stroke = Instance.new("UIStroke")
-stroke.Thickness = 2
-stroke.Color = Color3.fromRGB(200, 0, 0)
-stroke.Transparency = 0.3
-stroke.Parent = frame
+-- Redondear bordes
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = MainFrame
 
--- 📝 Título
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 50)
-title.Position = UDim2.new(0, 0, 0, 10)
-title.BackgroundTransparency = 1
-title.Text = "JoseAngel_Blox Bonds"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextScaled = true
-title.Font = Enum.Font.GothamBold
-title.Parent = frame
-
--- 👤 Créditos
-local credit = Instance.new("TextLabel")
-credit.Size = UDim2.new(1, 0, 0, 30)
-credit.Position = UDim2.new(0, 0, 0, 55)
-credit.BackgroundTransparency = 1
-credit.Text = "Creado por JoseAngel_Blox"
-credit.TextColor3 = Color3.fromRGB(200, 200, 200)
-credit.TextScaled = true
-credit.Font = Enum.Font.Gotham
-credit.Parent = frame
+-- Título (nombre rojo brillante)
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Position = UDim2.new(0, 0, 0, 5)
+Title.BackgroundTransparency = 1
+Title.Text = "JoseAngel_Blox Bonds"
+Title.TextColor3 = Color3.fromRGB(255, 0, 0) -- Rojo brillante
+Title.TextScaled = true
+Title.Font = Enum.Font.GothamBold
+Title.Parent = MainFrame
 
 -- Línea separadora
-local line = Instance.new("Frame")
-line.Size = UDim2.new(0.9, 0, 0, 2)
-line.Position = UDim2.new(0.05, 0, 0, 90)
-line.BackgroundColor3 = Color3.fromRGB(255, 200, 200)
-line.BackgroundTransparency = 0.5
-line.Parent = frame
+local Line = Instance.new("Frame")
+Line.Size = UDim2.new(0.8, 0, 0, 2)
+Line.Position = UDim2.new(0.1, 0, 0, 42)
+Line.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+Line.Parent = MainFrame
 
--- 🔘 Botón Auto Farm
-local farmButton = Instance.new("TextButton")
-farmButton.Size = UDim2.new(0.8, 0, 0, 50)
-farmButton.Position = UDim2.new(0.1, 0, 0, 105)
-farmButton.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
-farmButton.BackgroundTransparency = 0.2
-farmButton.Text = "▶ ACTIVAR FARM"
-farmButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-farmButton.TextScaled = true
-farmButton.Font = Enum.Font.GothamBold
-farmButton.Parent = frame
+-- Subtítulo "Creado por JoseAngel_Blox"
+local SubTitle = Instance.new("TextLabel")
+SubTitle.Size = UDim2.new(1, 0, 0, 20)
+SubTitle.Position = UDim2.new(0, 0, 0, 48)
+SubTitle.BackgroundTransparency = 1
+SubTitle.Text = "Creado por JoseAngel_Blox"
+SubTitle.TextColor3 = Color3.fromRGB(255, 200, 200)
+SubTitle.TextScaled = true
+SubTitle.Font = Enum.Font.Gotham
+SubTitle.Parent = MainFrame
 
-local farmCorner = Instance.new("UICorner")
-farmCorner.CornerRadius = UDim.new(0, 8)
-farmCorner.Parent = farmButton
+-- Botón: Auto Farm Bonds
+local FarmButton = Instance.new("TextButton")
+FarmButton.Size = UDim2.new(0.8, 0, 0, 40)
+FarmButton.Position = UDim2.new(0.1, 0, 0, 80)
+FarmButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+FarmButton.Text = "Auto Farm Bonds"
+FarmButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+FarmButton.TextScaled = true
+FarmButton.Font = Enum.Font.GothamBold
+FarmButton.Parent = MainFrame
 
--- 📊 Estado
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(1, 0, 0, 30)
-statusLabel.Position = UDim2.new(0, 0, 0, 170)
-statusLabel.BackgroundTransparency = 1
-statusLabel.Text = "⚪ Inactivo"
-statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-statusLabel.TextScaled = true
-statusLabel.Font = Enum.Font.Gotham
-statusLabel.Parent = frame
+-- Redondear botón
+local ButtonCorner = Instance.new("UICorner")
+ButtonCorner.CornerRadius = UDim.new(0, 5)
+ButtonCorner.Parent = FarmButton
 
--- 📍 Ubicación actual
-local locationLabel = Instance.new("TextLabel")
-locationLabel.Size = UDim2.new(1, 0, 0, 30)
-locationLabel.Position = UDim2.new(0, 0, 0, 200)
-locationLabel.BackgroundTransparency = 1
-locationLabel.Text = "📍 Esperando..."
-locationLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
-locationLabel.TextScaled = true
-locationLabel.Font = Enum.Font.Gotham
-locationLabel.Parent = frame
+-- Estado del farm
+local StatusLabel = Instance.new("TextLabel")
+StatusLabel.Size = UDim2.new(1, 0, 0, 20)
+StatusLabel.Position = UDim2.new(0, 0, 0, 130)
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Text = "❌ Inactivo"
+StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+StatusLabel.TextScaled = true
+StatusLabel.Font = Enum.Font.Gotham
+StatusLabel.Parent = MainFrame
 
--- 🟢 Botón de pausa
-local pauseButton = Instance.new("TextButton")
-pauseButton.Size = UDim2.new(0.35, 0, 0, 35)
-pauseButton.Position = UDim2.new(0.1, 0, 0, 245)
-pauseButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-pauseButton.BackgroundTransparency = 0.3
-pauseButton.Text = "⏸ Pausa"
-pauseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-pauseButton.TextScaled = true
-pauseButton.Font = Enum.Font.Gotham
-pauseButton.Parent = frame
-
-local pauseCorner = Instance.new("UICorner")
-pauseCorner.CornerRadius = UDim.new(0, 6)
-pauseCorner.Parent = pauseButton
-
--- 🔴 Botón de parar
-local stopButton = Instance.new("TextButton")
-stopButton.Size = UDim2.new(0.35, 0, 0, 35)
-stopButton.Position = UDim2.new(0.55, 0, 0, 245)
-stopButton.BackgroundColor3 = Color3.fromRGB(120, 0, 0)
-stopButton.BackgroundTransparency = 0.3
-stopButton.Text = "⏹ Parar"
-stopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-stopButton.TextScaled = true
-stopButton.Font = Enum.Font.Gotham
-stopButton.Parent = frame
-
-local stopCorner = Instance.new("UICorner")
-stopCorner.CornerRadius = UDim.new(0, 6)
-stopCorner.Parent = stopButton
-
--- 🟢 Botón de cerrar GUI (opcional)
-local closeButton = Instance.new("TextButton")
-closeButton.Size = UDim2.new(0, 30, 0, 30)
-closeButton.Position = UDim2.new(1, -40, 0, 5)
-closeButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-closeButton.BackgroundTransparency = 0.6
-closeButton.Text = "✕"
-closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeButton.TextScaled = true
-closeButton.Font = Enum.Font.GothamBold
-closeButton.Parent = frame
-
-local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(1, 0)
-closeCorner.Parent = closeButton
-
-closeButton.MouseButton1Click:Connect(function()
-    screenGui:Destroy()
-end)
+-- Contador de Bonds
+local BondCounter = Instance.new("TextLabel")
+BondCounter.Size = UDim2.new(1, 0, 0, 20)
+BondCounter.Position = UDim2.new(0, 0, 0, 152)
+BondCounter.BackgroundTransparency = 1
+BondCounter.Text = "Bonds: 0"
+BondCounter.TextColor3 = Color3.fromRGB(255, 255, 255)
+BondCounter.TextScaled = true
+BondCounter.Font = Enum.Font.Gotham
+BondCounter.Parent = MainFrame
 
 -- ============================================
--- 🧠 LÓGICA DE AUTO FARM
+--   FUNCIÓN AUTO FARM BONDS
 -- ============================================
-local isFarming = false
-local isPaused = false
-local currentTarget = nil
-local farmLoop = nil
-local bondCollector = nil
-
--- Función para recoger bonos cercanos
-local function collectNearbyBonds()
-    local collection = game:GetService("CollectionService")
-    local bondObjects = collection:GetTagged("Bond") -- ⚠️ Cambia el tag si es necesario
-    
-    if #bondObjects == 0 then
-        -- Si no encuentra con tag, busca por nombre
-        bondObjects = {}
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v:IsA("Part") and (v.Name:lower():find("bond") or v.Name:lower():find("coin")) then
-                table.insert(bondObjects, v)
-            end
-        end
+local function AutoFarmBonds()
+    if Farming then
+        Farming = false
+        StatusLabel.Text = "❌ Inactivo"
+        StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+        FarmButton.Text = "Auto Farm Bonds"
+        print("Auto Farm desactivado")
+        return
     end
     
-    for _, bond in pairs(bondObjects) do
-        local distance = (bond.Position - rootPart.Position).Magnitude
-        if distance < 20 then -- Rango de recolección
-            -- Simula el toque o fire el evento correspondiente
-            local fire = bond:FindFirstChild("TouchInterest")
-            if fire then
-                fire:FireServer()
-            end
-            task.wait(COLLECT_DELAY)
-        end
-    end
-end
-
--- Función principal de farm
-local function startFarming()
-    if isFarming then return end
-    isFarming = true
-    isPaused = false
-    statusLabel.Text = "🟢 Farmeando..."
-    statusLabel.TextColor3 = Color3.fromRGB(0, 255, 100)
-    farmButton.Text = "⏹ DETENER"
+    Farming = true
+    StatusLabel.Text = "✅ Activo"
+    StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+    FarmButton.Text = "⏹ Detener"
+    print("Auto Farm iniciado")
     
-    farmLoop = game:GetService("RunService").Stepped:Connect(function()
-        if isPaused then return end
-        
-        -- 1. Buscar ubicaciones disponibles
-        local bestLocation = nil
-        local bestDistance = math.huge
-        
-        for _, loc in pairs(bondLocations) do
-            local dist = (loc.pos - rootPart.Position).Magnitude
-            if dist < bestDistance then
-                bestDistance = dist
-                bestLocation = loc
+    -- Resetear variables
+    TrackCount = 1
+    BondCount = 0
+    TrackPassed = false
+    FoundLobby = false
+    
+    -- Obtener referencias
+    local HPP = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not HPP then
+        print("Esperando personaje...")
+        LocalPlayer.CharacterAdded:Wait()
+        HPP = LocalPlayer.Character.HumanoidRootPart
+    end
+    
+    local CreateParty = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("CreatePartyClient")
+    
+    -- Iniciar loop principal
+    spawn(function()
+        while Farming do
+            task.wait(Cooldown)
+            
+            -- ============================================
+            --   CÓDIGO DE LA IMAGEN 1: FIND LOBBY
+            -- ============================================
+            if game.PlaceId == 116495829189052 then
+                if not FoundLobby then
+                    print("Buscando lobby...")
+                    for i, v in pairs(Workspace.TeleportZones:GetChildren()) do
+                        if v.Name == "TeleportZone" and v.BillboardGui.StateLabel.Text == "Waiting for players..." then
+                            print("¡Lobby encontrado!")
+                            HPP.CFrame = v.ZoneContainer.CFrame
+                            FoundLobby = true
+                            task.wait(1)
+                            CreateParty:FireServer({["maxPlayers"] = 1})
+                        end
+                    end
+                end
+            
+            -- ============================================
+            --   CÓDIGO DE LA IMAGEN 2: RECOLECTAR BONDS
+            -- ============================================
+            elseif game.PlaceId == 70876832253163 then
+                local StartingTrack = Workspace.RailSegments:FindFirstChild("RailSegment")
+                local CollectBond = ReplicatedStorage:FindFirstChild("Packages") and ReplicatedStorage.Packages:FindFirstChild("ActivatedObjectClient")
+                local Items = Workspace.RuntimeItems
+                
+                if not CollectBond then
+                    CollectBond = ReplicatedStorage:FindFirstChild("Packages"):FindFirstChild("ActivatedObjectClient")
+                end
+                
+                HPP.Anchored = true
+                
+                if not TrackPassed then
+                    print("Teleportando al track", TrackCount)
+                    TrackPassed = true
+                end
+                
+                HPP.CFrame = StartingTrack.Guide.CFrame + Vector3.new(0, 250, 0)
+                
+                if StartingTrack.NextTrack.Value ~= nil then
+                    StartingTrack = StartingTrack.NextTrack.Value
+                    TrackCount = TrackCount + 1
+                else
+                    TeleportService:Teleport(116495829189052, LocalPlayer)
+                end
+                
+                -- Recolectar Bonds
+                for i, v in pairs(Items:GetChildren()) do
+                    if v.Name == "Bond" or v.Name == "BondCalculated" then
+                        spawn(function()
+                            for i = 1, 1000 do
+                                pcall(function()
+                                    v.Part.CFrame = HPP.CFrame
+                                end)
+                            end
+                            if CollectBond then
+                                CollectBond:FireServer(v)
+                            end
+                        end)
+                        
+                        if v.Name == "Bond" then
+                            BondCount = BondCount + 1
+                            BondCounter.Text = "Bonds: " .. BondCount
+                            print("Bonds obtenidos:", BondCount)
+                            v.Name = "BondCalculated"
+                        end
+                    end
+                    task.wait()
+                end
+                
+                if Items:FindFirstChild("Bond") == nil then
+                    TrackPassed = false
+                end
             end
-        end
-        
-        if bestLocation then
-            currentTarget = bestLocation.name
-            locationLabel.Text = "📍 " .. bestLocation.name
-            locationLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
-            
-            -- Teleport a la ubicación
-            rootPart.CFrame = CFrame.new(bestLocation.pos)
-            task.wait(TELEPORT_DELAY)
-            
-            -- Recoger bonos
-            collectNearbyBonds()
-            task.wait(CHECK_INTERVAL)
         end
     end)
 end
 
--- Función para detener el farm
-local function stopFarming()
-    isFarming = false
-    isPaused = false
-    if farmLoop then
-        farmLoop:Disconnect()
-        farmLoop = nil
-    end
-    statusLabel.Text = "⚪ Detenido"
-    statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-    locationLabel.Text = "📍 Esperando..."
-    farmButton.Text = "▶ ACTIVAR FARM"
-end
-
--- Función para pausar/reanudar
-local function togglePause()
-    if not isFarming then return end
-    isPaused = not isPaused
-    pauseButton.Text = isPaused and "▶ Reanudar" or "⏸ Pausa"
-    statusLabel.Text = isPaused and "⏸ Pausado" or "🟢 Farmeando..."
-    statusLabel.TextColor3 = isPaused and Color3.fromRGB(255, 200, 0) or Color3.fromRGB(0, 255, 100)
-end
+-- ============================================
+--   BOTÓN
+-- ============================================
+FarmButton.MouseButton1Click:Connect(AutoFarmBonds)
 
 -- ============================================
--- 🎮 EVENTOS DE BOTONES
+--   INICIO
 -- ============================================
-farmButton.MouseButton1Click:Connect(function()
-    if isFarming then
-        stopFarming()
-    else
-        startFarming()
-    end
-end)
-
-pauseButton.MouseButton1Click:Connect(togglePause)
-
-stopButton.MouseButton1Click:Connect(stopFarming)
-
--- ============================================
--- 🧹 LIMPIEZA AL MORIR
--- ============================================
-player.CharacterAdded:Connect(function(newChar)
-    character = newChar
-    humanoid = newChar:WaitForChild("Humanoid")
-    rootPart = newChar:WaitForChild("HumanoidRootPart")
-    if isFarming then
-        stopFarming()
-        task.wait(2)
-        startFarming()
-    end
-end)
-
--- ============================================
--- 🔧 COORDENADAS - ¡ACTUALIZA ESTO!
--- ============================================
-print("⚠️ ADVERTENCIA: Actualiza las coordenadas en 'bondLocations'")
-print("📌 Usa el comando: print(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)")
-print("📌 Luego reemplaza los valores Vector3.new en el script")
-print("")
-print("✅ Script JoseAngel_Blox Bonds cargado correctamente")
+print("=== JoseAngel_Blox Bonds CARGADO ===")
+print("Creado por JoseAngel_Blox")
+print("Presiona el botón para iniciar Auto Farm")
