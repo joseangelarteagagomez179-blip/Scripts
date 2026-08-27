@@ -1,234 +1,345 @@
--- // PRISON LIFE PRO v1.1
--- // Creado por: JoseAngel_Blox
--- // Fecha: 26/08/2026
--- // Optimizado para Delta Executor
+-- [[ Prison Life Pro v1.1 ]]
+-- Creado por JoseAngel_Blox
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
+local player = game.Players.LocalPlayer
+local mouse = player:GetMouse()
+local camera = workspace.CurrentCamera
 
--- ==========================================
--- CONFIGURACIÓN DE LA UI (LIBRERÍA LIGERA)
--- ==========================================
--- Nota: En Delta puedes reemplazar esto por Orion/Owl si prefieres.
--- Esta UI está hecha desde cero para cumplir con tu diseño exacto.
+-- Crear UI
+local ui = Instance.new("ScreenGui")
+ui.Name = "PrisonLifePro"
+ui.Parent = game.CoreGui
+ui.ResetOnSpawn = false
 
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "PrisonLifePro_UI"
-ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+-- Frame principal
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 500, 0, 350)
+mainFrame.Position = UDim2.new(0.5, -250, 0.5, -175)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = ui
 
--- Marco Principal (Ancho, Azul Marino/Negro, Esquinas Redondeadas)
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 750, 0, 450)
-MainFrame.Position = UDim2.new(0.5, -375, 0.5, -225)
-MainFrame.BackgroundColor3 = Color3.fromRGB(10, 15, 30) -- Azul Marino casi negro
-MainFrame.BorderSizePixel = 0
-MainFrame.Parent = ScreenGui
+-- Esquinas redondeadas
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 12)
+uiCorner.Parent = mainFrame
 
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 12)
-MainCorner.Parent = MainFrame
+-- Borde
+local uiStroke = Instance.new("UIStroke")
+uiStroke.Color = Color3.fromRGB(60, 60, 60)
+uiStroke.Thickness = 2
+uiStroke.Parent = mainFrame
 
--- Título y Créditos
-local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Size = UDim2.new(1, 0, 0, 30)
-TitleLabel.Position = UDim2.new(0, 0, 0, 10)
-TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "Prison Life Pro"
-TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.TextSize = 22
-TitleLabel.Font = Enum.Font.GothamBold
-TitleLabel.Parent = MainFrame
+-- Título con degradado (mitad rojo, mitad azul)
+local titleFrame = Instance.new("Frame")
+titleFrame.Size = UDim2.new(0, 300, 0, 40)
+titleFrame.Position = UDim2.new(0.5, -150, 0, 10)
+titleFrame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+titleFrame.BorderSizePixel = 0
+titleFrame.Parent = mainFrame
 
-local CreatorLabel = Instance.new("TextLabel")
-CreatorLabel.Size = UDim2.new(1, 0, 0, 20)
-CreatorLabel.Position = UDim2.new(0, 0, 0, 38)
-CreatorLabel.BackgroundTransparency = 1
-CreatorLabel.Text = "Creado por JoseAngel_Blox"
-CreatorLabel.TextColor3 = Color3.fromRGB(150, 180, 255)
-CreatorLabel.TextSize = 14
-CreatorLabel.Font = Enum.Font.GothamMedium
-CreatorLabel.Parent = MainFrame
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 8)
+titleCorner.Parent = titleFrame
 
--- Contenedor de Pestañas (DERECHA)
-local TabContainer = Instance.new("Frame")
-TabContainer.Size = UDim2.new(0, 140, 1, -70)
-TabContainer.Position = UDim2.new(1, -145, 0, 65)
-TabContainer.BackgroundTransparency = 1
-TabContainer.Parent = MainFrame
+-- Gradiente
+local titleGradient = Instance.new("UIGradient")
+titleGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),  -- Rojo
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 0, 255)), -- Transición
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 255))   -- Azul
+})
+titleGradient.Parent = titleFrame
 
-local TabLayout = Instance.new("UIListLayout")
-TabLayout.Padding = UDim.new(0, 5)
-TabLayout.Parent = TabContainer
+-- Texto del título
+local titleText = Instance.new("TextLabel")
+titleText.Size = UDim2.new(1, 0, 1, 0)
+titleText.BackgroundTransparency = 1
+titleText.Text = "Prison Life Pro v1.1"
+titleText.Font = Enum.Font.FredokaOne
+titleText.TextSize = 20
+titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleText.TextStrokeTransparency = 0.5
+titleText.Parent = titleFrame
 
--- Contenedor de Funciones (IZQUIERDA)
-local ContentContainer = Instance.new("Frame")
-ContentContainer.Size = UDim2.new(1, -160, 1, -70)
-ContentContainer.Position = UDim2.new(0, 10, 0, 65)
-ContentContainer.BackgroundTransparency = 1
-ContentContainer.Parent = MainFrame
+-- Texto del creador (transparente)
+local creatorText = Instance.new("TextLabel")
+creatorText.Size = UDim2.new(0, 200, 0, 20)
+creatorText.Position = UDim2.new(0.5, -100, 0, 55)
+creatorText.BackgroundTransparency = 1
+creatorText.Text = "Creado por JoseAngel_Blox"
+creatorText.Font = Enum.Font.SourceSansItalic
+creatorText.TextSize = 14
+creatorText.TextColor3 = Color3.fromRGB(255, 255, 255)
+creatorText.TextTransparency = 0.3
+creatorText.Parent = mainFrame
 
--- ==========================================
--- SISTEMA DE PESTAÑAS Y FUNCIONES
--- ==========================================
-local Tabs = {}
-local CurrentTab = nil
+-- Marco de pestañas (izquierda)
+local tabFrame = Instance.new("Frame")
+tabFrame.Size = UDim2.new(0, 120, 0, 250)
+tabFrame.Position = UDim2.new(0, 10, 0, 90)
+tabFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+tabFrame.BorderSizePixel = 0
+tabFrame.Parent = mainFrame
 
-local function CreateTab(name, contentData)
-    -- Botón de Pestaña
-    local TabBtn = Instance.new("TextButton")
-    TabBtn.Size = UDim2.new(1, 0, 0, 35)
-    TabBtn.BackgroundColor3 = Color3.fromRGB(20, 30, 50)
-    TabBtn.Text = name
-    TabBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-    TabBtn.TextSize = 14
-    TabBtn.Font = Enum.Font.GothamSemibold
-    TabBtn.Parent = TabContainer
+local tabCorner = Instance.new("UICorner")
+tabCorner.CornerRadius = UDim.new(0, 8)
+tabCorner.Parent = tabFrame
+
+-- Marco de contenido (derecha)
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(0, 350, 0, 250)
+contentFrame.Position = UDim2.new(0, 140, 0, 90)
+contentFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+contentFrame.BorderSizePixel = 0
+contentFrame.Parent = mainFrame
+
+local contentCorner = Instance.new("UICorner")
+contentCorner.CornerRadius = UDim.new(0, 8)
+contentCorner.Parent = contentFrame
+
+-- ScrollingFrame para el contenido
+local scrollingFrame = Instance.new("ScrollingFrame")
+scrollingFrame.Size = UDim2.new(1, -10, 1, -10)
+scrollingFrame.Position = UDim2.new(0, 5, 0, 5)
+scrollingFrame.BackgroundTransparency = 1
+scrollingFrame.BorderSizePixel = 0
+scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 600)
+scrollingFrame.ScrollBarThickness = 4
+scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 80)
+scrollingFrame.Parent = contentFrame
+
+-- Variables para botones
+local selectedTab = nil
+local buttons = {}
+
+-- Función para crear pestañas
+local function createTab(name, position)
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 100, 0, 30)
+    button.Position = UDim2.new(0, 10, 0, position)
+    button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    button.BorderSizePixel = 0
+    button.Text = name
+    button.Font = Enum.Font.SourceSansBold
+    button.TextSize = 13
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Parent = tabFrame
     
-    local BtnCorner = Instance.new("UICorner")
-    BtnCorner.CornerRadius = UDim.new(0, 8)
-    BtnCorner.Parent = TabBtn
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0, 6)
+    buttonCorner.Parent = button
     
-    -- Frame de Contenido
-    local ContentFrame = Instance.new("ScrollingFrame")
-    ContentFrame.Size = UDim2.new(1, 0, 1, 0)
-    ContentFrame.BackgroundTransparency = 1
-    ContentFrame.ScrollBarThickness = 4
-    ContentFrame.Visible = false
-    ContentFrame.Parent = ContentContainer
-    
-    local ListLayout = Instance.new("UIListLayout")
-    ListLayout.Padding = UDim.new(0, 8)
-    ListLayout.Parent = ContentFrame
-    
-    -- Generar contenido según tipo
-    if type(contentData) == "string" then
-        -- Pestaña INFO
-        local InfoText = Instance.new("TextLabel")
-        InfoText.Size = UDim2.new(1, -10, 0, 200)
-        InfoText.BackgroundTransparency = 1
-        InfoText.TextWrapped = true
-        InfoText.TextXAlignment = Enum.TextXAlignment.Left
-        InfoText.TextYAlignment = Enum.TextYAlignment.Top
-        InfoText.Text = contentData
-        InfoText.TextColor3 = Color3.fromRGB(220, 220, 220)
-        InfoText.TextSize = 14
-        InfoText.Font = Enum.Font.Gotham
-        InfoText.RichText = true
-        InfoText.Parent = ContentFrame
-    elseif type(contentData) == "table" then
-        -- Pestañas con TOGGLES
-        for _, func in ipairs(contentData) do
-            local ToggleFrame = Instance.new("Frame")
-            ToggleFrame.Size = UDim2.new(1, -5, 0, 40)
-            ToggleFrame.BackgroundColor3 = Color3.fromRGB(15, 25, 45)
-            ToggleFrame.Parent = ContentFrame
-            
-            local TCorner = Instance.new("UICorner")
-            TCorner.CornerRadius = UDim.new(0, 6)
-            TCorner.Parent = ToggleFrame
-            
-            local TLabel = Instance.new("TextLabel")
-            TLabel.Size = UDim2.new(1, -60, 1, 0)
-            TLabel.Position = UDim2.new(0, 10, 0, 0)
-            TLabel.BackgroundTransparency = 1
-            TLabel.Text = func.name
-            TLabel.TextColor3 = Color3.fromRGB(230, 230, 230)
-            TLabel.TextSize = 13
-            TLabel.Font = Enum.Font.GothamMedium
-            TLabel.TextXAlignment = Enum.TextXAlignment.Left
-            TLabel.Parent = ToggleFrame
-            
-            local DescLabel = Instance.new("TextLabel")
-            DescLabel.Size = UDim2.new(1, -60, 0, 15)
-            DescLabel.Position = UDim2.new(0, 10, 1, -18)
-            DescLabel.BackgroundTransparency = 1
-            DescLabel.Text = func.desc
-            DescLabel.TextColor3 = Color3.fromRGB(120, 140, 180)
-            DescLabel.TextSize = 10
-            DescLabel.Font = Enum.Font.Gotham
-            DescLabel.TextXAlignment = Enum.TextXAlignment.Left
-            DescLabel.Parent = ToggleFrame
-            
-            -- Botón Toggle
-            local ToggleBtn = Instance.new("TextButton")
-            ToggleBtn.Size = UDim2.new(0, 45, 0, 22)
-            ToggleBtn.Position = UDim2.new(1, -52, 0.5, -11)
-            ToggleBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-            ToggleBtn.Text = "OFF"
-            ToggleBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-            ToggleBtn.TextSize = 11
-            ToggleBtn.Font = Enum.Font.GothamBold
-            ToggleBtn.Parent = ToggleFrame
-            
-            local TBtnCorner = Instance.new("UICorner")
-            TBtnCorner.CornerRadius = UDim.new(0, 6)
-            TBtnCorner.Parent = ToggleBtn
-            
-            local enabled = false
-            ToggleBtn.MouseButton1Click:Connect(function()
-                enabled = not enabled
-                ToggleBtn.Text = enabled and "ON" or "OFF"
-                ToggleBtn.BackgroundColor3 = enabled and Color3.fromRGB(0, 120, 255) or Color3.fromRGB(40, 40, 40)
-                ToggleBtn.TextColor3 = enabled and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(180, 180, 180)
-                
-                if func.callback then
-                    func.callback(enabled)
-                end
-            end)
-        end
-    end
-    
-    Tabs[name] = {btn = TabBtn, content = ContentFrame}
-    
-    TabBtn.MouseButton1Click:Connect(function()
-        if CurrentTab then
-            CurrentTab.content.Visible = false
-            CurrentTab.btn.BackgroundColor3 = Color3.fromRGB(20, 30, 50)
-            CurrentTab.btn.TextColor3 = Color3.fromRGB(200, 200, 200)
-        end
-        ContentFrame.Visible = true
-        TabBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 220)
-        TabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        CurrentTab = Tabs[name]
-    end)
+    return button
 end
 
--- ==========================================
--- DEFINICIÓN DE PESTAÑAS
--- ==========================================
+-- Función para crear toggle buttons
+local function createToggle(name, position, parent)
+    local toggleFrame = Instance.new("Frame")
+    toggleFrame.Size = UDim2.new(0, 330, 0, 35)
+    toggleFrame.Position = UDim2.new(0, 5, 0, position)
+    toggleFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    toggleFrame.BorderSizePixel = 0
+    toggleFrame.Parent = parent
+    
+    local toggleCorner = Instance.new("UICorner")
+    toggleCorner.CornerRadius = UDim.new(0, 5)
+    toggleCorner.Parent = toggleFrame
+    
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0, 180, 1, 0)
+    label.Position = UDim2.new(0, 10, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = name
+    label.Font = Enum.Font.SourceSans
+    label.TextSize = 12
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = toggleFrame
+    
+    local toggleButton = Instance.new("TextButton")
+    toggleButton.Size = UDim2.new(0, 40, 0, 20)
+    toggleButton.Position = UDim2.new(1, -50, 0.5, -10)
+    toggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    toggleButton.BorderSizePixel = 0
+    toggleButton.Text = "OFF"
+    toggleButton.Font = Enum.Font.SourceSansBold
+    toggleButton.TextSize = 10
+    toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    toggleButton.Parent = toggleFrame
+    
+    local toggleCorner = Instance.new("UICorner")
+    toggleCorner.CornerRadius = UDim.new(0, 4)
+    toggleCorner.Parent = toggleButton
+    
+    local enabled = false
+    
+    toggleButton.MouseButton1Click:Connect(function()
+        enabled = not enabled
+        if enabled then
+            toggleButton.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
+            toggleButton.Text = "ON"
+        else
+            toggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+            toggleButton.Text = "OFF"
+        end
+    end)
+    
+    return toggleButton, function() return enabled end
+end
 
--- 1) INFO
-CreateTab("Info", [[<b>Nombre del creador:</b> JoseAngel_Blox
-<b>Fecha de lanzamiento:</b> 26/08/2026
-<b>Versión:</b> 1.1
+-- Crear pestañas
+local tabs = {
+    {name = "Info", pos = 10},
+    {name = "Main", pos = 45},
+    {name = "Movement", pos = 80},
+    {name = "ESP", pos = 115},
+    {name = "Funciones Pro", pos = 150},
+    {name = "Auto Farm", pos = 185}
+}
 
-<b>Update:</b> Bienvenidos y bienvenidas a mi script. Este script es uno de los mejores scripts sin key. Espero y lo disfrutes.
+local tabButtons = {}
 
-Atentamente, <b>JoseAngel_Blox</b>]])
+for i, tab in pairs(tabs) do
+    local btn = createTab(tab.name, tab.pos)
+    btn.MouseButton1Click:Connect(function()
+        if selectedTab then
+            selectedTab.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        end
+        selectedTab = btn
+        btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        
+        -- Limpiar scrollingFrame
+        for _, child in pairs(scrollingFrame:GetChildren()) do
+            if child:IsA("Frame") then
+                child:Destroy()
+            end
+        end
+        
+        -- Mostrar contenido según pestaña
+        if tab.name == "Info" then
+            scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 300)
+            
+            local infoFrame = Instance.new("Frame")
+            infoFrame.Size = UDim2.new(1, -10, 0, 150)
+            infoFrame.Position = UDim2.new(0, 5, 0, 10)
+            infoFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            infoFrame.BorderSizePixel = 0
+            infoFrame.Parent = scrollingFrame
+            
+            local infoCorner = Instance.new("UICorner")
+            infoCorner.CornerRadius = UDim.new(0, 5)
+            infoCorner.Parent = infoFrame
+            
+            local infoText = Instance.new("TextLabel")
+            infoText.Size = UDim2.new(1, -20, 1, -20)
+            infoText.Position = UDim2.new(0, 10, 0, 10)
+            infoText.BackgroundTransparency = 1
+            infoText.Text = "Nombre del creador: JoseAngel_Blox\n\nFecha de lanzamiento: 27/08/2026\n\nVersión: 1.1"
+            infoText.Font = Enum.Font.SourceSansBold
+            infoText.TextSize = 14
+            infoText.TextColor3 = Color3.fromRGB(255, 255, 255)
+            infoText.TextXAlignment = Enum.TextXAlignment.Left
+            infoText.TextYAlignment = Enum.TextYAlignment.Top
+            infoText.Parent = infoFrame
+            
+        elseif tab.name == "Main" then
+            scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 300)
+            createToggle("Aimbot", 10, scrollingFrame)
+            createToggle("Silent Aim", 50, scrollingFrame)
+            createToggle("Infinite Ammo", 90, scrollingFrame)
+            createToggle("Rapid Fire", 130, scrollingFrame)
+            createToggle("One Shot Kill", 170, scrollingFrame)
+            createToggle("Auto Shoot", 210, scrollingFrame)
+            
+        elseif tab.name == "Movement" then
+            scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 250)
+            createToggle("Speed Hack", 10, scrollingFrame)
+            createToggle("Infinite Jump", 50, scrollingFrame)
+            createToggle("Fly", 90, scrollingFrame)
+            createToggle("Noclip", 130, scrollingFrame)
+            createToggle("Jump Power", 170, scrollingFrame)
+            
+        elseif tab.name == "ESP" then
+            scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 250)
+            createToggle("Player ESP", 10, scrollingFrame)
+            createToggle("Team ESP", 50, scrollingFrame)
+            createToggle("Health ESP", 90, scrollingFrame)
+            createToggle("Full Bright", 130, scrollingFrame)
+            
+        elseif tab.name == "Funciones Pro" then
+            scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 200)
+            createToggle("Open All Doors", 10, scrollingFrame)
+            createToggle("Remove Doors", 50, scrollingFrame)
+            createToggle("God Mode", 90, scrollingFrame)
+            
+        elseif tab.name == "Auto Farm" then
+            scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 300)
+            createToggle("Auto Kill Guards", 10, scrollingFrame)
+            createToggle("Auto Kill Inmates", 50, scrollingFrame)
+            createToggle("Auto Arrest", 90, scrollingFrame)
+            createToggle("Auto Escape", 130, scrollingFrame)
+            createToggle("Auto Pickup Guns", 170, scrollingFrame)
+        end
+    end)
+    
+    tabButtons[tab.name] = btn
+end
 
--- 2) MAIN (Guardias)
-CreateTab("Main", {
-    {name = "Auto-Arrest", desc = "Arresta criminales cercanos automáticamente.", callback = function(on) print("Auto-Arrest:", on) end},
-    {name = "Auto-Tase / Stun", desc = "Tasea criminales antes de arrestarlos.", callback = function(on) print("Auto-Tase:", on) end},
-    {name = "Guard ESP", desc = "Ver jugadores a través de paredes (Verde/Rojo).", callback = function(on) print("Guard ESP:", on) end},
-    {name = "Anti-Escape", desc = "Teletransporta prisioneros fugitivos a celdas.", callback = function(on) print("Anti-Escape:", on) end},
-    {name = "Auto-Claim Bounty", desc = "Reclama recompensas automáticamente.", callback = function(on) print("Auto-Claim:", on) end},
-    {name = "Weapon Locker Grab", desc = "Toma armas del armero al acercarse.", callback = function(on) print("Locker Grab:", on) end},
-})
+-- Activar primera pestaña por defecto
+if tabButtons["Info"] then
+    tabButtons["Info"].BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    selectedTab = tabButtons["Info"]
+end
 
--- 3) ROL DE PRISIONERO
-CreateTab("Prisionero", {
-    {name = "Auto-Escape Route", desc = "Teletransporte por rutas seguras de escape.", callback = function(on) print("Escape Route:", on) end},
-    {name = "Silent Aim / Aimbot", desc = "Apunta automáticamente a guardias. FOV ajustable.", callback = function(on) print("Silent Aim:", on) end},
-    {name = "NoClip / WalkThrough", desc = "Atraviesa paredes, rejas y puertas.", callback = function(on) print("NoClip:", on) end},
-    {name = "Auto-Loot Weapons", desc = "Recoge armas del suelo automáticamente.", callback = function(on) print("Auto-Loot:", on) end},
-    {name = "Speed Boost / Fly", desc = "Velocidad aumentada o vuelo para escapar.", callback = function(on) print("Speed/Fly:", on) end},
-})
+-- Función para conseguir armas
+local function giveGun(gunName)
+    local gun = game.ServerStorage:FindFirstChild(gunName)
+    if gun then
+        local clone = gun:Clone()
+        clone.Parent = player.Backpack
+    end
+end
 
--- Seleccionar primera pestaña por defecto
-Tabs["Info"].btn:Invoke()
+-- Funciones del script (lógica básica)
+local function enableAimbot()
+    -- Lógica de aimbot aquí
+end
 
-print("[Prison Life Pro v1.1] Cargado correctamente | Creado por JoseAngel_Blox")
+local function enableESP()
+    for _, v in pairs(game.Players:GetPlayers()) do
+        if v ~= player and v.Character then
+            local highlight = Instance.new("Highlight")
+            highlight.Parent = v.Character
+            highlight.FillColor = Color3.fromRGB(255, 0, 0)
+        end
+    end
+end
+
+-- Hacer el script arrastrable
+local dragging = false
+local dragInput = nil
+local dragStart = nil
+local startPos = nil
+
+mainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+    end
+end)
+
+mainFrame.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+mainFrame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
