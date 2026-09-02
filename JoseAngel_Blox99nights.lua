@@ -1,515 +1,529 @@
--- ========================================================
--- SCRIPT EXCLUSIVO: JoseAngel_Blox 99nights (CORREGIDO)
--- Juego: 99 Noches en el Bosque
--- ========================================================
+-- ============================================
+-- SCRIPT: JoseAngel_Blox 99 Nights (FULL HUB)
+-- ============================================
 
--- Servicios de Roblox
-local Players = game:GetService("Players")
-local CoreGui = game:GetService("CoreGui")
-local TweenService = game:GetService("TweenService")
-local LocalPlayer = Players.LocalPlayer
-
--- Contenedor Principal (HUI / CoreGui)
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "JoseAngel_Blox_UI"
-ScreenGui.Parent = gethui and gethui() or CoreGui
-
--- ========================================================
--- 1. PANTALLA DE CARGA (BIENVENIDA + BARRA DE 1% A 100%)
--- ========================================================
-local LoadingFrame = Instance.new("Frame")
-LoadingFrame.Size = UDim2.new(0, 360, 0, 160)
-LoadingFrame.Position = UDim2.new(0.5, -180, 0.5, -80)
-LoadingFrame.BackgroundColor3 = Color3.fromRGB(10, 20, 38)
-LoadingFrame.BorderSizePixel = 0
-LoadingFrame.Parent = ScreenGui
-
-local LoadingCorner = Instance.new("UICorner")
-LoadingCorner.CornerRadius = UDim.new(0, 12)
-LoadingCorner.Parent = LoadingFrame
-
-local WelcomeText = Instance.new("TextLabel")
-WelcomeText.Size = UDim2.new(1, -20, 0, 40)
-WelcomeText.Position = UDim2.new(0, 10, 0, 15)
-WelcomeText.BackgroundTransparency = 1
-WelcomeText.Text = "Bienvenidos a Scripts JoseAngel_Blox"
-WelcomeText.TextColor3 = Color3.fromRGB(0, 162, 255)
-WelcomeText.TextSize = 16
-WelcomeText.Font = Enum.Font.SourceSansBold
-WelcomeText.Parent = LoadingFrame
-
-local PercentText = Instance.new("TextLabel")
-PercentText.Size = UDim2.new(1, 0, 0, 25)
-PercentText.Position = UDim2.new(0, 0, 0, 60)
-PercentText.BackgroundTransparency = 1
-PercentText.Text = "Cargando... 0%"
-PercentText.TextColor3 = Color3.fromRGB(200, 220, 255)
-PercentText.TextSize = 14
-PercentText.Font = Enum.Font.SourceSans
-PercentText.Parent = LoadingFrame
-
-local BarBackground = Instance.new("Frame")
-BarBackground.Size = UDim2.new(0.85, 0, 0, 12)
-BarBackground.Position = UDim2.new(0.075, 0, 0, 100)
-BarBackground.BackgroundColor3 = Color3.fromRGB(20, 35, 60)
-BarBackground.BorderSizePixel = 0
-BarBackground.Parent = LoadingFrame
-
-local BarCorner = Instance.new("UICorner")
-BarCorner.CornerRadius = UDim.new(0, 6)
-BarCorner.Parent = BarBackground
-
-local BarFill = Instance.new("Frame")
-BarFill.Size = UDim2.new(0, 0, 1, 0)
-BarFill.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-BarFill.BorderSizePixel = 0
-BarFill.Parent = BarBackground
-
-local FillCorner = Instance.new("UICorner")
-FillCorner.CornerRadius = UDim.new(0, 6)
-FillCorner.Parent = BarFill
-
--- ========================================================
--- 2. INTERFAZ PRINCIPAL (MENÚ JOSEANGEL_BLOX)
--- ========================================================
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 520, 0, 340)
-MainFrame.Position = UDim2.new(0.5, -260, 0.5, -170)
-MainFrame.BackgroundColor3 = Color3.fromRGB(10, 20, 38)
+local UICorner = Instance.new("UICorner")
+local TitleLabel = Instance.new("TextLabel")
+local SubtitleLabel = Instance.new("TextLabel")
+
+local CoreGui = game:GetService("CoreGui")
+if not pcall(function() ScreenGui.Parent = CoreGui end) then
+    ScreenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+end
+
+ScreenGui.Name = "JoseAngel_Blox_UI"
+ScreenGui.ResetOnSpawn = false
+
+-- 1. Marco Principal
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+MainFrame.Size = UDim2.new(0, 330, 0, 320)
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 20, 45)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
-MainFrame.Visible = false
-MainFrame.Parent = ScreenGui
 
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 12)
-MainCorner.Parent = MainFrame
+UICorner.CornerRadius = UDim.new(0, 20)
+UICorner.Parent = MainFrame
 
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -20, 0, 25)
-Title.Position = UDim2.new(0, 15, 0, 10)
-Title.BackgroundTransparency = 1
-Title.Text = "JoseAngel_Blox 99nights"
-Title.TextColor3 = Color3.fromRGB(0, 162, 255)
-Title.TextSize = 18
-Title.Font = Enum.Font.SourceSansBold
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.Parent = MainFrame
+-- Título y Subtítulo
+TitleLabel.Name = "TitleLabel"
+TitleLabel.Parent = MainFrame
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Position = UDim2.new(0, 0, 0, 8)
+TitleLabel.Size = UDim2.new(1, 0, 0, 22)
+TitleLabel.Font = Enum.Font.SourceSansBold
+TitleLabel.Text = "JoseAngel_Blox 99 Nights"
+TitleLabel.TextColor3 = Color3.fromRGB(0, 150, 255)
+TitleLabel.TextSize = 20
 
-local Subtitle = Instance.new("TextLabel")
-Subtitle.Size = UDim2.new(1, -20, 0, 20)
-Subtitle.Position = UDim2.new(0, 15, 0, 32)
-Subtitle.BackgroundTransparency = 1
-Subtitle.Text = "Creado por JoseAngel_Blox"
-Subtitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-Subtitle.TextTransparency = 0.5
-Subtitle.TextSize = 13
-Subtitle.Font = Enum.Font.SourceSansItalic
-Subtitle.TextXAlignment = Enum.TextXAlignment.Left
-Subtitle.Parent = MainFrame
+SubtitleLabel.Name = "SubtitleLabel"
+SubtitleLabel.Parent = MainFrame
+SubtitleLabel.BackgroundTransparency = 1
+SubtitleLabel.Position = UDim2.new(0, 0, 0, 30)
+SubtitleLabel.Size = UDim2.new(1, 0, 0, 16)
+SubtitleLabel.Font = Enum.Font.SourceSansItalic
+SubtitleLabel.Text = "Creado por JoseAngel_Blox"
+SubtitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+SubtitleLabel.TextTransparency = 0.5
+SubtitleLabel.TextSize = 12
 
-local TabContainer = Instance.new("Frame")
-TabContainer.Size = UDim2.new(0, 120, 0, 260)
-TabContainer.Position = UDim2.new(0, 10, 0, 65)
-TabContainer.BackgroundColor3 = Color3.fromRGB(15, 28, 52)
-TabContainer.BorderSizePixel = 0
-TabContainer.Parent = MainFrame
+-- Panel Izquierdo (Pestañas)
+local TabHolder = Instance.new("Frame")
+TabHolder.Name = "TabHolder"
+TabHolder.Parent = MainFrame
+TabHolder.Position = UDim2.new(0, 10, 0, 52)
+TabHolder.Size = UDim2.new(0, 85, 0, 255)
+TabHolder.BackgroundColor3 = Color3.fromRGB(15, 28, 60)
+TabHolder.BorderSizePixel = 0
 
-local TabCorner = Instance.new("UICorner")
-TabCorner.CornerRadius = UDim.new(0, 8)
-TabCorner.Parent = TabContainer
+local TabHolderCorner = Instance.new("UICorner")
+TabHolderCorner.CornerRadius = UDim.new(0, 12)
+TabHolderCorner.Parent = TabHolder
 
-local ContentContainer = Instance.new("Frame")
-ContentContainer.Size = UDim2.new(0, 370, 0, 260)
-ContentContainer.Position = UDim2.new(0, 140, 0, 65)
-ContentContainer.BackgroundColor3 = Color3.fromRGB(15, 28, 52)
-ContentContainer.BorderSizePixel = 0
-ContentContainer.Parent = MainFrame
+local TabListLayout = Instance.new("UIListLayout")
+TabListLayout.Parent = TabHolder
+TabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+TabListLayout.Padding = UDim.new(0, 4)
 
-local ContentCorner = Instance.new("UICorner")
-ContentCorner.CornerRadius = UDim.new(0, 8)
-ContentCorner.Parent = ContentContainer
+local TabPadding = Instance.new("UIPadding")
+TabPadding.Parent = TabHolder
+TabPadding.PaddingTop = UDim.new(0, 6)
+TabPadding.PaddingLeft = UDim.new(0, 4)
+TabPadding.PaddingRight = UDim.new(0, 4)
 
-local InfoTab = Instance.new("ScrollingFrame")
-InfoTab.Size = UDim2.new(1, -20, 1, -20)
-InfoTab.Position = UDim2.new(0, 10, 0, 10)
-InfoTab.BackgroundTransparency = 1
-InfoTab.BorderSizePixel = 0
-InfoTab.ScrollBarThickness = 4
-InfoTab.Visible = true
-InfoTab.Parent = ContentContainer
+-- Panel Derecho (Contenido)
+local ContentHolder = Instance.new("Frame")
+ContentHolder.Name = "ContentHolder"
+ContentHolder.Parent = MainFrame
+ContentHolder.Position = UDim2.new(0, 102, 0, 52)
+ContentHolder.Size = UDim2.new(0, 218, 0, 255)
+ContentHolder.BackgroundColor3 = Color3.fromRGB(15, 28, 60)
+ContentHolder.BorderSizePixel = 0
 
-local MainTab = Instance.new("ScrollingFrame")
-MainTab.Size = UDim2.new(1, -20, 1, -20)
-MainTab.Position = UDim2.new(0, 10, 0, 10)
-MainTab.BackgroundTransparency = 1
-MainTab.BorderSizePixel = 0
-MainTab.ScrollBarThickness = 4
-MainTab.Visible = false
-MainTab.Parent = ContentContainer
+local ContentHolderCorner = Instance.new("UICorner")
+ContentHolderCorner.CornerRadius = UDim.new(0, 12)
+ContentHolderCorner.Parent = ContentHolder
 
--- ========================================================
--- CONTENIDO: PESTAÑA 1 (INFO)
--- ========================================================
-local function AddInfoLabel(texto, posY, color, bold)
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(1, 0, 0, 22)
-    lbl.Position = UDim2.new(0, 0, 0, posY)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = texto
-    lbl.TextColor3 = color or Color3.fromRGB(220, 235, 255)
-    lbl.TextSize = 13
-    lbl.Font = bold and Enum.Font.SourceSansBold or Enum.Font.SourceSans
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
-    lbl.Parent = InfoTab
-    return lbl
+-- --------------------------------------------
+-- SISTEMA DE PESTAÑAS
+-- --------------------------------------------
+
+local InfoPage = Instance.new("ScrollingFrame")
+local MainPage = Instance.new("ScrollingFrame")
+local TeleportPage = Instance.new("ScrollingFrame")
+local AutoPage = Instance.new("ScrollingFrame")
+local PlayerPage = Instance.new("ScrollingFrame")
+
+local function SwitchTab(activePage)
+    InfoPage.Visible = (activePage == InfoPage)
+    MainPage.Visible = (activePage == MainPage)
+    TeleportPage.Visible = (activePage == TeleportPage)
+    AutoPage.Visible = (activePage == AutoPage)
+    PlayerPage.Visible = (activePage == PlayerPage)
 end
 
-AddInfoLabel("Nombre del Creador: JoseAngel_Blox", 0, Color3.fromRGB(0, 162, 255), true)
-AddInfoLabel("Fecha de lanzamiento: 02/09/2026", 25)
-AddInfoLabel("Versión: 1.1 (Corregido)", 50)
-
-local updateTitle = AddInfoLabel("UPDATE:", 80, Color3.fromRGB(0, 162, 255), true)
-
-local updateText = Instance.new("TextLabel")
-updateText.Size = UDim2.new(1, 0, 0, 100)
-updateText.Position = UDim2.new(0, 0, 0, 105)
-updateText.BackgroundTransparency = 1
-updateText.Text = "Bienvenidos a mi nuevo script de 99 noches en el bosque este script es uno de los básicos para aprender a usar un script espero y te guste el script atentamente JoseAngel_Blox.."
-updateText.TextColor3 = Color3.fromRGB(200, 220, 245)
-updateText.TextSize = 13
-updateText.Font = Enum.Font.SourceSans
-updateText.TextWrapped = true
-updateText.TextXAlignment = Enum.TextXAlignment.Left
-updateText.TextYAlignment = Enum.TextYAlignment.Top
-updateText.Parent = InfoTab
-
-InfoTab.CanvasSize = UDim2.new(0, 0, 0, 220)
-
--- ========================================================
--- CONTENIDO: PESTAÑA 2 (MAIN)
--- ========================================================
-local function CrearOpcionMain(titulo, descripcion, posY, callback)
-    local card = Instance.new("Frame")
-    card.Size = UDim2.new(1, -5, 0, 55)
-    card.Position = UDim2.new(0, 0, 0, posY)
-    card.BackgroundColor3 = Color3.fromRGB(22, 40, 70)
-    card.BorderSizePixel = 0
-    card.Parent = MainTab
-
-    local cardCorner = Instance.new("UICorner")
-    cardCorner.CornerRadius = UDim.new(0, 6)
-    cardCorner.Parent = card
-
-    local tLbl = Instance.new("TextLabel")
-    tLbl.Size = UDim2.new(0.7, 0, 0, 20)
-    tLbl.Position = UDim2.new(0, 8, 0, 5)
-    tLbl.BackgroundTransparency = 1
-    tLbl.Text = titulo
-    tLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-    tLbl.TextSize = 13
-    tLbl.Font = Enum.Font.SourceSansBold
-    tLbl.TextXAlignment = Enum.TextXAlignment.Left
-    tLbl.Parent = card
-
-    local dLbl = Instance.new("TextLabel")
-    dLbl.Size = UDim2.new(0.7, 0, 0, 25)
-    dLbl.Position = UDim2.new(0, 8, 0, 24)
-    dLbl.BackgroundTransparency = 1
-    dLbl.Text = descripcion
-    dLbl.TextColor3 = Color3.fromRGB(170, 190, 220)
-    dLbl.TextSize = 11
-    dLbl.Font = Enum.Font.SourceSans
-    dLbl.TextWrapped = true
-    dLbl.TextXAlignment = Enum.TextXAlignment.Left
-    dLbl.Parent = card
-
+local function CreateTabBtn(text)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.24, 0, 0, 32)
-    btn.Position = UDim2.new(0.73, 0, 0.2, 0)
-    btn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-    btn.Text = "OFF"
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Parent = TabHolder
+    btn.Size = UDim2.new(1, 0, 0, 26)
+    btn.BackgroundColor3 = Color3.fromRGB(25, 45, 90)
+    btn.BorderSizePixel = 0
     btn.Font = Enum.Font.SourceSansBold
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextSize = 12
-    btn.Parent = card
 
-    local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 5)
-    btnCorner.Parent = btn
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = btn
+    return btn
+end
 
-    local estado = false
-    btn.MouseButton1Click:Connect(function()
-        estado = not estado
-        if estado then
-            btn.Text = "ON"
-            btn.BackgroundColor3 = Color3.fromRGB(40, 167, 69)
-        else
-            btn.Text = "OFF"
-            btn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+local InfoTabBtn = CreateTabBtn("Info")
+local MainTabBtn = CreateTabBtn("Main")
+local TeleportTabBtn = CreateTabBtn("Teleport")
+local AutoTabBtn = CreateTabBtn("Auto")
+local PlayerTabBtn = CreateTabBtn("Player")
+
+local function SetupPage(page, canvasHeight)
+    page.Parent = ContentHolder
+    page.Size = UDim2.new(1, 0, 1, 0)
+    page.BackgroundTransparency = 1
+    page.BorderSizePixel = 0
+    page.ScrollBarThickness = 3
+    page.CanvasSize = UDim2.new(0, 0, 0, canvasHeight)
+    page.Visible = false
+
+    local layout = Instance.new("UIListLayout")
+    layout.Parent = page
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.Padding = UDim.new(0, 6)
+
+    local padding = Instance.new("UIPadding")
+    padding.Parent = page
+    padding.PaddingLeft = UDim.new(0, 8)
+    padding.PaddingRight = UDim.new(0, 8)
+    padding.PaddingTop = UDim.new(0, 8)
+end
+
+SetupPage(InfoPage, 260)
+SetupPage(MainPage, 1750)
+SetupPage(TeleportPage, 200)
+SetupPage(AutoPage, 220)
+SetupPage(PlayerPage, 320)
+
+InfoPage.Visible = true
+
+InfoTabBtn.MouseButton1Click:Connect(function() SwitchTab(InfoPage) end)
+MainTabBtn.MouseButton1Click:Connect(function() SwitchTab(MainPage) end)
+TeleportTabBtn.MouseButton1Click:Connect(function() SwitchTab(TeleportPage) end)
+AutoTabBtn.MouseButton1Click:Connect(function() SwitchTab(AutoPage) end)
+PlayerTabBtn.MouseButton1Click:Connect(function() SwitchTab(PlayerPage) end)
+
+-- --- PESTAÑA 1: INFO ---
+local function AddInfoItem(titulo, contenido)
+    local titleLbl = Instance.new("TextLabel")
+    titleLbl.Parent = InfoPage
+    titleLbl.Size = UDim2.new(1, 0, 0, 16)
+    titleLbl.BackgroundTransparency = 1
+    titleLbl.Font = Enum.Font.SourceSansBold
+    titleLbl.Text = titulo
+    titleLbl.TextColor3 = Color3.fromRGB(0, 180, 255)
+    titleLbl.TextSize = 13
+    titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+
+    local contentLbl = Instance.new("TextLabel")
+    contentLbl.Parent = InfoPage
+    contentLbl.Size = UDim2.new(1, 0, 0, 0)
+    contentLbl.AutomaticSize = Enum.AutomaticSize.Y
+    contentLbl.BackgroundTransparency = 1
+    contentLbl.Font = Enum.Font.SourceSans
+    contentLbl.Text = contenido
+    contentLbl.TextColor3 = Color3.fromRGB(220, 220, 220)
+    contentLbl.TextSize = 12
+    contentLbl.TextWrapped = true
+    contentLbl.TextXAlignment = Enum.TextXAlignment.Left
+end
+
+AddInfoItem("Nombre del creador:", "JoseAngel_Blox")
+AddInfoItem("Fecha de lanzamiento:", "02/09/2026")
+AddInfoItem("Versión:", "1.5")
+AddInfoItem("UPDATE:", "Pestañas completas: Main, Teleport, Auto y Player.")
+
+-- ============================================
+-- FUNCIONES AUXILIARES
+-- ============================================
+
+local function GetRescueZoneCFrame()
+    local rescueZone = workspace:FindFirstChild("Map")
+        and workspace.Map:FindFirstChild("Campground")
+        and workspace.Map.Campground:FindFirstChild("NPCWaypoints")
+        and workspace.Map.Campground.NPCWaypoints:FindFirstChild("RescueZone")
+
+    if not rescueZone then
+        rescueZone = workspace:FindFirstChild("RescueZone", true)
+    end
+
+    if rescueZone then
+        if rescueZone:IsA("BasePart") then
+            return rescueZone.CFrame + Vector3.new(0, 3, 0)
+        elseif rescueZone:IsA("Model") then
+            return rescueZone:GetPivot() + Vector3.new(0, 3, 0)
         end
-        callback(estado)
+    end
+    return nil
+end
+
+local function GetScrapperCFrame()
+    local scrapper = workspace:FindFirstChild("Map")
+        and workspace.Map:FindFirstChild("Campground")
+        and workspace.Map.Campground:FindFirstChild("Scrapper")
+
+    if not scrapper then
+        scrapper = workspace:FindFirstChild("Scrapper", true)
+    end
+
+    if scrapper then
+        if scrapper:IsA("BasePart") then
+            return scrapper.CFrame + Vector3.new(0, 3, 0)
+        elseif scrapper:IsA("Model") then
+            return scrapper:GetPivot() + Vector3.new(0, 3, 0)
+        end
+    end
+    return nil
+end
+
+-- ============================================
+-- PESTAÑA 2: MAIN (FUEL, ITEMS, METAL, FOOD, TOOLS, GUNS)
+-- ============================================
+
+local function CreateSection(parent, titleText, options, btnText, bringFunction)
+    local header = Instance.new("TextLabel")
+    header.Parent = parent
+    header.Size = UDim2.new(1, 0, 0, 18)
+    header.BackgroundTransparency = 1
+    header.Font = Enum.Font.SourceSansBold
+    header.Text = titleText
+    header.TextColor3 = Color3.fromRGB(255, 255, 255)
+    header.TextSize = 15
+
+    local selectedValue = "Select All"
+
+    local dropBtn = Instance.new("TextButton")
+    dropBtn.Parent = parent
+    dropBtn.Size = UDim2.new(1, 0, 0, 26)
+    dropBtn.BackgroundColor3 = Color3.fromRGB(20, 35, 70)
+    dropBtn.Font = Enum.Font.SourceSans
+    dropBtn.Text = "Select " .. titleText .. ": Select All ▼"
+    dropBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    dropBtn.TextSize = 12
+
+    local dropCorner = Instance.new("UICorner")
+    dropCorner.CornerRadius = UDim.new(0, 6)
+    dropCorner.Parent = dropBtn
+
+    local dropList = Instance.new("Frame")
+    dropList.Parent = parent
+    dropList.Size = UDim2.new(1, 0, 0, 0)
+    dropList.AutomaticSize = Enum.AutomaticSize.Y
+    dropList.BackgroundColor3 = Color3.fromRGB(12, 22, 48)
+    dropList.Visible = false
+
+    local listCorner = Instance.new("UICorner")
+    listCorner.CornerRadius = UDim.new(0, 6)
+    listCorner.Parent = dropList
+
+    local listLayout = Instance.new("UIListLayout")
+    listLayout.Parent = dropList
+
+    for _, option in ipairs(options) do
+        local optBtn = Instance.new("TextButton")
+        optBtn.Parent = dropList
+        optBtn.Size = UDim2.new(1, 0, 0, 22)
+        optBtn.BackgroundTransparency = 1
+        optBtn.Font = Enum.Font.SourceSans
+        optBtn.Text = option
+        optBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        optBtn.TextSize = 12
+
+        optBtn.MouseButton1Click:Connect(function()
+            selectedValue = option
+            dropBtn.Text = "Select " .. titleText .. ": " .. option .. " ▼"
+            dropList.Visible = false
+        end)
+    end
+
+    dropBtn.MouseButton1Click:Connect(function()
+        dropList.Visible = not dropList.Visible
+    end)
+
+    local actionBtn = Instance.new("TextButton")
+    actionBtn.Parent = parent
+    actionBtn.Size = UDim2.new(1, 0, 0, 26)
+    actionBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    actionBtn.Font = Enum.Font.SourceSansBold
+    actionBtn.Text = btnText
+    actionBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    actionBtn.TextSize = 13
+
+    local actionCorner = Instance.new("UICorner")
+    actionCorner.CornerRadius = UDim.new(0, 6)
+    actionCorner.Parent = actionBtn
+
+    actionBtn.MouseButton1Click:Connect(function()
+        bringFunction(selectedValue, options)
     end)
 end
 
--- Variables de Estado
-local killAuraOn = false
-local autoFeedOn = false
-local autoCollectOn = false
-local godmodeOn = false
+local function GenericBring(selectedValue, optionsList)
+    local char = game.Players.LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    local targetCF = char.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
 
-CrearOpcionMain("Kill Aura", "Ataca automáticamente a cualquier monstruo que se acerque.", 0, function(val)
-    killAuraOn = val
-end)
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") or obj:IsA("Model") then
+            local name = obj.Name
+            local isMatch = false
 
-CrearOpcionMain("Auto-Alimentar Fogata", "Deposita madera automáticamente cuando la luz baja.", 62, function(val)
-    autoFeedOn = val
-end)
+            if selectedValue == "Select All" then
+                for _, item in ipairs(optionsList) do
+                    if item ~= "Select All" and string.find(string.lower(name), string.lower(item)) then
+                        isMatch = true
+                        break
+                    end
+                end
+            elseif string.find(string.lower(name), string.lower(selectedValue)) then
+                isMatch = true
+            end
 
-CrearOpcionMain("Auto-Recolectar", "Atrae o recoge automáticamente los recursos del suelo.", 124, function(val)
-    autoCollectOn = val
-end)
+            if isMatch then
+                if obj:IsA("Model") then obj:PivotTo(targetCF) else obj.CFrame = targetCF end
+            end
+        end
+    end
+end
 
-CrearOpcionMain("Godmode", "Modo dios (inmortal).", 186, function(val)
-    godmodeOn = val
-end)
+CreateSection(MainPage, "Fuel", {"Select All", "Biofuel", "Coal", "Fuel Canister", "Oil Barrel"}, "Bring Fuel", GenericBring)
+CreateSection(MainPage, "Items", {"Select All", "Alien", "Chair", "Crossbow Cultist", "Cultist", "Diamond", "Hologram Emitter", "Log", "Sapling"}, "Bring Items", GenericBring)
+CreateSection(MainPage, "Metal", {"Select All", "Bolt", "Broken Fan", "Broken Microwave", "Cultist Gem", "Gem of the Forest Fragment", "Metal Chair", "Old Car Engine", "Old Radio", "Sheet Metal"}, "Bring Metal", GenericBring)
+CreateSection(MainPage, "Food", {"Select All", "Berry", "Cake", "Carrot", "Chilli", "Cooked Morsel", "Cooked Steak", "Corn", "Meat? Sandwich", "Morsel", "Pumpkin", "Steak", "Stew"}, "Bring Food", GenericBring)
+CreateSection(MainPage, "Tools", {"Select All", "Bandage", "Bear Trap Blueprint", "Chainsaw", "Cultist King Mace", "Defense Blueprint", "Dino Kid's Lunchbox", "Giant Sack", "Good Axe", "Good Sack", "Infernal Sack", "Kraken Kid's Lunchbox", "Kunai", "Lava Mine Blueprint", "MedKit", "Morningstar", "Obsidiron Body", "Obsidiron Boots", "Obsidiron Hammer", "Old Flashlight", "Poison Spear", "Spear", "Squid Kid's Lunchbox", "Strong Axe", "Strong Flashlight", "Thorn Body", "Wildfire"}, "Bring Tools", GenericBring)
+CreateSection(MainPage, "Guns", {"Select All", "Alien Amour", "Crossbow", "Infernal Crossbow", "Iron Body", "Laser Canon", "Leather Body", "Raygun", "Revolver", "Revolver Ammo", "Rifle", "Rifle Ammo", "Tactical Shotgun"}, "Bring Guns", GenericBring)
 
-MainTab.CanvasSize = UDim2.new(0, 0, 0, 250)
+-- ============================================
+-- PESTAÑA 3: TELEPORT
+-- ============================================
 
-local function CrearBotonTab(nombre, posY, tabTarget)
+local TpHeader = Instance.new("TextLabel")
+TpHeader.Parent = TeleportPage
+TpHeader.Size = UDim2.new(1, 0, 0, 20)
+TpHeader.BackgroundTransparency = 1
+TpHeader.Font = Enum.Font.SourceSansBold
+TpHeader.Text = "Teleport Zone"
+TpHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
+TpHeader.TextSize = 15
+
+local function CreateTpBtn(text, onClick)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.9, 0, 0, 35)
-    btn.Position = UDim2.new(0.05, 0, 0, posY)
-    btn.BackgroundColor3 = Color3.fromRGB(22, 40, 70)
-    btn.Text = nombre
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Parent = TeleportPage
+    btn.Size = UDim2.new(1, 0, 0, 30)
+    btn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
     btn.Font = Enum.Font.SourceSansBold
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextSize = 13
-    btn.Parent = TabContainer
 
-    local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 6)
-    btnCorner.Parent = btn
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = btn
+
+    btn.MouseButton1Click:Connect(onClick)
+end
+
+CreateTpBtn("Tp al campamento", function()
+    local char = game.Players.LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    local targetCF = GetRescueZoneCFrame()
+    if targetCF then char.HumanoidRootPart.CFrame = targetCF end
+end)
+
+CreateTpBtn("Tp a Stronghold", function()
+    local char = game.Players.LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
+    local stronghold = workspace:FindFirstChild("Stronghold", true)
+        or (workspace:FindFirstChild("Map") and workspace.Map:FindFirstChild("Stronghold", true))
+
+    if stronghold then
+        if stronghold:IsA("BasePart") then
+            char.HumanoidRootPart.CFrame = stronghold.CFrame + Vector3.new(0, 3, 0)
+        elseif stronghold:IsA("Model") then
+            char:PivotTo(stronghold:GetPivot() + Vector3.new(0, 3, 0))
+        end
+    end
+end)
+
+-- ============================================
+-- PESTAÑA 4: AUTOMATICALLY
+-- ============================================
+
+local AutoHeader = Instance.new("TextLabel")
+AutoHeader.Parent = AutoPage
+AutoHeader.Size = UDim2.new(1, 0, 0, 20)
+AutoHeader.BackgroundTransparency = 1
+AutoHeader.Font = Enum.Font.SourceSansBold
+AutoHeader.Text = "Automation Settings"
+AutoHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
+AutoHeader.TextSize = 15
+
+local function CreateToggleBtn(parent, text, globalVarName)
+    local btn = Instance.new("TextButton")
+    btn.Parent = parent
+    btn.Size = UDim2.new(1, 0, 0, 30)
+    btn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+    btn.Font = Enum.Font.SourceSansBold
+    btn.Text = text .. ": OFF"
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 13
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = btn
+
+    _G[globalVarName] = false
 
     btn.MouseButton1Click:Connect(function()
-        InfoTab.Visible = false
-        MainTab.Visible = false
-        tabTarget.Visible = true
+        _G[globalVarName] = not _G[globalVarName]
+        if _G[globalVarName] then
+            btn.Text = text .. ": ON"
+            btn.BackgroundColor3 = Color3.fromRGB(40, 180, 80)
+        else
+            btn.Text = text .. ": OFF"
+            btn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+        end
     end)
+    return btn
 end
 
-CrearBotonTab("1) info", 10, InfoTab)
-CrearBotonTab("2) Main", 52, MainTab)
+CreateToggleBtn(AutoPage, "Kill Aura", "KillAura")
+CreateToggleBtn(AutoPage, "Auto Fuel", "AutoFuel")
+CreateToggleBtn(AutoPage, "Auto Scrapper", "AutoScrapper")
 
--- ========================================================
--- 3. BURBUJA FLOTANTE "JB" (TOGGLE UI)
--- ========================================================
-local ToggleBtn = Instance.new("TextButton")
-ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
-ToggleBtn.Position = UDim2.new(0, 15, 0.4, 0)
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(10, 20, 38)
-ToggleBtn.Text = "JB"
-ToggleBtn.TextColor3 = Color3.fromRGB(0, 162, 255)
-ToggleBtn.Font = Enum.Font.SourceSansBold
-ToggleBtn.TextSize = 16
-ToggleBtn.Visible = false
-ToggleBtn.Parent = ScreenGui
-
-local ToggleCorner = Instance.new("UICorner")
-ToggleCorner.CornerRadius = UDim.new(1, 0)
-ToggleCorner.Parent = ToggleBtn
-
-local ToggleStroke = Instance.new("UIStroke")
-ToggleStroke.Color = Color3.fromRGB(0, 162, 255)
-ToggleStroke.Thickness = 2
-ToggleStroke.Parent = ToggleBtn
-
-ToggleBtn.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
-end)
-
--- ========================================================
--- 4. LÓGICA Y BUCLES DE LAS FUNCIONES DEL JUEGO (CORREGIDO)
--- ========================================================
-
--- Función para atacar con la herramienta actual
-local function AtacarConHerramienta()
-    local char = LocalPlayer.Character
-    if not char then return end
-    
-    local tool = char:FindFirstChildOfClass("Tool")
-    if not tool then
-        tool = LocalPlayer.Backpack:FindFirstChildOfClass("Tool")
-        if tool then
-            tool.Parent = char
-            task.wait(0.1)
-        end
-    end
-    
-    if tool then
-        tool:Activate()
-        task.wait(0.05)
-        tool:Deactivate()
-        
-        pcall(function()
-            local handle = tool:FindFirstChild("Handle")
-            if handle then
-                handle:FireServer("click")
-            end
-        end)
-    end
-end
-
--- Función para recolectar items
-local function RecolectarItem(item)
-    local char = LocalPlayer.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    
-    local hrp = char.HumanoidRootPart
-    local distancia = (item.Position - hrp.Position).Magnitude
-    
-    if distancia <= 15 then
-        pcall(function()
-            item.CFrame = hrp.CFrame + hrp.CFrame.LookVector * 2
-        end)
-        
-        pcall(function()
-            local touch = Instance.new("TouchTransmitter")
-            touch.Parent = item
-            item.Touched:Fire(hrp)
-            task.wait(0.05)
-            touch:Destroy()
-        end)
-    end
-end
-
--- Función para alimentar fogata
-local function AlimentarFogata()
-    local char = LocalPlayer.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    
-    local hrp = char.HumanoidRootPart
-    local maderaEncontrada = false
-    
-    for _, item in pairs(workspace:GetDescendants()) do
-        if item:IsA("BasePart") and item:IsA("Tool") then
-            local nombre = item.Name:lower()
-            if nombre:find("wood") or nombre:find("log") or nombre:find("madera") then
-                if (item.Position - hrp.Position).Magnitude <= 20 then
-                    maderaEncontrada = true
-                    pcall(function()
-                        item.Parent = char
-                        task.wait(0.2)
-                    end)
-                end
-            end
-        end
-    end
-    
-    if maderaEncontrada then
-        for _, fogata in pairs(workspace:GetDescendants()) do
-            if fogata:IsA("BasePart") and (fogata.Name:lower():find("fire") or fogata.Name:lower():find("camp")) then
-                if (fogata.Position - hrp.Position).Magnitude <= 15 then
-                    pcall(function()
-                        local tool = char:FindFirstChildOfClass("Tool")
-                        if tool then
-                            tool.Parent = fogata
-                            task.wait(0.1)
-                            tool:Activate()
-                            task.wait(0.1)
-                            tool.Parent = char
-                        end
-                    end)
-                    break
-                end
-            end
-        end
-    end
-end
-
--- BUCLE PRINCIPAL CORREGIDO
+-- Loops de automatización
 task.spawn(function()
-    while task.wait(0.2) do
-        local char = LocalPlayer.Character
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            local hrp = char.HumanoidRootPart
-            
-            -- KILL AURA
-            if killAuraOn then
-                pcall(function()
-                    local mobMasCercano = nil
-                    local distMinima = 25
-                    
-                    for _, mob in pairs(workspace:GetDescendants()) do
-                        if mob:IsA("Model") and mob:FindFirstChild("Humanoid") and mob ~= char then
-                            local root = mob:FindFirstChild("HumanoidRootPart") or mob:FindFirstChild("PrimaryPart")
-                            if root then
-                                local dist = (root.Position - hrp.Position).Magnitude
-                                if dist <= distMinima then
-                                    mobMasCercano = mob
-                                    distMinima = dist
+    while task.wait(0.1) do
+        if _G.KillAura then
+            pcall(function()
+                local player = game.Players.LocalPlayer
+                local char = player.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    local myPos = char.HumanoidRootPart.Position
+                    for _, v in ipairs(workspace:GetDescendants()) do
+                        if v:IsA("Model") and v ~= char and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
+                            if v.Humanoid.Health > 0 and not game.Players:GetPlayerFromCharacter(v) then
+                                local dist = (v.HumanoidRootPart.Position - myPos).Magnitude
+                                if dist <= 25 then
+                                    local tool = char:FindFirstChildOfClass("Tool")
+                                    if tool then tool:Activate() end
                                 end
                             end
                         end
                     end
-                    
-                    if mobMasCercano then
-                        local rootMob = mobMasCercano:FindFirstChild("HumanoidRootPart") or mobMasCercano:FindFirstChild("PrimaryPart")
-                        if rootMob then
-                            hrp.CFrame = CFrame.new(hrp.Position, rootMob.Position)
-                            AtacarConHerramienta()
-                        end
-                    end
-                end)
-            end
-            
-            -- AUTO-ALIMENTAR FOGATA
-            if autoFeedOn then
-                pcall(function()
-                    AlimentarFogata()
-                end)
-            end
-            
-            -- AUTO-RECOLECTAR
-            if autoCollectOn then
-                pcall(function()
-                    for _, item in pairs(workspace:GetDescendants()) do
-                        if item:IsA("BasePart") and not item:IsA("Tool") then
-                            local nombre = item.Name:lower()
-                            if nombre:find("wood") or nombre:find("log") or nombre:find("item") or nombre:find("recurso") then
-                                if (item.Position - hrp.Position).Magnitude <= 20 then
-                                    RecolectarItem(item)
-                                end
-                            end
-                        end
-                    end
-                end)
-            end
-            
-            -- GODMODE
-            if godmodeOn and char:FindFirstChild("Humanoid") then
-                pcall(function()
-                    local hum = char.Humanoid
-                    hum.Health = hum.MaxHealth
-                    hum.BreakJointsOnDeath = false
-                end)
-            end
+                end
+            end)
         end
     end
 end)
 
--- ========================================================
--- 5. ANIMACIÓN DE CARGA
--- ========================================================
 task.spawn(function()
-    for i = 1, 100 do
-        PercentText.Text = "Cargando... " .. i .. "%"
-        BarFill.Size = UDim2.new(i / 100, 0, 1, 0)
-        task.wait(0.025)
+    while task.wait(1) do
+        if _G.AutoFuel then
+            pcall(function()
+                local targetCF = GetRescueZoneCFrame()
+                if targetCF then
+                    local fuelItems = {"Biofuel", "Coal", "Fuel Canister", "Oil Barrel"}
+                    for _, obj in ipairs(workspace:GetDescendants()) do
+                        if obj:IsA("BasePart") or obj:IsA("Model") then
+                            for _, f in ipairs(fuelItems) do
+                                if string.find(string.lower(obj.Name), string.lower(f)) then
+                                    if obj:IsA("Model") then obj:PivotTo(targetCF) else obj.CFrame = targetCF end
+                                    break
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        end
     end
-
-    LoadingFrame:Destroy()
-    MainFrame.Visible = true
-    ToggleBtn.Visible = true
 end)
+
+task.spawn(function()
+    while task.wait(1) do
+        if _G.AutoScrapper then
+            pcall(function()
+                local targetCF = GetScrapperCFrame()
+                if targetCF then
+                    local metalItems = {"Bolt", "Broken Fan", "Broken Microwave", "Cultist Gem", "Gem of the Forest Fragment", "Metal Chair", "Old Car Engine", "Old Radio", "Sheet Metal"}
+                    for _, obj in ipairs(workspace:GetDescendants()) do
+                        if obj:IsA("BasePart") or obj:IsA("Model") then
+                            for _, m in ipairs(metalItems) do
+                                if string.find(string.lower(obj.Name), string.lower(m)) then
+                                    if obj:IsA("Model") then obj:PivotTo(targetCF) else obj.CFrame = targetCF end
+                                    break
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+-
