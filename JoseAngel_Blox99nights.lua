@@ -1,38 +1,26 @@
 -- ========================================================
--- SCRIPT COMPLETO: JoseAngel_Blox 99nights
--- Creado para: 99 Noches en el Bosque
+-- SCRIPT EXCLUSIVO: JoseAngel_Blox 99nights (CORREGIDO)
+-- Juego: 99 Noches en el Bosque
 -- ========================================================
 
+-- Servicios de Roblox
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local LocalPlayer = Players.LocalPlayer
 
--- Asignación de Interfaz Segura (Anti-Bloqueo)
+-- Contenedor Principal (HUI / CoreGui)
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "JoseAngel_Blox_UI"
-ScreenGui.ResetOnSpawn = false
-
-if gethui then
-    pcall(function() ScreenGui.Parent = gethui() end)
-elseif syn and syn.protect_gui then
-    pcall(function()
-        syn.protect_gui(ScreenGui)
-        ScreenGui.Parent = game:GetService("CoreGui")
-    end)
-else
-    pcall(function() ScreenGui.Parent = game:GetService("CoreGui") end)
-end
-
-if not ScreenGui.Parent then
-    ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-end
+ScreenGui.Parent = gethui and gethui() or CoreGui
 
 -- ========================================================
--- 1. PANTALLA DE CARGA (ANIMACIÓN DE 1% A 100%)
+-- 1. PANTALLA DE CARGA (BIENVENIDA + BARRA DE 1% A 100%)
 -- ========================================================
 local LoadingFrame = Instance.new("Frame")
 LoadingFrame.Size = UDim2.new(0, 360, 0, 160)
 LoadingFrame.Position = UDim2.new(0.5, -180, 0.5, -80)
-LoadingFrame.BackgroundColor3 = Color3.fromRGB(10, 20, 38) -- Fondo Azul Marino
+LoadingFrame.BackgroundColor3 = Color3.fromRGB(10, 20, 38)
 LoadingFrame.BorderSizePixel = 0
 LoadingFrame.Parent = ScreenGui
 
@@ -45,7 +33,7 @@ WelcomeText.Size = UDim2.new(1, -20, 0, 40)
 WelcomeText.Position = UDim2.new(0, 10, 0, 15)
 WelcomeText.BackgroundTransparency = 1
 WelcomeText.Text = "Bienvenidos a Scripts JoseAngel_Blox"
-WelcomeText.TextColor3 = Color3.fromRGB(0, 162, 255) -- Letras Azules
+WelcomeText.TextColor3 = Color3.fromRGB(0, 162, 255)
 WelcomeText.TextSize = 16
 WelcomeText.Font = Enum.Font.SourceSansBold
 WelcomeText.Parent = LoadingFrame
@@ -82,12 +70,12 @@ FillCorner.CornerRadius = UDim.new(0, 6)
 FillCorner.Parent = BarFill
 
 -- ========================================================
--- 2. INTERFAZ PRINCIPAL (MENÚ AZUL MARINO)
+-- 2. INTERFAZ PRINCIPAL (MENÚ JOSEANGEL_BLOX)
 -- ========================================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 520, 0, 340)
 MainFrame.Position = UDim2.new(0.5, -260, 0.5, -170)
-MainFrame.BackgroundColor3 = Color3.fromRGB(10, 20, 38) -- Azul Marino
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 20, 38)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
@@ -98,13 +86,12 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 12)
 MainCorner.Parent = MainFrame
 
--- Títulos
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -20, 0, 25)
 Title.Position = UDim2.new(0, 15, 0, 10)
 Title.BackgroundTransparency = 1
 Title.Text = "JoseAngel_Blox 99nights"
-Title.TextColor3 = Color3.fromRGB(0, 162, 255) -- Letras Azules
+Title.TextColor3 = Color3.fromRGB(0, 162, 255)
 Title.TextSize = 18
 Title.Font = Enum.Font.SourceSansBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
@@ -116,13 +103,12 @@ Subtitle.Position = UDim2.new(0, 15, 0, 32)
 Subtitle.BackgroundTransparency = 1
 Subtitle.Text = "Creado por JoseAngel_Blox"
 Subtitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-Subtitle.TextTransparency = 0.5 -- Transparente
+Subtitle.TextTransparency = 0.5
 Subtitle.TextSize = 13
 Subtitle.Font = Enum.Font.SourceSansItalic
 Subtitle.TextXAlignment = Enum.TextXAlignment.Left
 Subtitle.Parent = MainFrame
 
--- Contenedores
 local TabContainer = Instance.new("Frame")
 TabContainer.Size = UDim2.new(0, 120, 0, 260)
 TabContainer.Position = UDim2.new(0, 10, 0, 65)
@@ -145,7 +131,6 @@ local ContentCorner = Instance.new("UICorner")
 ContentCorner.CornerRadius = UDim.new(0, 8)
 ContentCorner.Parent = ContentContainer
 
--- Pestañas
 local InfoTab = Instance.new("ScrollingFrame")
 InfoTab.Size = UDim2.new(1, -20, 1, -20)
 InfoTab.Position = UDim2.new(0, 10, 0, 10)
@@ -178,12 +163,14 @@ local function AddInfoLabel(texto, posY, color, bold)
     lbl.Font = bold and Enum.Font.SourceSansBold or Enum.Font.SourceSans
     lbl.TextXAlignment = Enum.TextXAlignment.Left
     lbl.Parent = InfoTab
+    return lbl
 end
 
 AddInfoLabel("Nombre del Creador: JoseAngel_Blox", 0, Color3.fromRGB(0, 162, 255), true)
 AddInfoLabel("Fecha de lanzamiento: 02/09/2026", 25)
-AddInfoLabel("Versión: 1.1", 50)
-AddInfoLabel("UPDATE:", 80, Color3.fromRGB(0, 162, 255), true)
+AddInfoLabel("Versión: 1.1 (Corregido)", 50)
+
+local updateTitle = AddInfoLabel("UPDATE:", 80, Color3.fromRGB(0, 162, 255), true)
 
 local updateText = Instance.new("TextLabel")
 updateText.Size = UDim2.new(1, 0, 0, 100)
@@ -255,8 +242,13 @@ local function CrearOpcionMain(titulo, descripcion, posY, callback)
     local estado = false
     btn.MouseButton1Click:Connect(function()
         estado = not estado
-        btn.Text = estado and "ON" or "OFF"
-        btn.BackgroundColor3 = estado and Color3.fromRGB(40, 167, 69) or Color3.fromRGB(0, 120, 215)
+        if estado then
+            btn.Text = "ON"
+            btn.BackgroundColor3 = Color3.fromRGB(40, 167, 69)
+        else
+            btn.Text = "OFF"
+            btn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+        end
         callback(estado)
     end)
 end
@@ -271,24 +263,20 @@ CrearOpcionMain("Kill Aura", "Ataca automáticamente a cualquier monstruo que se
     killAuraOn = val
 end)
 
-CrearOpcionMain("Auto-Alimentar Fogata", "Deposita madera automáticamente en la fogata.", 62, function(val)
+CrearOpcionMain("Auto-Alimentar Fogata", "Deposita madera automáticamente cuando la luz baja.", 62, function(val)
     autoFeedOn = val
 end)
 
-CrearOpcionMain("Auto-Recolectar", "Recoge madera y recursos cercanos automáticamente.", 124, function(val)
+CrearOpcionMain("Auto-Recolectar", "Atrae o recoge automáticamente los recursos del suelo.", 124, function(val)
     autoCollectOn = val
 end)
 
-CrearOpcionMain("Godmode", "Aumenta la velocidad y curación del jugador.", 186, function(val)
+CrearOpcionMain("Godmode", "Modo dios (inmortal).", 186, function(val)
     godmodeOn = val
-    if not val and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.WalkSpeed = 16
-    end
 end)
 
 MainTab.CanvasSize = UDim2.new(0, 0, 0, 250)
 
--- Botones de Navegación
 local function CrearBotonTab(nombre, posY, tabTarget)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0.9, 0, 0, 35)
@@ -315,7 +303,7 @@ CrearBotonTab("1) info", 10, InfoTab)
 CrearBotonTab("2) Main", 52, MainTab)
 
 -- ========================================================
--- 3. BURBUJA FLOTANTE "JB"
+-- 3. BURBUJA FLOTANTE "JB" (TOGGLE UI)
 -- ========================================================
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
@@ -342,66 +330,183 @@ ToggleBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ========================================================
--- 4. BUCLE PRINCIPAL DE FUNCIONES DEL JUEGO
+-- 4. LÓGICA Y BUCLES DE LAS FUNCIONES DEL JUEGO (CORREGIDO)
 -- ========================================================
-task.spawn(function()
-    while task.wait(0.2) do
+
+-- Función para atacar con la herramienta actual
+local function AtacarConHerramienta()
+    local char = LocalPlayer.Character
+    if not char then return end
+    
+    local tool = char:FindFirstChildOfClass("Tool")
+    if not tool then
+        tool = LocalPlayer.Backpack:FindFirstChildOfClass("Tool")
+        if tool then
+            tool.Parent = char
+            task.wait(0.1)
+        end
+    end
+    
+    if tool then
+        tool:Activate()
+        task.wait(0.05)
+        tool:Deactivate()
+        
         pcall(function()
-            local char = LocalPlayer.Character
-            if char and char:FindFirstChild("HumanoidRootPart") then
-
-                -- 1. Kill Aura (Equipa arma y ataca enemigos en rango)
-                if killAuraOn then
-                    for _, mob in pairs(workspace:GetChildren()) do
-                        if mob:IsA("Model") and mob ~= char and mob:FindFirstChildOfClass("Humanoid") then
-                            local mobRoot = mob:FindFirstChild("HumanoidRootPart") or mob.PrimaryPart
-                            if mobRoot and (mobRoot.Position - char.HumanoidRootPart.Position).Magnitude <= 22 then
-                                local tool = char:FindFirstChildOfClass("Tool") or LocalPlayer.Backpack:FindFirstChildOfClass("Tool")
-                                if tool then
-                                    tool.Parent = char
-                                    tool:Activate()
-                                end
-                            end
-                        end
-                    end
-                end
-
-                -- 2. Auto-Recolectar y Auto-Alimentar Fogata (ProximityPrompts)
-                if autoCollectOn or autoFeedOn then
-                    for _, prompt in pairs(workspace:GetDescendants()) do
-                        if prompt:IsA("ProximityPrompt") then
-                            local parentPart = prompt.Parent
-                            if parentPart and parentPart:IsA("BasePart") then
-                                local dist = (parentPart.Position - char.HumanoidRootPart.Position).Magnitude
-                                if dist <= prompt.MaxActivationDistance then
-                                    if fireproximityprompt then
-                                        fireproximityprompt(prompt)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-
-                -- 3. Godmode / Súper Resistencia y Velocidad
-                if godmodeOn and char:FindFirstChild("Humanoid") then
-                    char.Humanoid.WalkSpeed = 45
-                    char.Humanoid.Health = char.Humanoid.MaxHealth
-                end
-
+            local handle = tool:FindFirstChild("Handle")
+            if handle then
+                handle:FireServer("click")
             end
         end)
+    end
+end
+
+-- Función para recolectar items
+local function RecolectarItem(item)
+    local char = LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    
+    local hrp = char.HumanoidRootPart
+    local distancia = (item.Position - hrp.Position).Magnitude
+    
+    if distancia <= 15 then
+        pcall(function()
+            item.CFrame = hrp.CFrame + hrp.CFrame.LookVector * 2
+        end)
+        
+        pcall(function()
+            local touch = Instance.new("TouchTransmitter")
+            touch.Parent = item
+            item.Touched:Fire(hrp)
+            task.wait(0.05)
+            touch:Destroy()
+        end)
+    end
+end
+
+-- Función para alimentar fogata
+local function AlimentarFogata()
+    local char = LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    
+    local hrp = char.HumanoidRootPart
+    local maderaEncontrada = false
+    
+    for _, item in pairs(workspace:GetDescendants()) do
+        if item:IsA("BasePart") and item:IsA("Tool") then
+            local nombre = item.Name:lower()
+            if nombre:find("wood") or nombre:find("log") or nombre:find("madera") then
+                if (item.Position - hrp.Position).Magnitude <= 20 then
+                    maderaEncontrada = true
+                    pcall(function()
+                        item.Parent = char
+                        task.wait(0.2)
+                    end)
+                end
+            end
+        end
+    end
+    
+    if maderaEncontrada then
+        for _, fogata in pairs(workspace:GetDescendants()) do
+            if fogata:IsA("BasePart") and (fogata.Name:lower():find("fire") or fogata.Name:lower():find("camp")) then
+                if (fogata.Position - hrp.Position).Magnitude <= 15 then
+                    pcall(function()
+                        local tool = char:FindFirstChildOfClass("Tool")
+                        if tool then
+                            tool.Parent = fogata
+                            task.wait(0.1)
+                            tool:Activate()
+                            task.wait(0.1)
+                            tool.Parent = char
+                        end
+                    end)
+                    break
+                end
+            end
+        end
+    end
+end
+
+-- BUCLE PRINCIPAL CORREGIDO
+task.spawn(function()
+    while task.wait(0.2) do
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            local hrp = char.HumanoidRootPart
+            
+            -- KILL AURA
+            if killAuraOn then
+                pcall(function()
+                    local mobMasCercano = nil
+                    local distMinima = 25
+                    
+                    for _, mob in pairs(workspace:GetDescendants()) do
+                        if mob:IsA("Model") and mob:FindFirstChild("Humanoid") and mob ~= char then
+                            local root = mob:FindFirstChild("HumanoidRootPart") or mob:FindFirstChild("PrimaryPart")
+                            if root then
+                                local dist = (root.Position - hrp.Position).Magnitude
+                                if dist <= distMinima then
+                                    mobMasCercano = mob
+                                    distMinima = dist
+                                end
+                            end
+                        end
+                    end
+                    
+                    if mobMasCercano then
+                        local rootMob = mobMasCercano:FindFirstChild("HumanoidRootPart") or mobMasCercano:FindFirstChild("PrimaryPart")
+                        if rootMob then
+                            hrp.CFrame = CFrame.new(hrp.Position, rootMob.Position)
+                            AtacarConHerramienta()
+                        end
+                    end
+                end)
+            end
+            
+            -- AUTO-ALIMENTAR FOGATA
+            if autoFeedOn then
+                pcall(function()
+                    AlimentarFogata()
+                end)
+            end
+            
+            -- AUTO-RECOLECTAR
+            if autoCollectOn then
+                pcall(function()
+                    for _, item in pairs(workspace:GetDescendants()) do
+                        if item:IsA("BasePart") and not item:IsA("Tool") then
+                            local nombre = item.Name:lower()
+                            if nombre:find("wood") or nombre:find("log") or nombre:find("item") or nombre:find("recurso") then
+                                if (item.Position - hrp.Position).Magnitude <= 20 then
+                                    RecolectarItem(item)
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+            
+            -- GODMODE
+            if godmodeOn and char:FindFirstChild("Humanoid") then
+                pcall(function()
+                    local hum = char.Humanoid
+                    hum.Health = hum.MaxHealth
+                    hum.BreakJointsOnDeath = false
+                end)
+            end
+        end
     end
 end)
 
 -- ========================================================
--- 5. ANIMACIÓN DE CARGA (0% A 100%)
+-- 5. ANIMACIÓN DE CARGA
 -- ========================================================
 task.spawn(function()
     for i = 1, 100 do
         PercentText.Text = "Cargando... " .. i .. "%"
         BarFill.Size = UDim2.new(i / 100, 0, 1, 0)
-        task.wait(0.02)
+        task.wait(0.025)
     end
 
     LoadingFrame:Destroy()
