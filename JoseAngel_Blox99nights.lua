@@ -3,20 +3,6 @@
 -- Juego: 99 Noches en el Bosque
 -- ========================================================
 
--- 1. VALIDACIÓN DE LUGAR (Exclusivo para 99 Noches en el Bosque)
-local PLACE_ID_PERMITIDO = 79546208627805
-
-if game.PlaceId ~= PLACE_ID_PERMITIDO then
-    pcall(function()
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "Juego No Compatible",
-            Text = "Este script es exclusivo para 99 Noches en el Bosque.",
-            Duration = 5
-        })
-    end)
-    return
-end
-
 -- Servicios de Roblox
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
@@ -29,7 +15,7 @@ ScreenGui.Name = "JoseAngel_Blox_UI"
 ScreenGui.Parent = gethui and gethui() or CoreGui
 
 -- ========================================================
--- 2. PANTALLA DE CARGA (BIENVENIDA + BARRA DE 1% A 100%)
+-- 1. PANTALLA DE CARGA (BIENVENIDA + BARRA DE 1% A 100%)
 -- ========================================================
 local LoadingFrame = Instance.new("Frame")
 LoadingFrame.Size = UDim2.new(0, 360, 0, 160)
@@ -85,7 +71,7 @@ FillCorner.CornerRadius = UDim.new(0, 6)
 FillCorner.Parent = BarFill
 
 -- ========================================================
--- 3. INTERFAZ PRINCIPAL (MENÚ JOSEANGEL_BLOX)
+-- 2. INTERFAZ PRINCIPAL (MENÚ JOSEANGEL_BLOX)
 -- ========================================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 520, 0, 340)
@@ -327,7 +313,7 @@ CrearBotonTab("1) info", 10, InfoTab)
 CrearBotonTab("2) Main", 52, MainTab)
 
 -- ========================================================
--- 4. BURBUJA FLOTANTE "JB" (TOGGLE UI)
+-- 3. BURBUJA FLOTANTE "JB" (TOGGLE UI)
 -- ========================================================
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
@@ -354,7 +340,7 @@ ToggleBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ========================================================
--- 5. LÓGICA Y BUCLES DE LAS FUNCIONES DEL JUEGO
+-- 4. LÓGICA Y BUCLES DE LAS FUNCIONES DEL JUEGO
 -- ========================================================
 task.spawn(function()
     while task.wait(0.3) do
@@ -403,13 +389,13 @@ task.spawn(function()
 end)
 
 -- ========================================================
--- 6. ANIMACIÓN DE LA BARRA DE CARGA (1% A 100%)
+-- 5. ANIMACIÓN DE LA BARRA DE CARGA (1% A 100%)
 -- ========================================================
 task.spawn(function()
     for i = 1, 100 do
         PercentText.Text = "Cargando... " .. i .. "%"
         BarFill.Size = UDim2.new(i / 100, 0, 1, 0)
-        task.wait(0.025) -- Duración total aprox: 2.5 segundos
+        task.wait(0.025)
     end
 
     -- Al llegar a 100%, oculta la pantalla de carga y muestra el menú
