@@ -1,26 +1,38 @@
 -- ========================================================
--- SCRIPT EXCLUSIVO: JoseAngel_Blox 99nights
--- Juego: 99 Noches en el Bosque
+-- SCRIPT COMPLETO: JoseAngel_Blox 99nights
+-- Creado para: 99 Noches en el Bosque
 -- ========================================================
 
--- Servicios de Roblox
 local Players = game:GetService("Players")
-local CoreGui = game:GetService("CoreGui")
-local TweenService = game:GetService("TweenService")
-local LocalPlayer = Players.LocalPlayer
+local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
--- Contenedor Principal (HUI / CoreGui)
+-- Asignación de Interfaz Segura (Anti-Bloqueo)
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "JoseAngel_Blox_UI"
-ScreenGui.Parent = gethui and gethui() or CoreGui
+ScreenGui.ResetOnSpawn = false
+
+if gethui then
+    pcall(function() ScreenGui.Parent = gethui() end)
+elseif syn and syn.protect_gui then
+    pcall(function()
+        syn.protect_gui(ScreenGui)
+        ScreenGui.Parent = game:GetService("CoreGui")
+    end)
+else
+    pcall(function() ScreenGui.Parent = game:GetService("CoreGui") end)
+end
+
+if not ScreenGui.Parent then
+    ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+end
 
 -- ========================================================
--- 1. PANTALLA DE CARGA (BIENVENIDA + BARRA DE 1% A 100%)
+-- 1. PANTALLA DE CARGA (ANIMACIÓN DE 1% A 100%)
 -- ========================================================
 local LoadingFrame = Instance.new("Frame")
 LoadingFrame.Size = UDim2.new(0, 360, 0, 160)
 LoadingFrame.Position = UDim2.new(0.5, -180, 0.5, -80)
-LoadingFrame.BackgroundColor3 = Color3.fromRGB(10, 20, 38) -- Azul Marino
+LoadingFrame.BackgroundColor3 = Color3.fromRGB(10, 20, 38) -- Fondo Azul Marino
 LoadingFrame.BorderSizePixel = 0
 LoadingFrame.Parent = ScreenGui
 
@@ -48,7 +60,6 @@ PercentText.TextSize = 14
 PercentText.Font = Enum.Font.SourceSans
 PercentText.Parent = LoadingFrame
 
--- Contenedor de la Barra
 local BarBackground = Instance.new("Frame")
 BarBackground.Size = UDim2.new(0.85, 0, 0, 12)
 BarBackground.Position = UDim2.new(0.075, 0, 0, 100)
@@ -71,23 +82,23 @@ FillCorner.CornerRadius = UDim.new(0, 6)
 FillCorner.Parent = BarFill
 
 -- ========================================================
--- 2. INTERFAZ PRINCIPAL (MENÚ JOSEANGEL_BLOX)
+-- 2. INTERFAZ PRINCIPAL (MENÚ AZUL MARINO)
 -- ========================================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 520, 0, 340)
 MainFrame.Position = UDim2.new(0.5, -260, 0.5, -170)
-MainFrame.BackgroundColor3 = Color3.fromRGB(10, 20, 38) -- Fondo Azul Marino
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 20, 38) -- Azul Marino
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
-MainFrame.Visible = false -- Oculto hasta que cargue
+MainFrame.Visible = false
 MainFrame.Parent = ScreenGui
 
 local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 12)
 MainCorner.Parent = MainFrame
 
--- Encabezado / Títulos
+-- Títulos
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -20, 0, 25)
 Title.Position = UDim2.new(0, 15, 0, 10)
@@ -105,13 +116,13 @@ Subtitle.Position = UDim2.new(0, 15, 0, 32)
 Subtitle.BackgroundTransparency = 1
 Subtitle.Text = "Creado por JoseAngel_Blox"
 Subtitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-Subtitle.TextTransparency = 0.5 -- Letra transparente / sutil
+Subtitle.TextTransparency = 0.5 -- Transparente
 Subtitle.TextSize = 13
 Subtitle.Font = Enum.Font.SourceSansItalic
 Subtitle.TextXAlignment = Enum.TextXAlignment.Left
 Subtitle.Parent = MainFrame
 
--- Panel de Pestañas (Izquierda)
+-- Contenedores
 local TabContainer = Instance.new("Frame")
 TabContainer.Size = UDim2.new(0, 120, 0, 260)
 TabContainer.Position = UDim2.new(0, 10, 0, 65)
@@ -123,7 +134,6 @@ local TabCorner = Instance.new("UICorner")
 TabCorner.CornerRadius = UDim.new(0, 8)
 TabCorner.Parent = TabContainer
 
--- Panel de Contenido (Derecha)
 local ContentContainer = Instance.new("Frame")
 ContentContainer.Size = UDim2.new(0, 370, 0, 260)
 ContentContainer.Position = UDim2.new(0, 140, 0, 65)
@@ -168,14 +178,12 @@ local function AddInfoLabel(texto, posY, color, bold)
     lbl.Font = bold and Enum.Font.SourceSansBold or Enum.Font.SourceSans
     lbl.TextXAlignment = Enum.TextXAlignment.Left
     lbl.Parent = InfoTab
-    return lbl
 end
 
 AddInfoLabel("Nombre del Creador: JoseAngel_Blox", 0, Color3.fromRGB(0, 162, 255), true)
 AddInfoLabel("Fecha de lanzamiento: 02/09/2026", 25)
 AddInfoLabel("Versión: 1.1", 50)
-
-local updateTitle = AddInfoLabel("UPDATE:", 80, Color3.fromRGB(0, 162, 255), true)
+AddInfoLabel("UPDATE:", 80, Color3.fromRGB(0, 162, 255), true)
 
 local updateText = Instance.new("TextLabel")
 updateText.Size = UDim2.new(1, 0, 0, 100)
@@ -247,13 +255,8 @@ local function CrearOpcionMain(titulo, descripcion, posY, callback)
     local estado = false
     btn.MouseButton1Click:Connect(function()
         estado = not estado
-        if estado then
-            btn.Text = "ON"
-            btn.BackgroundColor3 = Color3.fromRGB(40, 167, 69) -- Verde
-        else
-            btn.Text = "OFF"
-            btn.BackgroundColor3 = Color3.fromRGB(0, 120, 215) -- Azul
-        end
+        btn.Text = estado and "ON" or "OFF"
+        btn.BackgroundColor3 = estado and Color3.fromRGB(40, 167, 69) or Color3.fromRGB(0, 120, 215)
         callback(estado)
     end)
 end
@@ -264,29 +267,28 @@ local autoFeedOn = false
 local autoCollectOn = false
 local godmodeOn = false
 
--- 1. Kill Aura
 CrearOpcionMain("Kill Aura", "Ataca automáticamente a cualquier monstruo que se acerque.", 0, function(val)
     killAuraOn = val
 end)
 
--- 2. Auto-Alimentar Fogata
-CrearOpcionMain("Auto-Alimentar Fogata", "Deposita madera automáticamente cuando la luz baja.", 62, function(val)
+CrearOpcionMain("Auto-Alimentar Fogata", "Deposita madera automáticamente en la fogata.", 62, function(val)
     autoFeedOn = val
 end)
 
--- 3. Auto-Recolectar
-CrearOpcionMain("Auto-Recolectar", "Atrae o recoge automáticamente los recursos del suelo.", 124, function(val)
+CrearOpcionMain("Auto-Recolectar", "Recoge madera y recursos cercanos automáticamente.", 124, function(val)
     autoCollectOn = val
 end)
 
--- 4. Godmode
-CrearOpcionMain("Godmode", "Modo dios (inmortal).", 186, function(val)
+CrearOpcionMain("Godmode", "Aumenta la velocidad y curación del jugador.", 186, function(val)
     godmodeOn = val
+    if not val and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.WalkSpeed = 16
+    end
 end)
 
 MainTab.CanvasSize = UDim2.new(0, 0, 0, 250)
 
--- Botones de Navegación de Pestañas
+-- Botones de Navegación
 local function CrearBotonTab(nombre, posY, tabTarget)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0.9, 0, 0, 35)
@@ -313,7 +315,7 @@ CrearBotonTab("1) info", 10, InfoTab)
 CrearBotonTab("2) Main", 52, MainTab)
 
 -- ========================================================
--- 3. BURBUJA FLOTANTE "JB" (TOGGLE UI)
+-- 3. BURBUJA FLOTANTE "JB"
 -- ========================================================
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
@@ -323,11 +325,11 @@ ToggleBtn.Text = "JB"
 ToggleBtn.TextColor3 = Color3.fromRGB(0, 162, 255)
 ToggleBtn.Font = Enum.Font.SourceSansBold
 ToggleBtn.TextSize = 16
-ToggleBtn.Visible = false -- Se activa al terminar la carga
+ToggleBtn.Visible = false
 ToggleBtn.Parent = ScreenGui
 
 local ToggleCorner = Instance.new("UICorner")
-ToggleCorner.CornerRadius = UDim.new(1, 0) -- Círculo perfecto
+ToggleCorner.CornerRadius = UDim.new(1, 0)
 ToggleCorner.Parent = ToggleBtn
 
 local ToggleStroke = Instance.new("UIStroke")
@@ -340,19 +342,20 @@ ToggleBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ========================================================
--- 4. LÓGICA Y BUCLES DE LAS FUNCIONES DEL JUEGO
+-- 4. BUCLE PRINCIPAL DE FUNCIONES DEL JUEGO
 -- ========================================================
 task.spawn(function()
-    while task.wait(0.3) do
-        local char = LocalPlayer.Character
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            -- Bucle Kill Aura
-            if killAuraOn then
-                pcall(function()
-                    for _, mob in pairs(workspace:GetDescendants()) do
-                        if mob:IsA("Model") and mob:FindFirstChild("Humanoid") and mob ~= char then
-                            local root = mob:FindFirstChild("HumanoidRootPart") or mob:FindFirstChild("PrimaryPart")
-                            if root and (root.Position - char.HumanoidRootPart.Position).Magnitude <= 22 then
+    while task.wait(0.2) do
+        pcall(function()
+            local char = LocalPlayer.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+
+                -- 1. Kill Aura (Equipa arma y ataca enemigos en rango)
+                if killAuraOn then
+                    for _, mob in pairs(workspace:GetChildren()) do
+                        if mob:IsA("Model") and mob ~= char and mob:FindFirstChildOfClass("Humanoid") then
+                            local mobRoot = mob:FindFirstChild("HumanoidRootPart") or mob.PrimaryPart
+                            if mobRoot and (mobRoot.Position - char.HumanoidRootPart.Position).Magnitude <= 22 then
                                 local tool = char:FindFirstChildOfClass("Tool") or LocalPlayer.Backpack:FindFirstChildOfClass("Tool")
                                 if tool then
                                     tool.Parent = char
@@ -361,44 +364,46 @@ task.spawn(function()
                             end
                         end
                     end
-                end)
-            end
+                end
 
-            -- Bucle Auto Recolectar
-            if autoCollectOn then
-                pcall(function()
-                    for _, item in pairs(workspace:GetDescendants()) do
-                        if item:IsA("BasePart") and (item.Name:lower():find("wood") or item.Name:lower():find("log") or item.Name:lower():find("item")) then
-                            if (item.Position - char.HumanoidRootPart.Position).Magnitude <= 35 then
-                                firetouchinterest(char.HumanoidRootPart, item, 0)
-                                firetouchinterest(char.HumanoidRootPart, item, 1)
+                -- 2. Auto-Recolectar y Auto-Alimentar Fogata (ProximityPrompts)
+                if autoCollectOn or autoFeedOn then
+                    for _, prompt in pairs(workspace:GetDescendants()) do
+                        if prompt:IsA("ProximityPrompt") then
+                            local parentPart = prompt.Parent
+                            if parentPart and parentPart:IsA("BasePart") then
+                                local dist = (parentPart.Position - char.HumanoidRootPart.Position).Magnitude
+                                if dist <= prompt.MaxActivationDistance then
+                                    if fireproximityprompt then
+                                        fireproximityprompt(prompt)
+                                    end
+                                end
                             end
                         end
                     end
-                end)
-            end
+                end
 
-            -- Bucle Godmode
-            if godmodeOn and char:FindFirstChild("Humanoid") then
-                pcall(function()
+                -- 3. Godmode / Súper Resistencia y Velocidad
+                if godmodeOn and char:FindFirstChild("Humanoid") then
+                    char.Humanoid.WalkSpeed = 45
                     char.Humanoid.Health = char.Humanoid.MaxHealth
-                end)
+                end
+
             end
-        end
+        end)
     end
 end)
 
 -- ========================================================
--- 5. ANIMACIÓN DE LA BARRA DE CARGA (1% A 100%)
+-- 5. ANIMACIÓN DE CARGA (0% A 100%)
 -- ========================================================
 task.spawn(function()
     for i = 1, 100 do
         PercentText.Text = "Cargando... " .. i .. "%"
         BarFill.Size = UDim2.new(i / 100, 0, 1, 0)
-        task.wait(0.025)
+        task.wait(0.02)
     end
 
-    -- Al llegar a 100%, oculta la pantalla de carga y muestra el menú
     LoadingFrame:Destroy()
     MainFrame.Visible = true
     ToggleBtn.Visible = true
