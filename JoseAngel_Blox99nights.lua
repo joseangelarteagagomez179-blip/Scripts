@@ -1,321 +1,267 @@
--- ╔══════════════════════════════════════════════╗
--- ║          99 Noches en el Bosque               ║
--- ║         Creado por: JoseAngel_Blox            ║
--- ║              Versión 1.1 📱 Móvil             ║
--- ║            ✅ ERROR CORREGIDO                 ║
--- ╚══════════════════════════════════════════════╝
+-- Script: 99 noches en el bosque
+-- Creado por: JoseAngel_Blox
+-- Versión: 1.1
 
--- === SERVICIOS ===
-local Players = game:GetService("Players")
-local Player = Players.LocalPlayer
-local PlayerGui = Player:WaitForChild("PlayerGui")
-
--- === VARIABLES GLOBALES ===
-local selectedFuel = nil
-local selectedFood = nil
-local spawnFuelEnabled = false
-local spawnFoodEnabled = false
-local killAuraEnabled = false
-local autoFuelEnabled = false
-local godmodeEnabled = false
-local currentTab = "Info"
-
--- === FUNCIÓN AUXILIAR: ESQUINAS REDONDEADAS (compatible) ===
-local function addCornerRadius(instance, radius)
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, radius)
-    UICorner.Parent = instance
-    return UICorner
-end
-
--- === CREAR INTERFAZ — DISEÑO COMPATIBLE ===
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "99NochesScript"
-ScreenGui.Parent = PlayerGui
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
--- Ventana Principal
 local MainFrame = Instance.new("Frame")
+local UICorner = Instance.new("UICorner")
+local Header = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local Subtitle = Instance.new("TextLabel")
+local SideBar = Instance.new("Frame")
+local ContentArea = Instance.new("Frame")
+local UIListLayout_SideBar = Instance.new("UIListLayout")
+
+-- Configuración Base ScreenGui
+ScreenGui.Name = "99NochesEnElBosqueGui"
+ScreenGui.Parent = game:GetService("CoreGui") or game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ResetOnSpawn = false
+
+-- Frame Principal (Cuadrado con bordes redondeados)
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-MainFrame.BorderSizePixel = 0
-MainFrame.Position = UDim2.new(0.05, 0, 0.05, 0)
-MainFrame.Size = UDim2.new(0, 340, 0, 420)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+MainFrame.Position = UDim2.new(0.5, -250, 0.5, -175)
+MainFrame.Size = UDim2.new(0, 500, 0, 350)
 MainFrame.Active = true
 MainFrame.Draggable = true
-addCornerRadius(MainFrame, 16) -- ✅ Esquinas redondeadas SIN error
 
--- Título Principal
-local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Name = "TitleLabel"
-TitleLabel.Parent = MainFrame
-TitleLabel.BackgroundTransparency = 1
-TitleLabel.Position = UDim2.new(0.5, 0, 0, 15)
-TitleLabel.Size = UDim2.new(0, 310, 0, 35)
-TitleLabel.Font = Enum.Font.GothamBlack
-TitleLabel.Text = "99 Noches en el Bosque"
-TitleLabel.TextColor3 = Color3.fromRGB(255, 60, 60)
-TitleLabel.TextScaled = true
-TitleLabel.TextXAlignment = Enum.TextXAlignment.Center
+UICorner.CornerRadius = UDim.new(0, 15)
+UICorner.Parent = MainFrame
 
--- Subtítulo — Creado por (transparente)
-local CreatorLabel = Instance.new("TextLabel")
-CreatorLabel.Name = "CreatorLabel"
-CreatorLabel.Parent = MainFrame
-CreatorLabel.BackgroundTransparency = 1
-CreatorLabel.Position = UDim2.new(0.5, 0, 0, 52)
-CreatorLabel.Size = UDim2.new(0, 280, 0, 22)
-CreatorLabel.Font = Enum.Font.Gotham
-CreatorLabel.Text = "Creado por JoseAngel_Blox"
-CreatorLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-CreatorLabel.TextTransparency = 0.4
-CreatorLabel.TextScaled = true
-CreatorLabel.TextXAlignment = Enum.TextXAlignment.Center
+-- Título y Subtítulo
+Title.Name = "Title"
+Title.Parent = MainFrame
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0, 15, 0, 10)
+Title.Size = UDim2.new(0, 470, 0, 20)
+Title.Font = Enum.Font.SourceSansBold
+Title.Text = "99 noches en el bosque"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 20.000
+Title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Línea Separadora
-local Line = Instance.new("Frame")
-Line.Parent = MainFrame
-Line.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
-Line.Position = UDim2.new(0.05, 0, 0, 80)
-Line.Size = UDim2.new(0.9, 0, 2, 0)
+Subtitle.Name = "Subtitle"
+Subtitle.Parent = MainFrame
+Subtitle.BackgroundTransparency = 1
+Subtitle.Position = UDim2.new(0, 15, 0, 30)
+Subtitle.Size = UDim2.new(0, 470, 0, 15)
+Subtitle.Font = Enum.Font.SourceSans
+Subtitle.Text = "Creado por JoseAngel_Blox"
+Subtitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+Subtitle.TextTransparency = 0.5 -- Letras transparentes/semi-transparentes
+Subtitle.TextSize = 14.000
+Subtitle.TextXAlignment = Enum.TextXAlignment.Left
 
--- Panel Pestañas (Izquierda)
-local TabContainer = Instance.new("Frame")
-TabContainer.Name = "TabContainer"
-TabContainer.Parent = MainFrame
-TabContainer.BackgroundTransparency = 1
-TabContainer.Position = UDim2.new(0.03, 0, 0, 90)
-TabContainer.Size = UDim2.new(0, 90, 0, 320)
+-- Barra Lateral Izquierda (Pestañas)
+SideBar.Name = "SideBar"
+SideBar.Parent = MainFrame
+SideBar.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+SideBar.Position = UDim2.new(0, 10, 0, 55)
+SideBar.Size = UDim2.new(0, 120, 0, 280)
 
--- Panel Contenido (Derecha)
-local ContentContainer = Instance.new("Frame")
-ContentContainer.Name = "ContentContainer"
-ContentContainer.Parent = MainFrame
-ContentContainer.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
-ContentContainer.Position = UDim2.new(0.32, 0, 0, 90)
-ContentContainer.Size = UDim2.new(0, 225, 0, 320)
-addCornerRadius(ContentContainer, 10)
+local SideBarCorner = Instance.new("UICorner")
+SideBarCorner.CornerRadius = UDim.new(0, 8)
+SideBarCorner.Parent = SideBar
 
--- === FUNCIÓN PARA CREAR BOTONES DE PESTAÑA ===
-local function createTabButton(name, posY)
-    local btn = Instance.new("TextButton")
-    btn.Name = name.."Tab"
-    btn.Parent = TabContainer
-    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
-    btn.Position = UDim2.new(0, 0, 0, posY)
-    btn.Size = UDim2.new(0, 85, 0, 40)
-    btn.Font = Enum.Font.GothamBold
-    btn.Text = name
-    btn.TextColor3 = Color3.fromRGB(220, 220, 220)
-    btn.TextScaled = true
-    btn.AutoLocalize = false
-    addCornerRadius(btn, 8)
-    return btn
-end
+UIListLayout_SideBar.Parent = SideBar
+UIListLayout_SideBar.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout_SideBar.Padding = UDim.new(0, 5)
 
--- Crear Pestañas
-local InfoTabBtn = createTabButton("Info", 0)
-local MainTabBtn = createTabButton("Main", 50)
-local TpTabBtn = createTabButton("Tp", 100)
+-- Área de Contenido Derecha
+ContentArea.Name = "ContentArea"
+ContentArea.Parent = MainFrame
+ContentArea.BackgroundTransparency = 1
+ContentArea.Position = UDim2.new(0, 140, 0, 55)
+ContentArea.Size = UDim2.new(0, 350, 0, 280)
 
--- === FUNCIÓN PARA ACTIVAR/DESTACAR PESTAÑA ===
-local function setActiveTab(tabName)
-    currentTab = tabName
-    InfoTabBtn.BackgroundColor3 = tabName == "Info" and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(50, 50, 70)
-    MainTabBtn.BackgroundColor3 = tabName == "Main" and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(50, 50, 70)
-    TpTabBtn.BackgroundColor3 = tabName == "Tp" and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(50, 50, 70)
-end
+-- Contenedor de Pestañas
+local Tabs = {}
+local TabButtons = {}
 
--- === FUNCIÓN PARA LIMPIAR CONTENIDO ===
-local function clearContent()
-    for _, child in ipairs(ContentContainer:GetChildren()) do
-        if child:IsA("GuiObject") or child:IsA("UICorner") then child:Destroy() end
-    end
-end
+local function CreateTab(name)
+    local Button = Instance.new("TextButton")
+    Button.Name = name .. "TabBtn"
+    Button.Parent = SideBar
+    Button.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+    Button.Size = UDim2.new(1, 0, 0, 35)
+    Button.Font = Enum.Font.SourceSansBold
+    Button.Text = name
+    Button.TextColor3 = Color3.fromRGB(200, 200, 200)
+    Button.TextSize = 15.000
 
--- === FUNCIÓN PARA CREAR BOTONES Y TOGGLES ===
-local function createToggle(name, posY, callback)
-    local btn = Instance.new("TextButton")
-    btn.Parent = ContentContainer
-    btn.BackgroundColor3 = Color3.fromRGB(60, 60, 90)
-    btn.Position = UDim2.new(0.05, 0, 0, posY)
-    btn.Size = UDim2.new(0.9, 0, 0, 32)
-    btn.Font = Enum.Font.Gotham
-    btn.Text = "❌ "..name
-    btn.TextColor3 = Color3.fromRGB(230, 230, 230)
-    btn.TextScaled = true
-    btn.AutoLocalize = false
-    addCornerRadius(btn, 6)
-    local enabled = false
-    btn.MouseButton1Click:Connect(function()
-        enabled = not enabled
-        btn.Text = (enabled and "✅ " or "❌ ")..name
-        btn.BackgroundColor3 = enabled and Color3.fromRGB(40, 120, 70) or Color3.fromRGB(60, 60, 90)
-        callback(enabled)
+    local BtnCorner = Instance.new("UICorner")
+    BtnCorner.CornerRadius = UDim.new(0, 6)
+    BtnCorner.Parent = Button
+
+    local Page = Instance.new("ScrollingFrame")
+    Page.Name = name .. "Page"
+    Page.Parent = ContentArea
+    Page.BackgroundTransparency = 1
+    Page.Size = UDim2.new(1, 0, 1, 0)
+    Page.Visible = false
+    Page.ScrollBarThickness = 4
+
+    local PageLayout = Instance.new("UIListLayout")
+    PageLayout.Parent = Page
+    PageLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    PageLayout.Padding = UDim.new(0, 8)
+
+    Tabs[name] = Page
+    TabButtons[name] = Button
+
+    Button.MouseButton1Click:Connect(function()
+        for _, p in pairs(Tabs) do p.Visible = false end
+        for _, b in pairs(TabButtons) do b.TextColor3 = Color3.fromRGB(200, 200, 200) end
+        Page.Visible = true
+        Button.TextColor3 = Color3.fromRGB(0, 220, 130)
     end)
-    return btn
+
+    return Page
 end
 
-local function createButton(name, posY, callback)
-    local btn = Instance.new("TextButton")
-    btn.Parent = ContentContainer
-    btn.BackgroundColor3 = Color3.fromRGB(70, 50, 100)
-    btn.Position = UDim2.new(0.05, 0, 0, posY)
-    btn.Size = UDim2.new(0.9, 0, 0, 30)
-    btn.Font = Enum.Font.Gotham
-    btn.Text = name
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextScaled = true
-    btn.AutoLocalize = false
-    addCornerRadius(btn, 6)
-    btn.MouseButton1Click:Connect(callback)
-    return btn
-end
+-- Creación de Pestañas
+local InfoPage = CreateTab("Info")
+local MainPage = CreateTab("Main")
+local TpPage = CreateTab("Tp")
 
-local function createLabel(text, posY, color)
+-- Mostrar primera pestaña por defecto
+Tabs["Info"].Visible = true
+TabButtons["Info"].TextColor3 = Color3.fromRGB(0, 220, 130)
+
+----------------------------------------------------
+-- 1) PESTAÑA: INFO
+----------------------------------------------------
+local function AddInfoLabel(text, size, bold)
     local lbl = Instance.new("TextLabel")
-    lbl.Parent = ContentContainer
+    lbl.Parent = InfoPage
     lbl.BackgroundTransparency = 1
-    lbl.Position = UDim2.new(0.05, 0, 0, posY)
-    lbl.Size = UDim2.new(0.9, 0, 0, 22)
-    lbl.Font = Enum.Font.GothamBold
+    lbl.Size = UDim2.new(1, -10, 0, size or 20)
+    lbl.Font = bold and Enum.Font.SourceSansBold or Enum.Font.SourceSans
     lbl.Text = text
-    lbl.TextColor3 = color or Color3.fromRGB(255, 255, 255)
-    lbl.TextScaled = true
+    lbl.TextColor3 = Color3.fromRGB(230, 230, 230)
+    lbl.TextSize = 14
+    lbl.TextWrapped = true
     lbl.TextXAlignment = Enum.TextXAlignment.Left
-    lbl.AutoLocalize = false
-    return lbl
 end
 
--- === CONTENIDO PESTAÑA INFO ===
-local function loadInfoTab()
-    clearContent()
-    createLabel("📋 Información", 5, Color3.fromRGB(255, 100, 100))
-    createLabel("Nombre del creador:", 40)
-    createLabel("  JoseAngel_Blox", 62)
-    createLabel("Fecha de lanzamiento:", 92)
-    createLabel("  03/09/2026", 114)
-    createLabel("Versión:", 144)
-    createLabel("  1.1", 166)
-    createLabel("UPDATE:", 196, Color3.fromRGB(255, 200, 60))
-    local updateBox = Instance.new("TextLabel")
-    updateBox.Parent = ContentContainer
-    updateBox.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
-    updateBox.Position = UDim2.new(0.05, 0, 220)
-    updateBox.Size = UDim2.new(0.9, 0, 0, 80)
-    updateBox.Font = Enum.Font.Gotham
-    updateBox.Text = "Nuevo script sencillo y facil de usar con este script aprenderas a usar un script para 99 noches en el bosque y después le vamos aumentando la dificultad espero y lo disfrutes.."
-    updateBox.TextColor3 = Color3.fromRGB(220, 220, 220)
-    updateBox.TextScaled = true
-    updateBox.TextWrapped = true
-    updateBox.TextXAlignment = Enum.TextXAlignment.Left
-    updateBox.TextYAlignment = Enum.TextYAlignment.Top
-    updateBox.AutoLocalize = false
-    addCornerRadius(updateBox, 6)
+AddInfoLabel("Nombre del creador: JoseAngel_Blox", 20, true)
+AddInfoLabel("Fecha de lanzamiento: 03/09/2026", 20, false)
+AddInfoLabel("Versión: 1.1", 20, false)
+AddInfoLabel("----------------------------------------", 15, false)
+AddInfoLabel("UPDATE: Nuevo script sencillo y facil de usar con este script aprenderas a usar un script para 99 noches en el bosque y después le vamos aumentando la dificultad espero y lo disfrutes..", 80, false)
+
+----------------------------------------------------
+-- FUNCIONES AUXILIARES PARA COMPONENTES DE UI
+----------------------------------------------------
+local function CreateSectionHeader(parent, title)
+    local lbl = Instance.new("TextLabel")
+    lbl.Parent = parent
+    lbl.BackgroundTransparency = 1
+    lbl.Size = UDim2.new(1, -10, 0, 25)
+    lbl.Font = Enum.Font.SourceSansBold
+    lbl.Text = title
+    lbl.TextColor3 = Color3.fromRGB(255, 180, 50)
+    lbl.TextSize = 16
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
 end
 
--- === CONTENIDO PESTAÑA MAIN ===
-local function loadMainTab()
-    clearContent()
-    local y = 5
-    
-    -- 🔥 FUEL
-    createLabel("🔥 Fuel", y, Color3.fromRGB(255, 140, 0))
-    y = y + 25
-    createLabel("Select Fuel ↓", y)
-    y = y + 25
-    createButton("Coal", y, function() selectedFuel = "Coal"; print("✅ Seleccionado: Coal") end); y += 30
-    createButton("Log", y, function() selectedFuel = "Log"; print("✅ Seleccionado: Log") end); y += 30
-    createButton("Oil Barrer", y, function() selectedFuel = "Oil Barrer"; print("✅ Seleccionado: Oil Barrer") end); y += 30
-    createButton("Fuel Canister", y, function() selectedFuel = "Fuel Canister"; print("✅ Seleccionado: Fuel Canister") end); y += 30
-    createButton("Biofuel", y, function() selectedFuel = "Biofuel"; print("✅ Seleccionado: Biofuel") end); y += 35
-    createToggle("Spawn ítem (Toggle)", y, function(enabled) spawnFuelEnabled = enabled end); y += 40
-    
-    -- 🥩 FOOD
-    createLabel("🥩 Food", y, Color3.fromRGB(220, 60, 60))
-    y = y + 25
-    createLabel("Select Food ↓", y)
-    y = y + 25
-    createButton("Morsel", y, function() selectedFood = "Morsel"; print("✅ Seleccionado: Morsel") end); y += 30
-    createButton("Steak", y, function() selectedFood = "Steak"; print("✅ Seleccionado: Steak") end); y += 35
-    createToggle("Spawn ítem (Toggle)", y, function(enabled) spawnFoodEnabled = enabled end); y += 40
-    
-    -- 🗡️ AUTO
-    createLabel("🗡️ Auto", y, Color3.fromRGB(120, 200, 60))
-    y = y + 25
-    createToggle("Kill Aura", y, function(e) killAuraEnabled = e end); y += 35
-    createToggle("Auto Fuel", y, function(e) autoFuelEnabled = e end); y += 35
-    createToggle("Godmode", y, function(e) godmodeEnabled = e end)
-end
+local function CreateToggle(parent, text, callback)
+    local btn = Instance.new("TextButton")
+    btn.Parent = parent
+    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+    btn.Size = UDim2.new(1, -10, 0, 30)
+    btn.Font = Enum.Font.SourceSans
+    btn.Text = text .. " [OFF]"
+    btn.TextColor3 = Color3.fromRGB(255, 100, 100)
+    btn.TextSize = 14
 
--- === CONTENIDO PESTAÑA TP ===
-local function loadTpTab()
-    clearContent()
-    createLabel("📍 Teletransportación", 5, Color3.fromRGB(80, 200, 255))
-    createButton("Tp al Camp (RescueZone)", 45, function()
-        local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-        local zone = workspace:FindFirstChild("RescueZone")
-        if hrp and zone then hrp.CFrame = zone.CFrame end
-    end)
-    createButton("Tp a Stronghold", 90, function()
-        local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-        local sh = workspace:FindFirstChild("Stronghold")
-        if hrp and sh then hrp.CFrame = sh.CFrame end
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 5)
+    corner.Parent = btn
+
+    local state = false
+    btn.MouseButton1Click:Connect(function()
+        state = not state
+        btn.Text = text .. (state and " [ON]" or " [OFF]")
+        btn.TextColor3 = state and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(255, 100, 100)
+        task.spawn(callback, state)
     end)
 end
 
--- === ASIGNAR CLICKS A PESTAÑAS ===
-InfoTabBtn.MouseButton1Click:Connect(function() setActiveTab("Info"); loadInfoTab() end)
-MainTabBtn.MouseButton1Click:Connect(function() setActiveTab("Main"); loadMainTab() end)
-TpTabBtn.MouseButton1Click:Connect(function() setActiveTab("Tp"); loadTpTab() end)
+local function CreateButton(parent, text, callback)
+    local btn = Instance.new("TextButton")
+    btn.Parent = parent
+    btn.BackgroundColor3 = Color3.fromRGB(50, 60, 80)
+    btn.Size = UDim2.new(1, -10, 0, 30)
+    btn.Font = Enum.Font.SourceSansBold
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 14
 
--- === CARGAR PESTAÑA INICIAL ===
-loadInfoTab()
-setActiveTab("Info")
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 5)
+    corner.Parent = btn
 
--- === LOOP DE FUNCIONES ACTIVAS ===
-task.spawn(function()
-    while task.wait(0.5) do
-        local char = Player.Character
-        local hrp = char and char:FindFirstChild("HumanoidRootPart")
-        local hum = char and char:FindFirstChild("Humanoid")
-        if not hrp or not hum then continue end
-        
-        -- Godmode
-        if godmodeEnabled then hum.Health = 100 end
-        
-        -- Kill Aura
-        if killAuraEnabled then
-            for _, v in ipairs(workspace:GetChildren()) do
-                if v:IsA("Model") and v ~= char and v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("Humanoid") then
-                    local dist = (v.HumanoidRootPart.Position - hrp.Position).Magnitude
-                    if dist < 25 then v.Humanoid.Health = 0 end
-                end
-            end
-        end
-        
-        -- Auto Fuel
-        if autoFuelEnabled then
-            local zone = workspace:FindFirstChild("RescueZone")
-            if zone and selectedFuel then
-                for _, v in ipairs(workspace:GetChildren()) do
-                    if v:IsA("BasePart") and string.find(v.Name:lower(), selectedFuel:lower()) then
-                        v.Position = zone.Position + Vector3.new(math.random(-3,3), 2, math.random(-3,3))
-                    end
-                end
-            end
-        end
+    btn.MouseButton1Click:Connect(function()
+        task.spawn(callback)
+    end)
+end
+
+----------------------------------------------------
+-- 2) PESTAÑA: MAIN
+----------------------------------------------------
+-- 🔥 Fuel
+CreateSectionHeader(MainPage, "🔥 Fuel")
+CreateButton(MainPage, "Select Fuel: Coal, Log, Oil Barrer, Fuel Canister, Biofuel", function()
+    print("Selección de combustible")
+end)
+CreateToggle(MainPage, "Spawn ítem (Fuel)", function(state)
+    print("Spawn Fuel Item:", state)
+end)
+
+-- 🥩 Food
+CreateSectionHeader(MainPage, "🥩 Food")
+CreateButton(MainPage, "Select Food: Morsel, Steak", function()
+    print("Selección de comida")
+end)
+CreateToggle(MainPage, "Spawn ítem (Food)", function(state)
+    print("Spawn Food Item:", state)
+end)
+
+-- 🗡️ Auto
+CreateSectionHeader(MainPage, "🗡️ Auto")
+CreateToggle(MainPage, "Kill aura (Matar a lo lejos)", function(state)
+    print("Kill aura:", state)
+end)
+CreateToggle(MainPage, "Auto Fuel (Llevar combustible a RescueZone)", function(state)
+    print("Auto Fuel:", state)
+end)
+CreateToggle(MainPage, "Godmode (Modo dios)", function(state)
+    print("Godmode:", state)
+end)
+
+----------------------------------------------------
+-- 3) PESTAÑA: TP
+----------------------------------------------------
+CreateSectionHeader(TpPage, "📍 Teleports")
+
+CreateButton(TpPage, "Tp al camp (RescueZone)", function()
+    local player = game.Players.LocalPlayer
+    local targetZone = workspace:FindFirstChild("RescueZone")
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") and targetZone then
+        player.Character.HumanoidRootPart.CFrame = targetZone.CFrame
+    else
+        warn("Zona RescueZone no encontrada o personaje no listo")
     end
 end)
 
--- === NOTIFICACIÓN DE CARGA ===
-pcall(function()
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "✅ Script Cargado",
-        Text = "99 Noches en el Bosque — JoseAngel_Blox",
-        Duration = 3
-    })
+CreateButton(TpPage, "Tp a stronghold", function()
+    local player = game.Players.LocalPlayer
+    local targetZone = workspace:FindFirstChild("stronghold") or workspace:FindFirstChild("Stronghold")
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") and targetZone then
+        player.Character.HumanoidRootPart.CFrame = targetZone.CFrame
+    else
+        warn("Zona Stronghold no encontrada o personaje no listo")
+    end
 end)
-
-print("[✅] Script cargado correctamente — 99 Noches en el Bosque v1.1 (Corregido)")
