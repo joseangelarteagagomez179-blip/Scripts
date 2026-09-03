@@ -1,596 +1,307 @@
---[[
-    JoseAngel_Blox 99 Nights
-    Creador: JoseAngel_Blox
-    Fecha: 02/09/2026
-    Versión: 1.1
-]]
+-- ==============================================
+-- JoseAngel_Blox 99Nights | Script v1.1
+-- Creado por: JoseAngel_Blox
+-- Fecha: 02/09/2026
+-- ==============================================
+-- ⚠️ Solo para uso personal y educativo. Úsalo bajo tu responsabilidad.
 
--- Servicios
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
 
--- Variables
-local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local camera = Workspace.CurrentCamera
-
--- Configuración
-local settings = {
-    flyEnabled = false,
-    noclipEnabled = false,
-    godmodeEnabled = false,
-    killAuraEnabled = false,
-    killAuraRange = 20,
-    autoFuelEnabled = false,
-    autoScrapperEnabled = false,
-    walkspeed = 16,
-    antiLagEnabled = false,
-    bringFuelEnabled = false,
-    bringMetalEnabled = false,
-    bringFoodEnabled = false,
-    bringToolsEnabled = false,
-    bringGunsEnabled = false
-}
-
--- Items seleccionados
-local selectedItems = {
-    fuel = {},
-    metal = {},
-    food = {},
-    tools = {},
-    guns = {}
-}
-
--- Crear GUI
+-- === CREAR INTERFAZ ===
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "JoseAngel_Blox"
-ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-ScreenGui.ResetOnSpawn = false
+ScreenGui.Name = "JoseAngel_Blox_99Nights"
+ScreenGui.Parent = PlayerGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Frame principal cuadrado con esquinas redondeadas
+-- Ventana principal — AZUL MARINO, ESQUINAS REDONDEADAS
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 600, 0, 400)
-MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
-MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 139) -- Azul marino
+MainFrame.Size = UDim2.new(0, 580, 0, 420)
+MainFrame.Position = UDim2.new(0.5, -290, 0.5, -210)
+MainFrame.BackgroundColor3 = Color3.fromRGB(0, 32, 96) -- 🔵 AZUL MARINO
 MainFrame.BorderSizePixel = 0
+MainFrame.CornerRadius = UDim.new(0, 16) -- 🟦 ESQUINAS REDONDEADAS
 MainFrame.Parent = ScreenGui
 
--- Esquinas redondeadas
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 15)
-UICorner.Parent = MainFrame
+-- Título principal — LETRAS AZULES
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Name = "TitleLabel"
+TitleLabel.Size = UDim2.new(1, 0, 0, 50)
+TitleLabel.Position = UDim2.new(0, 0, 0, 0)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Text = "JoseAngel_Blox 99Nights"
+TitleLabel.TextColor3 = Color3.fromRGB(80, 180, 255) -- 🔵 AZUL
+TitleLabel.Font = Enum.Font.GothamBlack
+TitleLabel.TextSize = 28
+TitleLabel.Parent = MainFrame
 
--- Título
-local Title = Instance.new("TextLabel")
-Title.Name = "Title"
-Title.Size = UDim2.new(1, 0, 0, 50)
-Title.Position = UDim2.new(0, 0, 0, 10)
-Title.BackgroundTransparency = 1
-Title.Text = "JoseAngel_Blox 99 Nights"
-Title.TextColor3 = Color3.fromRGB(0, 150, 255) -- Azul claro
-Title.TextSize = 24
-Title.Font = Enum.Font.SourceSansBold
-Title.Parent = MainFrame
+-- Subtítulo — TRANSPARENTE
+local SubTitle = Instance.new("TextLabel")
+SubTitle.Name = "SubTitle"
+SubTitle.Size = UDim2.new(1, 0, 0, 25)
+SubTitle.Position = UDim2.new(0, 0, 0, 45)
+SubTitle.BackgroundTransparency = 1
+SubTitle.Text = "Creado por JoseAngel_Blox"
+SubTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+SubTitle.TextTransparency = 0.5 -- ✅ TRANSPARENTE
+SubTitle.Font = Enum.Font.Gotham
+SubTitle.TextSize = 14
+SubTitle.Parent = MainFrame
 
--- Contenedor de pestañas (izquierda)
-local TabContainer = Instance.new("Frame")
-TabContainer.Name = "TabContainer"
-TabContainer.Size = UDim2.new(0, 150, 0, 300)
-TabContainer.Position = UDim2.new(0, 10, 0, 70)
-TabContainer.BackgroundColor3 = Color3.fromRGB(0, 0, 100)
-TabContainer.BorderSizePixel = 0
-TabContainer.Parent = MainFrame
+-- Pestañas LADO IZQUIERDO
+local TabFrame = Instance.new("Frame")
+TabFrame.Name = "TabFrame"
+TabFrame.Size = UDim2.new(0, 130, 1, -80)
+TabFrame.Position = UDim2.new(0, 10, 0, 70)
+TabFrame.BackgroundTransparency = 1
+TabFrame.Parent = MainFrame
 
-local TabCorner = Instance.new("UICorner")
-TabCorner.CornerRadius = UDim.new(0, 10)
-TabCorner.Parent = TabContainer
-
--- Contenedor de contenido (derecha)
+-- Contenido LADO DERECHO
 local ContentFrame = Instance.new("Frame")
 ContentFrame.Name = "ContentFrame"
-ContentFrame.Size = UDim2.new(0, 420, 0, 300)
-ContentFrame.Position = UDim2.new(0, 170, 0, 70)
-ContentFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 100)
-ContentFrame.BorderSizePixel = 0
+ContentFrame.Size = UDim2.new(1, -160, 1, -80)
+ContentFrame.Position = UDim2.new(0, 150, 0, 70)
+ContentFrame.BackgroundTransparency = 1
 ContentFrame.Parent = MainFrame
 
-local ContentCorner = Instance.new("UICorner")
-ContentCorner.CornerRadius = UDim.new(0, 10)
-ContentCorner.Parent = ContentFrame
+-- === ESTADO DEL SCRIPT ===
+local state = {
+    activeTab = "Info",
+    toggles = {
+        KillAura = false,
+        Godmode = false,
+        BringFuel = false,
+        BringMetal = false,
+        BringFood = false,
+        BringItems = false,
+        BringAmour = false
+    },
+    selected = {
+        Fuel = nil,
+        Metal = nil,
+        Food = nil,
+        Items = nil,
+        Amour = nil
+    }
+}
 
--- Función para crear pestañas
-local tabs = {}
-local function CreateTab(name, icon)
-    local tab = Instance.new("TextButton")
-    tab.Name = name
-    tab.Size = UDim2.new(1, -10, 0, 40)
-    tab.Position = UDim2.new(0, 5, 0, #tabs * 45 + 10)
-    tab.BackgroundColor3 = Color3.fromRGB(30, 30, 130)
-    tab.TextColor3 = Color3.fromRGB(255, 255, 255)
-    tab.Text = icon .. " " .. name
-    tab.TextSize = 16
-    tab.Font = Enum.Font.SourceSansBold
-    tab.AutoButtonColor = true
-    tab.Parent = TabContainer
+-- === ITEMS LISTAS ===
+local Items = {
+    Fuel = {"Coal", "Log", "Fuel Canister", "Oil Barrer", "Biofuel"},
+    Metal = {"Bolt", "Broken Fan", "Broken Microwave", "Cultist Gem", "Gem of the Forest Fragment", "Metal Chair", "Old Car Engine", "Old Radio", "Sheet Metal"},
+    Food = {"Berry", "Cake", "Carrot", "Chilli", "Cooked Morsel", "Cooked Steak", "Corn", "Meat? Sandwich", "Morsel", "Pumpkin", "Steak", "Stew"},
+    Items = {"Bandage", "Good Sack", "Giant Sack", "Infernal Sack", "Good Axe", "Strong Axe", "Strong Flashlight"},
+    Amour = {"Revolver", "Rifle", "Revolver Ammo", "Rifle Ammo", "Crossbow", "Infernal Crossbow"}
+}
+
+-- === FUNCIONES PARA CREAR PESTAÑAS ===
+local function createTab(name, posY)
+    local btn = Instance.new("TextButton")
+    btn.Name = name.."Tab"
+    btn.Size = UDim2.new(1, 0, 0, 35)
+    btn.Position = UDim2.new(0, 0, 0, posY)
+    btn.BackgroundColor3 = name == "Info" and Color3.fromRGB(40, 80, 160) or Color3.fromRGB(20, 50, 120)
+    btn.CornerRadius = UDim.new(0, 8)
+    btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 15
+    btn.Parent = TabFrame
     
-    local tabCorner = Instance.new("UICorner")
-    tabCorner.CornerRadius = UDim.new(0, 8)
-    tabCorner.Parent = tab
-    
-    tabs[name] = tab
-    return tab
-end
-
--- Crear pestañas
-CreateTab("Info", "ℹ️")
-CreateTab("Main", "🎯")
-CreateTab("Auto", "⚡")
-CreateTab("Player", "👤")
-CreateTab("Teleport", "🚀")
-
--- Función para limpiar contenido
-local function ClearContent()
-    for _, child in pairs(ContentFrame:GetChildren()) do
-        if child:IsA("Frame") or child:IsA("ScrollingFrame") then
-            child:Destroy()
+    btn.MouseButton1Click:Connect(function()
+        state.activeTab = name
+        for _, b in ipairs(TabFrame:GetChildren()) do
+            if b:IsA("TextButton") then
+                b.BackgroundColor3 = Color3.fromRGB(20, 50, 120)
+            end
         end
-    end
-end
-
--- Función para crear sección con scroll
-local function CreateScrollFrame()
-    local scroll = Instance.new("ScrollingFrame")
-    scroll.Size = UDim2.new(1, -10, 1, -10)
-    scroll.Position = UDim2.new(0, 5, 0, 5)
-    scroll.BackgroundTransparency = 1
-    scroll.BorderSizePixel = 0
-    scroll.ScrollBarThickness = 5
-    scroll.ScrollBarImageColor3 = Color3.fromRGB(0, 150, 255)
-    scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-    scroll.Parent = ContentFrame
-    
-    local layout = Instance.new("UIListLayout")
-    layout.Padding = UDim.new(0, 5)
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Parent = scroll
-    
-    return scroll, layout
-end
-
--- Función para crear toggle
-local function CreateToggle(parent, text, callback)
-    local toggleFrame = Instance.new("Frame")
-    toggleFrame.Size = UDim2.new(1, -10, 0, 30)
-    toggleFrame.BackgroundTransparency = 1
-    toggleFrame.Parent = parent
-    
-    local toggle = Instance.new("TextButton")
-    toggle.Size = UDim2.new(0, 50, 0, 25)
-    toggle.Position = UDim2.new(0, 5, 0, 2)
-    toggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-    toggle.Text = ""
-    toggle.Parent = toggleFrame
-    
-    local toggleCorner = Instance.new("UICorner")
-    toggleCorner.CornerRadius = UDim.new(0, 12)
-    toggleCorner.Parent = toggle
-    
-    local knob = Instance.new("Frame")
-    knob.Size = UDim2.new(0, 20, 0, 20)
-    knob.Position = UDim2.new(0, 2, 0, 2)
-    knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    knob.Parent = toggle
-    
-    local knobCorner = Instance.new("UICorner")
-    knobCorner.CornerRadius = UDim.new(1, 0)
-    knobCorner.Parent = knob
-    
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(0, 200, 0, 25)
-    label.Position = UDim2.new(0, 60, 0, 0)
-    label.BackgroundTransparency = 1
-    label.Text = text
-    label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    label.TextSize = 14
-    label.Font = Enum.Font.SourceSans
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = toggleFrame
-    
-    local isEnabled = false
-    
-    toggle.MouseButton1Click:Connect(function()
-        isEnabled = not isEnabled
-        if isEnabled then
-            toggle.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-            knob:TweenPosition(UDim2.new(0, 28, 0, 2), "In", "Linear", 0.1)
-        else
-            toggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-            knob:TweenPosition(UDim2.new(0, 2, 0, 2), "In", "Linear", 0.1)
-        end
-        callback(isEnabled)
+        btn.BackgroundColor3 = Color3.fromRGB(40, 80, 160)
+        loadContent(name)
     end)
-    
-    return toggleFrame
+    return btn
 end
 
--- Función para crear botón
-local function CreateButton(parent, text, callback)
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(1, -10, 0, 35)
-    button.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.Text = text
-    button.TextSize = 14
-    button.Font = Enum.Font.SourceSansBold
-    button.Parent = parent
-    
-    local buttonCorner = Instance.new("UICorner")
-    buttonCorner.CornerRadius = UDim.new(0, 8)
-    buttonCorner.Parent = button
-    
-    button.MouseButton1Click:Connect(callback)
-    
-    return button
-end
+-- === CARGAR CONTENIDO DE PESTAÑAS ===
+function loadContent(tabName)
+    for _, child in ipairs(ContentFrame:GetChildren()) do
+        child:Destroy()
+    end
 
--- Función para crear dropdown
-local function CreateDropdown(parent, text, items, callback)
-    local dropdownFrame = Instance.new("Frame")
-    dropdownFrame.Size = UDim2.new(1, -10, 0, 30)
-    dropdownFrame.BackgroundTransparency = 1
-    dropdownFrame.Parent = parent
-    
-    local dropdownButton = Instance.new("TextButton")
-    dropdownButton.Size = UDim2.new(1, 0, 0, 30)
-    dropdownButton.BackgroundColor3 = Color3.fromRGB(50, 50, 150)
-    dropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    dropdownButton.Text = text
-    dropdownButton.TextSize = 14
-    dropdownButton.Font = Enum.Font.SourceSansBold
-    dropdownButton.Parent = dropdownFrame
-    
-    local dropdownCorner = Instance.new("UICorner")
-    dropdownCorner.CornerRadius = UDim.new(0, 8)
-    dropdownCorner.Parent = dropdownButton
-    
-    local itemsFrame = Instance.new("Frame")
-    itemsFrame.Size = UDim2.new(1, 0, 0, 0)
-    itemsFrame.Position = UDim2.new(0, 0, 1, 0)
-    itemsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 100)
-    itemsFrame.Visible = false
-    itemsFrame.ZIndex = 5
-    itemsFrame.Parent = dropdownFrame
-    
-    local itemsCorner = Instance.new("UICorner")
-    itemsCorner.CornerRadius = UDim.new(0, 8)
-    itemsCorner.Parent = itemsFrame
-    
-    local selectedItems = {}
-    
-    dropdownButton.MouseButton1Click:Connect(function()
-        itemsFrame.Visible = not itemsFrame.Visible
-        if itemsFrame.Visible then
-            itemsFrame.Size = UDim2.new(1, 0, 0, #items * 30)
-        else
-            itemsFrame.Size = UDim2.new(1, 0, 0, 0)
+    if tabName == "Info" then
+        local InfoBox = Instance.new("TextLabel")
+        InfoBox.Size = UDim2.new(1, 0, 1, 0)
+        InfoBox.BackgroundTransparency = 1
+        InfoBox.Text = [[📌 Nombre del creador: JoseAngel_Blox
+📅 Fecha de lanzamiento: 02/09/2026
+🔢 Versión: 1.1
+
+🔄 UPDATE:
+¡Bienvenidos y bienvenidas a mi script 
+básico para las nuevas personas usando 
+Delta Executor! Este es un script básico 
+para 99 Noches en el Bosque, donde 
+aprenderás paso a paso a usar un script 
+para este juego. Espero y te guste el 
+script. Saludos atentamente: JoseAngel_Blox 😉]]
+        InfoBox.TextColor3 = Color3.fromRGB(230, 230, 255)
+        InfoBox.Font = Enum.Font.Gotham
+        InfoBox.TextSize = 14
+        InfoBox.TextWrapped = true
+        InfoBox.TextXAlignment = Enum.TextXAlignment.Left
+        InfoBox.TextYAlignment = Enum.TextYAlignment.Top
+        InfoBox.Parent = ContentFrame
+
+    elseif tabName == "Main" then
+        local yOffset = 0
+        local function addToggle(name, key)
+            local container = Instance.new("Frame")
+            container.Size = UDim2.new(1, 0, 0, 32)
+            container.Position = UDim2.new(0, 0, 0, yOffset)
+            container.BackgroundTransparency = 1
+            container.Parent = ContentFrame
+
+            local lbl = Instance.new("TextLabel")
+            lbl.Size = UDim2.new(0.75, 0, 1, 0)
+            lbl.BackgroundTransparency = 1
+            lbl.Text = name
+            lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+            lbl.Font = Enum.Font.Gotham
+            lbl.TextSize = 14
+            lbl.TextXAlignment = Enum.TextXAlignment.Left
+            lbl.Parent = container
+
+            local btn = Instance.new("TextButton")
+            btn.Size = UDim2.new(0, 70, 0, 26)
+            btn.Position = UDim2.new(0.78, 0, 0.5, -13)
+            btn.BackgroundColor3 = state.toggles[key] and Color3.fromRGB(0, 200, 80) or Color3.fromRGB(180, 40, 40)
+            btn.CornerRadius = UDim.new(0, 6)
+            btn.Text = state.toggles[key] and "ON" or "OFF"
+            btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            btn.Font = Enum.Font.GothamBold
+            btn.TextSize = 12
+            btn.Parent = container
+
+            btn.MouseButton1Click:Connect(function()
+                state.toggles[key] = not state.toggles[key]
+                btn.BackgroundColor3 = state.toggles[key] and Color3.fromRGB(0, 200, 80) or Color3.fromRGB(180, 40, 40)
+                btn.Text = state.toggles[key] and "ON" or "OFF"
+            end)
+
+            yOffset = yOffset + 35
         end
-    end)
-    
-    for i, item in pairs(items) do
-        local itemButton = Instance.new("TextButton")
-        itemButton.Size = UDim2.new(1, -10, 0, 25)
-        itemButton.Position = UDim2.new(0, 5, 0, (i - 1) * 30 + 5)
-        itemButton.BackgroundColor3 = Color3.fromRGB(60, 60, 120)
-        itemButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        itemButton.Text = item
-        itemButton.TextSize = 12
-        itemButton.Font = Enum.Font.SourceSans
-        itemButton.Parent = itemsFrame
-        
-        local itemCorner = Instance.new("UICorner")
-        itemCorner.CornerRadius = UDim.new(0, 6)
-        itemCorner.Parent = itemButton
-        
-        itemButton.MouseButton1Click:Connect(function()
-            selectedItems[item] = not selectedItems[item]
-            if selectedItems[item] then
-                itemButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-            else
-                itemButton.BackgroundColor3 = Color3.fromRGB(60, 60, 120)
-            end
-            callback(item, selectedItems[item])
-        end)
-    end
-    
-    return dropdownFrame, selectedItems
-end
 
--- Funciones del juego
-local function getNearestItem(itemName)
-    local nearest = nil
-    local nearestDist = math.huge
-    
-    for _, item in pairs(Workspace:GetDescendants()) do
-        if item:IsA("BasePart") and item.Name:lower():find(itemName:lower()) then
-            local dist = (item.Position - character.HumanoidRootPart.Position).Magnitude
-            if dist < nearestDist then
-                nearest = item
-                nearestDist = dist
+        local function addSection(title, list, stateKey, toggleKey)
+            local header = Instance.new("TextLabel")
+            header.Size = UDim2.new(1, 0, 0, 28)
+            header.Position = UDim2.new(0, 0, 0, yOffset)
+            header.BackgroundTransparency = 1
+            header.Text = title
+            header.TextColor3 = Color3.fromRGB(255, 210, 0)
+            header.Font = Enum.Font.GothamBold
+            header.TextSize = 15
+            header.TextXAlignment = Enum.TextXAlignment.Left
+            header.Parent = ContentFrame
+            yOffset = yOffset + 28
+
+            local selected = Instance.new("TextButton")
+            selected.Size = UDim2.new(1, 0, 0, 30)
+            selected.Position = UDim2.new(0, 0, 0, yOffset)
+            selected.BackgroundColor3 = Color3.fromRGB(30, 60, 140)
+            selected.CornerRadius = UDim.new(0, 6)
+            selected.Text = "Select " .. stateKey .. " ↓"
+            selected.TextColor3 = Color3.fromRGB(200, 220, 255)
+            selected.Font = Enum.Font.Gotham
+            selected.TextSize = 13
+            selected.Parent = ContentFrame
+            yOffset = yOffset + 35
+
+            local dropdown = Instance.new("Frame")
+            dropdown.Size = UDim2.new(1, 0, 0, #list * 28)
+            dropdown.Position = UDim2.new(0, 0, 0, yOffset)
+            dropdown.BackgroundColor3 = Color3.fromRGB(25, 45, 90)
+            dropdown.CornerRadius = UDim.new(0, 6)
+            dropdown.Visible = false
+            dropdown.Parent = ContentFrame
+
+            for i, item in ipairs(list) do
+                local itemBtn = Instance.new("TextButton")
+                itemBtn.Size = UDim2.new(1, -10, 0, 24)
+                itemBtn.Position = UDim2.new(0, 5, 0, (i - 1) * 26)
+                itemBtn.BackgroundTransparency = 1
+                itemBtn.Text = item
+                itemBtn.TextColor3 = Color3.fromRGB(230, 230, 255)
+                itemBtn.Font = Enum.Font.Gotham
+                itemBtn.TextSize = 12
+                itemBtn.TextXAlignment = Enum.TextXAlignment.Left
+                itemBtn.Parent = dropdown
+
+                itemBtn.MouseButton1Click:Connect(function()
+                    state.selected[stateKey] = item
+                    selected.Text = item .. " ↓"
+                    dropdown.Visible = false
+                end)
             end
+
+            selected.MouseButton1Click:Connect(function()
+                dropdown.Visible = not dropdown.Visible
+            end)
+
+            yOffset = yOffset + #list * 28 + 5
+            addToggle("Bring " .. stateKey, toggleKey)
         end
-    end
-    
-    return nearest
-end
 
-local function bringItem(itemName)
-    local item = getNearestItem(itemName)
-    if item then
-        item.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
-    end
-end
+        -- === FUNCIONES MAIN ===
+        addToggle("💀 Kill Aura → Matar automáticamente", "KillAura")
+        addToggle("🛡️ Godmode → Modo dios inmortal", "Godmode")
+        yOffset = yOffset + 10
 
-local function bringAllSelected(category)
-    for itemName, selected in pairs(selectedItems[category]) do
-        if selected then
-            bringItem(itemName)
-        end
+        addSection("🔥 Fuel", Items.Fuel, "Fuel", "BringFuel")
+        addSection("⚙️ Metal", Items.Metal, "Metal", "BringMetal")
+        addSection("🍕 Food", Items.Food, "Food", "BringFood")
+        addSection("📦 Items", Items.Items, "Items", "BringItems")
+        addSection("🗡️ Amour", Items.Amour, "Amour", "BringAmour")
     end
 end
 
--- Kill Aura
-local function killAuraLoop()
-    while settings.killAuraEnabled do
-        local enemies = {"Bunny", "Wolf", "Alpha Wolf", "Bear", "Cultist", "Crossbow Cultist", "Mossy Wolf"}
-        for _, enemyName in pairs(enemies) do
-            for _, obj in pairs(Workspace:GetDescendants()) do
-                if obj:IsA("Model") and obj.Name:lower():find(enemyName:lower()) then
-                    local enemyHumanoid = obj:FindFirstChild("Humanoid")
-                    local enemyRoot = obj:FindFirstChild("HumanoidRootPart")
-                    if enemyHumanoid and enemyRoot and enemyHumanoid.Health > 0 then
-                        local dist = (enemyRoot.Position - character.HumanoidRootPart.Position).Magnitude
-                        if dist <= settings.killAuraRange then
-                            enemyHumanoid.Health = 0
-                        end
-                    end
-                end
-            end
-        end
-        wait(0.5)
-    end
-end
+-- === CREAR PESTAÑAS ===
+createTab("Info", 10)
+createTab("Main", 55)
 
--- Auto Fuel
-local function autoFuelLoop()
-    while settings.autoFuelEnabled do
-        local fuelItems = {"Log", "Coal", "Oil Barrel", "Fuel Canister", "Biofuel"}
-        for _, fuelItem in pairs(fuelItems) do
-            local item = getNearestItem(fuelItem)
-            if item then
-                local rescueZone = Workspace:FindFirstChild("RescueZone")
-                if rescueZone then
-                    item.CFrame = rescueZone.CFrame + Vector3.new(0, 3, 0)
-                end
-            end
-        end
-        wait(1)
-    end
-end
+-- === CARGAR INFO POR DEFECTO ===
+task.wait(0.1)
+loadContent("Info")
 
--- Auto Scrapper
-local function autoScrapperLoop()
-    while settings.autoScrapperEnabled do
-        local metalItems = {"Bolt", "Broken Fan", "Broken Microwave", "Cultist Gem", "Gem of the Forest Fragment", "Metal Chair", "Old Car Engine", "Old Radio", "Sheet Metal"}
-        for _, metalItem in pairs(metalItems) do
-            local item = getNearestItem(metalItem)
-            if item then
-                local scrapper = Workspace:FindFirstChild("Scrapper")
-                if scrapper then
-                    item.CFrame = scrapper.CFrame + Vector3.new(0, 3, 0)
-                end
-            end
-        end
-        wait(1)
+-- === HACER VENTANA MOVIBLE ===
+local dragStart, startPos
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragStart = UserInputService:GetMouseLocation()
+        startPos = MainFrame.Position
     end
-end
-
--- Fly
-local function flyLoop()
-    while settings.flyEnabled do
-        if character and character.HumanoidRootPart then
-            local direction = camera.CFrame.LookVector
-            local moveDirection = Vector3.new()
-            
-            if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-                moveDirection = moveDirection + direction
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-                moveDirection = moveDirection - direction
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-                moveDirection = moveDirection - camera.CFrame.RightVector
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-                moveDirection = moveDirection + camera.CFrame.RightVector
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-                moveDirection = moveDirection + Vector3.new(0, 1, 0)
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
-                moveDirection = moveDirection - Vector3.new(0, 1, 0)
-            end
-            
-            character.HumanoidRootPart.Velocity = moveDirection * 30
-        end
-        wait()
+end)
+MainFrame.InputChanged:Connect(function(input)
+    if dragStart and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = UserInputService:GetMouseLocation() - dragStart
+        MainFrame.Position = UDim2.new(
+            startPos.X.Scale, startPos.X.Offset + delta.X,
+            startPos.Y.Scale, startPos.Y.Offset + delta.Y
+        )
     end
-end
-
--- Noclip
-local function noclipLoop()
-    while settings.noclipEnabled do
-        if character then
-            for _, part in pairs(character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = false
-                end
-            end
-        end
-        wait()
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragStart = nil
     end
-end
-
--- Godmode
-local function godmodeLoop()
-    while settings.godmodeEnabled do
-        if character and humanoid then
-            humanoid.Health = humanoid.MaxHealth
-            humanoid.MaxHealth = math.huge
-            humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
-        end
-        wait(0.5)
-    end
-end
-
--- Anti Lag
-local function antiLagLoop()
-    while settings.antiLagEnabled do
-        for _, obj in pairs(Workspace:GetDescendants()) do
-            if obj:IsA("BasePart") and not obj:IsDescendantOf(character) then
-                obj.Material = Enum.Material.Plastic
-            end
-        end
-        wait(5)
-    end
-end
-
--- Teleport
-local function teleportTo(locationName)
-    local location = Workspace:FindFirstChild(locationName)
-    if location then
-        character.HumanoidRootPart.CFrame = location.CFrame + Vector3.new(0, 5, 0)
-    else
-        print("No se encontró: " .. locationName)
-    end
-end
-
--- Conectar pestañas
-tabs["Info"].MouseButton1Click:Connect(function()
-    ClearContent()
-    local scroll, layout = CreateScrollFrame()
-    
-    local infoLabel = Instance.new("TextLabel")
-    infoLabel.Size = UDim2.new(1, -10, 0, 30)
-    infoLabel.BackgroundTransparency = 1
-    infoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    infoLabel.TextSize = 16
-    infoLabel.Font = Enum.Font.SourceSansBold
-    infoLabel.Text = "Nombre del creador: JoseAngel_Blox"
-    infoLabel.TextXAlignment = Enum.TextXAlignment.Left
-    infoLabel.Parent = scroll
-    
-    local dateLabel = Instance.new("TextLabel")
-    dateLabel.Size = UDim2.new(1, -10, 0, 30)
-    dateLabel.BackgroundTransparency = 1
-    dateLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    dateLabel.TextSize = 16
-    dateLabel.Font = Enum.Font.SourceSansBold
-    dateLabel.Text = "Fecha de lanzamiento: 02/09/2026"
-    dateLabel.TextXAlignment = Enum.TextXAlignment.Left
-    dateLabel.Parent = scroll
-    
-    local versionLabel = Instance.new("TextLabel")
-    versionLabel.Size = UDim2.new(1, -10, 0, 30)
-    versionLabel.BackgroundTransparency = 1
-    versionLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    versionLabel.TextSize = 16
-    versionLabel.Font = Enum.Font.SourceSansBold
-    versionLabel.Text = "Versión 1.1"
-    versionLabel.TextXAlignment = Enum.TextXAlignment.Left
-    versionLabel.Parent = scroll
-    
-    scroll.CanvasSize = UDim2.new(0, 0, 0, 100)
 end)
 
-tabs["Main"].MouseButton1Click:Connect(function()
-    ClearContent()
-    local scroll, layout = CreateScrollFrame()
-    
-    -- Fuel Section
-    local fuelLabel = Instance.new("TextLabel")
-    fuelLabel.Size = UDim2.new(1, -10, 0, 25)
-    fuelLabel.BackgroundTransparency = 1
-    fuelLabel.TextColor3 = Color3.fromRGB(255, 100, 0)
-    fuelLabel.TextSize = 16
-    fuelLabel.Font = Enum.Font.SourceSansBold
-    fuelLabel.Text = "🔥 Fuel"
-    fuelLabel.TextXAlignment = Enum.TextXAlignment.Left
-    fuelLabel.Parent = scroll
-    
-    local fuelDropdown, fuelItems = CreateDropdown(scroll, "Select All ↓", {"Coal", "Log", "Oil Barrel", "Fuel Canister", "Biofuel"}, function(item, selected)
-        selectedItems.fuel[item] = selected
-    end)
-    
-    CreateToggle(scroll, "Bring Items", function(enabled)
-        settings.bringFuelEnabled = enabled
-        if enabled then
-            spawn(function()
-                while settings.bringFuelEnabled do
-                    bringAllSelected("fuel")
-                    wait(0.5)
-                end
-            end)
-        end
-    end)
-    
-    -- Metal Section
-    local metalLabel = Instance.new("TextLabel")
-    metalLabel.Size = UDim2.new(1, -10, 0, 25)
-    metalLabel.BackgroundTransparency = 1
-    metalLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
-    metalLabel.TextSize = 16
-    metalLabel.Font = Enum.Font.SourceSansBold
-    metalLabel.Text = "📎 Bring Metal"
-    metalLabel.TextXAlignment = Enum.TextXAlignment.Left
-    metalLabel.Parent = scroll
-    
-    local metalDropdown, metalItems = CreateDropdown(scroll, "Select All ↓", {"Bolt", "Broken Fan", "Broken Microwave", "Cultist Gem", "Gem of the Forest Fragment", "Metal Chair", "Old Car Engine", "Old Radio", "Sheet Metal"}, function(item, selected)
-        selectedItems.metal[item] = selected
-    end)
-    
-    CreateToggle(scroll, "Bring Item", function(enabled)
-        settings.bringMetalEnabled = enabled
-        if enabled then
-            spawn(function()
-                while settings.bringMetalEnabled do
-                    bringAllSelected("metal")
-                    wait(0.5)
-                end
-            end)
-        end
-    end)
-    
-    -- Food Section
-    local foodLabel = Instance.new("TextLabel")
-    foodLabel.Size = UDim2.new(1, -10, 0, 25)
-    foodLabel.BackgroundTransparency = 1
-    foodLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
-    foodLabel.TextSize = 16
-    foodLabel.Font = Enum.Font.SourceSansBold
-    foodLabel.Text = "🥩 Food"
-    foodLabel.TextXAlignment = Enum.TextXAlignment.Left
-    foodLabel.Parent = scroll
-    
-    local foodDropdown, foodItems = CreateDropdown(scroll, "Select All ↓", {"Berry", "Cake", "Carrot", "Chilli", "Cooked Morsel", "Cooked Steak", "Corn", "Meat? Sandwich", "Morsel", "Pumpkin", "Steak", "Stew"}, function(item, selected)
-        selectedItems.food[item] = selected
-    end)
-    
-    CreateToggle(scroll, "Bring Item", function(enabled)
-        settings.bringFoodEnabled = enabled
-        if enabled then
-                    
+-- === CONFIRMACIÓN ===
+print("[✅] JoseAngel_Blox 99Nights v1.1 | Cargado correctamente")
+game:GetService("StarterGui"):SetCore("Notification", {
+    Title = "JoseAngel_Blox 99Nights",
+    Text = "Script v1.1 activado ✅",
+    Duration = 3
+})
