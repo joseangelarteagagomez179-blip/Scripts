@@ -22,10 +22,9 @@ local Input = {Forward=false, Backward=false, Left=false, Right=false, Up=false,
 
 -- Actualizar personaje
 local function UpdateCharacter()
-    Character = Player.Character
-    if not Character then return end
-    Humanoid = Character:FindFirstChildOfClass("Humanoid")
-    RootPart = Character:FindFirstChild("HumanoidRootPart")
+    Character = Player.Character or Player.CharacterAdded:Wait()
+    Humanoid = Character:WaitForChild("Humanoid", 3)
+    RootPart = Character:WaitForChild("HumanoidRootPart", 3)
     Camera = workspace.CurrentCamera
 end
 
@@ -33,7 +32,9 @@ end
 local function SetNoclip(state)
     if not Character then return end
     for _, part in ipairs(Character:GetDescendants()) do
-        if part:IsA("BasePart") then part.CanCollide = not state end
+        if part:IsA("BasePart") and part.CanCollide == state then 
+            part.CanCollide = not state 
+        end
     end
 end
 
@@ -43,12 +44,13 @@ local function FlyUpdate(deltaTime)
     
     -- Dirección según cámara
     local camCF = Camera.CFrame
-    local camDir = camCF.LookVector
-    camDir = Vector3.new(camDir.X, 0, camDir.Z).Unit -- Mantener altura
-    local camRight = camCF.RightVector
-    camRight = Vector3.new(camRight.X, 0, camRight.Z).Unit
+    local camDir = Vector3.new(camCF.LookVector.X, 0, camCF.LookVector.Z)
+    if camDir.Magnitude > 0 then camDir = camDir.Unit end
     
-    local dir = Vector3.new()
+    local camRight = Vector3.new(camCF.RightVector.X, 0, camCF.RightVector.Z)
+    if camRight.Magnitude > 0 then camRight = camRight.Unit end
+    
+    local dir = Vector3.zero
     
     -- Teclado / Joystick
     if Input.Forward then dir += camDir end
@@ -59,25 +61,26 @@ local function FlyUpdate(deltaTime)
     if Input.Down then dir -= Vector3.new(0, 1, 0) end
     
     -- Normalizar para velocidad uniforme
-    if dir.Magnitude > 0 then dir = dir.Unit * FlySpeed end
+    if dir.Magnitude > 0 then dir = dir.Unit end
     
-    -- ✅ Corregido: Asignar posición directamente para NO caerse
-    RootPart.CFrame += dir * deltaTime * FlySpeed
+    -- Anular inercia y caída
+    RootPart.AssemblyLinearVelocity = Vector3.zero
+    RootPart.AssemblyAngularVelocity = Vector3.zero
+    
+    -- Aplicar movimiento exacto
+    RootPart.CFrame += dir * (FlySpeed * deltaTime)
 end
 
--- ACTIVAR/DESACTIVAR FLY CORREGIDO
+-- ACTIVAR/DESACTIVAR FLY
 local function ToggleFly()
     UpdateCharacter()
-    if not Humanoid or not RootPart then return end
+    if not Humanoid or not RootPart then return false end
     
     FlyEnabled = not FlyEnabled
     
-    -- ✅ Evitar que se hunda en el piso
     Humanoid.PlatformStand = FlyEnabled
-    Humanoid.GravityScale = FlyEnabled and 0 or 1
-    Humanoid.JumpPower = 0
     Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, not FlyEnabled)
-    Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, not FlyEnabled)
+    Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, not FlyEnabled)
     
     if FlyEnabled then
         SetNoclip(true)
@@ -86,9 +89,12 @@ local function ToggleFly()
             if FlyEnabled then SetNoclip(true) end
         end)
     else
-        if NoclipConnection then NoclipConnection:Disconnect() end
+        if NoclipConnection then 
+            NoclipConnection:Disconnect() 
+            NoclipConnection = nil
+        end
         SetNoclip(false)
-        Humanoid.GravityScale = 1
+        RootPart.AssemblyLinearVelocity = Vector3.zero
     end
     
     return FlyEnabled
@@ -115,13 +121,12 @@ UserInputService.InputEnded:Connect(function(input, gp)
     if input.KeyCode == Enum.KeyCode.LeftControl then Input.Down = false end
 end)
 
--- ✅ SOPORTE JOYSTICK MÓVIL (corregido)
+-- SOPORTE JOYSTICK MÓVIL
 UserInputService.InputChanged:Connect(function(input, gp)
-    if not gp then return end
     if input.KeyCode == Enum.KeyCode.Thumbstick1 then
         local pos = input.Position
-        Input.Forward = pos.Y < -0.2
-        Input.Backward = pos.Y > 0.2
+        Input.Forward = pos.Y > 0.2
+        Input.Backward = pos.Y < -0.2
         Input.Left = pos.X < -0.2
         Input.Right = pos.X > 0.2
     end
@@ -133,6 +138,7 @@ Player.CharacterAdded:Connect(UpdateCharacter)
 -- ================== INTERFAZ UI ==================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "JoseAngel_BloxFlyUI"
+ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = Player:WaitForChild("PlayerGui")
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
