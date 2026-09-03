@@ -1,14 +1,13 @@
 -- JoseAngel_Bloc Fly | Zapato Volador
 -- ✅ Fly + Noclip Integrado
--- 📱 Funciona en PC + Móvil (Teclas + Joystick)
--- 🎨 Diseño compacto, esquinas redondeadas
+-- 📱 PC + Móvil (Teclas + Joystick)
+-- 🎨 Diseño profesional | Corregido para Delta
 
 -- Servicios
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
-local StarterGui = game:GetService("StarterGui")
 
 local Player = Players.LocalPlayer
 local Character, Humanoid, RootPart, Camera
@@ -40,11 +39,9 @@ end
 local function FlyUpdate(deltaTime)
     if not FlyEnabled or not RootPart or not Camera then return end
     
-    -- Dirección según cámara
     local camCF = Camera.CFrame
     local dir = Vector3.new()
     
-    -- Teclado / Joystick
     if Input.Forward then dir += camCF.LookVector end
     if Input.Backward then dir -= camCF.LookVector end
     if Input.Left then dir -= camCF.RightVector end
@@ -52,10 +49,7 @@ local function FlyUpdate(deltaTime)
     if Input.Up then dir += Vector3.new(0,1,0) end
     if Input.Down then dir -= Vector3.new(0,1,0) end
     
-    -- Normalizar para velocidad uniforme
     if dir.Magnitude > 0 then dir = dir.Unit * FlySpeed end
-    
-    -- Aplicar movimiento
     RootPart.Velocity = dir * FlySpeed
 end
 
@@ -80,7 +74,7 @@ local function ToggleFly()
     return FlyEnabled
 end
 
--- CONTROLES DE ENTRADA
+-- CONTROLES PC
 UserInputService.InputBegan:Connect(function(input, gp)
     if gp then return end
     if input.KeyCode == Enum.KeyCode.W then Input.Forward = true end
@@ -101,45 +95,38 @@ UserInputService.InputEnded:Connect(function(input, gp)
     if input.KeyCode == Enum.KeyCode.LeftControl then Input.Down = false end
 end)
 
--- Conexión de vuelo
 RunService.RenderStepped:Connect(FlyUpdate)
 Player.CharacterAdded:Connect(UpdateCharacter)
 
--- ================== INTERFAZ UI ==================
+-- ================== INTERFAZ UI (CORREGIDA) ==================
 local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "JoseAngel_BlocFlyUI"
 ScreenGui.Parent = Player:WaitForChild("PlayerGui")
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Contenedor principal (cuadrado redondeado, pequeño)
+-- Contenedor principal
 local MainFrame = Instance.new("Frame")
-MainFrame.Name = "JoseAngel_BlocFly"
+MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.Size = UDim2.new(0, 170, 0, 210)
 MainFrame.Position = UDim2.new(0.02, 0, 0.5, -105)
 MainFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
 MainFrame.BorderSizePixel = 0
-MainFrame.CornerRadius = UDim.new(0, 14)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
--- Sombra
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 14)
-UICorner.Parent = MainFrame
+-- ✅ ESQUINAS REDONDEADAS (la forma correcta)
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 14)
+MainCorner.Parent = MainFrame
 
-local UIShadow = Instance.new("UIGradient")
-UIShadow.Rotation = 90
-UIShadow.Transparency = NumberSequence.new{0, 0.15}
-UIShadow.Parent = MainFrame
-
--- Título + Icono Zapato Volador
+-- Título + Icono
 local TitleContainer = Instance.new("Frame")
 TitleContainer.Parent = MainFrame
 TitleContainer.Size = UDim2.new(1, -16, 0, 45)
 TitleContainer.Position = UDim2.new(0, 8, 0, 8)
 TitleContainer.BackgroundTransparency = 1
 
--- Icono Zapato con Alas 🥿✈️
 local ShoeIcon = Instance.new("TextLabel")
 ShoeIcon.Parent = TitleContainer
 ShoeIcon.Size = UDim2.new(0, 32, 1, 0)
@@ -166,7 +153,9 @@ Separator.Parent = MainFrame
 Separator.Size = UDim2.new(1, -20, 0, 1)
 Separator.Position = UDim2.new(0, 10, 0, 53)
 Separator.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
-Instance.new("UICorner", Separator).CornerRadius = UDim.new(0, 1)
+local SepCorner = Instance.new("UICorner")
+SepCorner.CornerRadius = UDim.new(0, 1)
+SepCorner.Parent = Separator
 
 -- Botón FLY
 local FlyBtn = Instance.new("TextButton")
@@ -179,7 +168,9 @@ FlyBtn.Text = "FLY"
 FlyBtn.TextSize = 16
 FlyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 FlyBtn.AutoLocalize = false
-Instance.new("UICorner", FlyBtn).CornerRadius = UDim.new(0, 10)
+local FlyBtnCorner = Instance.new("UICorner")
+FlyBtnCorner.CornerRadius = UDim.new(0, 10)
+FlyBtnCorner.Parent = FlyBtn
 
 -- Contenedor Velocidad
 local SpeedContainer = Instance.new("Frame")
@@ -197,6 +188,7 @@ SpeedLabel.Font = Enum.Font.Gotham
 SpeedLabel.TextSize = 12
 SpeedLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 
+-- Botón Menos
 local MinusBtn = Instance.new("TextButton")
 MinusBtn.Parent = SpeedContainer
 MinusBtn.Size = UDim2.new(0, 45, 0, 30)
@@ -206,8 +198,11 @@ MinusBtn.Text = "−"
 MinusBtn.Font = Enum.Font.GothamBold
 MinusBtn.TextSize = 18
 MinusBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", MinusBtn).CornerRadius = UDim.new(0, 8)
+local MinusCorner = Instance.new("UICorner")
+MinusCorner.CornerRadius = UDim.new(0, 8)
+MinusCorner.Parent = MinusBtn
 
+-- Botón Más
 local PlusBtn = Instance.new("TextButton")
 PlusBtn.Parent = SpeedContainer
 PlusBtn.Size = UDim2.new(0, 45, 0, 30)
@@ -217,9 +212,11 @@ PlusBtn.Text = "+"
 PlusBtn.Font = Enum.Font.GothamBold
 PlusBtn.TextSize = 18
 PlusBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", PlusBtn).CornerRadius = UDim.new(0, 8)
+local PlusCorner = Instance.new("UICorner")
+PlusCorner.CornerRadius = UDim.new(0, 8)
+PlusCorner.Parent = PlusBtn
 
--- ACCIONES BOTONES
+-- ACCIONES
 FlyBtn.MouseButton1Click:Connect(function()
     local state = ToggleFly()
     FlyBtn.BackgroundColor3 = state and Color3.fromRGB(76, 175, 80) or Color3.fromRGB(58, 58, 68)
