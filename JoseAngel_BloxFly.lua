@@ -1,4 +1,4 @@
--- [[ JoseAngel_Bloc Fly - Professional Edition ]] --
+-- [[ JoseAngel_Blox Fly - Professional Edition ]] --
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -17,7 +17,7 @@ local noclipConnection, flyConnection = nil, nil
 
 -- [[ CREACIÓN DE LA INTERFAZ ]] --
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "JoseAngel_BlocFly"
+ScreenGui.Name = "JoseAngel_BloxFly"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = (RunService:IsStudio() and player.PlayerGui) or CoreGui
 
@@ -45,7 +45,7 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -40, 0, 30)
 Title.Position = UDim2.new(0, 10, 0, 10)
 Title.BackgroundTransparency = 1
-Title.Text = "JoseAngel_Bloc Fly"
+Title.Text = "JoseAngel_Blox Fly"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 14
